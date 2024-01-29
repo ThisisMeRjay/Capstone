@@ -165,7 +165,6 @@ export default {
     },
     handleSearch(query) {
       console.log("Search for:", query);
-      console.log("test");
       // Implement your search logic here
     },
     // ... other methods ...
