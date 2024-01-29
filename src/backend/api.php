@@ -7,7 +7,8 @@ header("Access-Control-Allow-Origin: http://localhost:5173"); // Update this to 
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
-function fetchProducts() {
+function fetchProducts()
+{
     global $conn;
 
     // Fetch products from the database
@@ -31,4 +32,3 @@ function fetchProducts() {
 // Return data as JSON
 header('Content-Type: application/json');
 echo json_encode(fetchProducts());
-?>

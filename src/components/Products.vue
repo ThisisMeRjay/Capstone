@@ -1,13 +1,32 @@
 <template>
   <div class="bg-white cursor-pointer">
     <div class="mx-auto max-w-2xl px-4 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-      <h2 class="md:text-2xl text-lg font-bold tracking-tight text-sky-900">Popular products</h2>
+      <h2 class="md:text-2xl text-lg font-bold tracking-tight text-sky-900">
+        Popular products
+      </h2>
 
-      <div class="mt-6 grid grid-cols-2 gap-x-8 gap-y-8 md:grid-cols-3 lg:grid-cols-4 xl:gap-x-8">
-        <div @click="showModal(product)" v-for="product in products" :key="product.product_id" class="group relative border-2 border-zinc-300 rounded-2xl p-1 sm:p-2 overflow-hidden">
-          <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-sky-900 lg:aspect-none group-hover:opacity-75 lg:h-44">
-            <img :src="'data:image/png;base64,' + product.image" :alt="product.imageAlt" class="h-32 w-full object-center lg:h-44 lg:w-full" />
-            <Icon icon="ph:heart-light" class="heart-icon" @click="onHeartClick(product)" />
+      <div
+        class="mt-6 grid grid-cols-2 gap-x-8 gap-y-8 md:grid-cols-3 lg:grid-cols-4 xl:gap-x-8"
+      >
+        <div
+          @click="showModal(product)"
+          v-for="product in products"
+          :key="product.product_id"
+          class="group relative border-2 border-zinc-300 rounded-2xl p-1 sm:p-2 overflow-hidden"
+        >
+          <div
+            class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-sky-900 lg:aspect-none group-hover:opacity-75 lg:h-44"
+          >
+            <img
+              :src="'data:image/png;base64,' + product.image"
+              :alt="product.imageAlt"
+              class="h-32 w-full object-center lg:h-44 lg:w-full"
+            />
+            <Icon
+              icon="ph:heart-light"
+              class="heart-icon"
+              @click="onHeartClick(product)"
+            />
           </div>
           <div class="mt-24 text-xs sm:text-sm">
             <div class="absolute bottom-0 w-full inset-x-0 rounded-b-md p-2">
@@ -19,13 +38,25 @@
                 </h3>
                 <p class="font-medium">₱{{ product.price }}</p>
                 <div class="mt-1">
-                  <span v-for="star in getStars(product.ratings)" :key="star.id" :class="{'star-colored': star.colored, 'star-grey': !star.colored}">&#9733;</span>
+                  <span
+                    v-for="star in getStars(product.ratings)"
+                    :key="star.id"
+                    :class="{
+                      'star-colored': star.colored,
+                      'star-grey': !star.colored,
+                    }"
+                    >&#9733;</span
+                  >
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <product-modal :is-visible="isModalVisible" :product="selectedProduct" @update:isVisible="isModalVisible = $event"></product-modal>
+        <product-modal
+          :is-visible="isModalVisible"
+          :product="selectedProduct"
+          @update:isVisible="isModalVisible = $event"
+        ></product-modal>
       </div>
     </div>
   </div>
@@ -34,8 +65,8 @@
 <script>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { Icon } from '@iconify/vue';
-import ProductModal from '@/components/ProductModal.vue';
+import { Icon } from "@iconify/vue";
+import ProductModal from "@/components/ProductModal.vue";
 
 export default {
   components: {
@@ -62,23 +93,25 @@ export default {
 
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost/Ecommerce/vue-project/src/backend/api.php');
-        console.log('API Response Data:', response);
+        const response = await axios.get(
+          "http://localhost/Ecommerce/vue-project/src/backend/api.php"
+        );
+        console.log("API Response Data:", response);
         products.value = response.data;
       } catch (error) {
-        console.error('Error fetching products: ', error);
+        console.error("Error fetching products: ", error);
       }
     };
 
     onMounted(fetchProducts);
 
     const getStars = (averageRating) => {
-    const totalStars = 5;
-    const roundedRating = Math.round(averageRating);
-    return Array.from({ length: totalStars }, (_, i) => {
-      return { id: i, colored: i < roundedRating };
-    });
-  };
+      const totalStars = 5;
+      const roundedRating = Math.round(averageRating);
+      return Array.from({ length: totalStars }, (_, i) => {
+        return { id: i, colored: i < roundedRating };
+      });
+    };
 
     onMounted(fetchProducts);
 

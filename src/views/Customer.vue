@@ -1,7 +1,6 @@
-
 <template>
-    <Header />
-    <Products />
+  <Header />
+  <Products />
 </template>
 <script>
 import Header from "@/components/Header.vue";
@@ -10,6 +9,6 @@ export default {
   components: {
     Header,
     Products,
-  }
-}
+  },
+};
 </script>
