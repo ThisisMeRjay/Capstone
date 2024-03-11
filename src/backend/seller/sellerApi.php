@@ -139,37 +139,50 @@ function deleteProduct() {
     $data = json_decode(file_get_contents("php://input"), true);
     $product_id = $data['id'];
 
-    // Delete from products table
-    $stmt = $conn->prepare("DELETE FROM products WHERE product_id = ?");
-    if ($stmt) {
-        $stmt->bind_param("i", $product_id);
-        $stmt->execute();
-        $stmt->close();
-        echo "Product deleted from products table.\n";
-    } else {
-        echo "Error preparing statement to delete from products table.\n";
-    }
+    // Begin a transaction
+    $conn->begin_transaction();
 
-    // Delete from product_specifications table
-    $stmt = $conn->prepare("DELETE FROM product_specifications WHERE product_id = ?");
-    if ($stmt) {
-        $stmt->bind_param("i", $product_id);
-        $stmt->execute();
-        $stmt->close();
-        echo "Product deleted from product_specifications table.\n";
-    } else {
-        echo "Error preparing statement to delete from product_specifications table.\n";
-    }
+    try {
+        // Delete from inventory table first to avoid foreign key constraint failure
+        $stmt = $conn->prepare("DELETE FROM inventory WHERE product_id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $product_id);
+            $stmt->execute();
+            $stmt->close();
+            echo "Product deleted from inventory table.\n";
+        } else {
+            // If preparation fails, throw an exception
+            throw new Exception("Error preparing statement to delete from inventory table.\n");
+        }
 
-    // Delete from inventory table
-    $stmt = $conn->prepare("DELETE FROM inventory WHERE product_id = ?");
-    if ($stmt) {
-        $stmt->bind_param("i", $product_id);
-        $stmt->execute();
-        $stmt->close();
-        echo "Product deleted from inventory table.\n";
-    } else {
-        echo "Error preparing statement to delete from inventory table.\n";
+        // Delete from product_specifications table
+        $stmt = $conn->prepare("DELETE FROM product_specifications WHERE product_id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $product_id);
+            $stmt->execute();
+            $stmt->close();
+            echo "Product deleted from product_specifications table.\n";
+        } else {
+            throw new Exception("Error preparing statement to delete from product_specifications table.\n");
+        }
+
+        // Finally, delete from products table
+        $stmt = $conn->prepare("DELETE FROM products WHERE product_id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $product_id);
+            $stmt->execute();
+            $stmt->close();
+            echo "Product deleted from products table.\n";
+        } else {
+            throw new Exception("Error preparing statement to delete from products table.\n");
+        }
+
+        // If everything is fine, commit the transaction
+        $conn->commit();
+    } catch (Exception $e) {
+        // An error occurred, roll back the transaction and print the error message
+        $conn->rollback();
+        echo $e->getMessage();
     }
 }
 
@@ -295,6 +308,9 @@ function EditStatus()
         $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
     } elseif ($newStatus == 'delivered') {
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivered_date = ? WHERE order_detail_id = ?");
+        $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
+    } elseif ($newStatus == 'cancelled') {
+        $stmt = $conn->prepare("UPDATE order_details SET status = ?, processing_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
     }
 
