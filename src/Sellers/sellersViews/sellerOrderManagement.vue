@@ -24,13 +24,16 @@
           <form class="">
             <select
               id="status"
+              v-model="selectedStatus"
+              @click="filteredOrders"
               class="shadow border text-gray-900 outline-none text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-32 px-3 py-2.5"
             >
-              <option selected>Status</option>
-              <option value="">Pending</option>
-              <option value="">Out for Delivery</option>
-              <option value="">Delivered</option>
-              <option value="">Cancelled</option>
+              <option disabled value="">Status</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="out_for_delivery">Out for Delivery</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </form>
         </div>
@@ -198,7 +201,7 @@
 </template>
 <script>
 // YourComponent.vue <script> part
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller"; // Adjust the path as necessary
@@ -213,6 +216,8 @@ export default {
       location.reload(true);
     };
 
+    const selectedStatus = ref("");
+
     const orders = ref([]);
 
     let selectValue = ref("");
@@ -226,6 +231,16 @@ export default {
     const userOrderName = ref(""); // constaining  the name of the order that is being edited in status modal
 
     let orderIdToEdit = ref(null); // pass the id to this
+
+    const filteredOrders = () => {
+      if (!selectedStatus.value) {
+        return orders.value; // Return all orders if no status is selected
+      }
+      console.log("selescted status: ", selectedStatus.value);
+      return orders.value.filter(
+        (order) => order.status === selectedStatus.value
+      );
+    };
 
     const editStatus = (orderId) => {
       orderIdToEdit.value = orderId;
@@ -303,6 +318,8 @@ export default {
       orders,
       editData,
       selectValue,
+      selectedStatus,
+      filteredOrders,
 
       editStatus,
       showStatusModal,

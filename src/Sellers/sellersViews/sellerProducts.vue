@@ -53,7 +53,7 @@
           <p class="text-xs">As of {{ currentDate }}</p>
         </div>
         <div class="p-2">
-          <h1 class="text-3xl font-extrabold">{{ inventoryStatus }}</h1>
+          <h1 class="text-3xl font-extrabold">{{ totalStocks }}</h1>
         </div>
       </div>
     </div>
@@ -121,7 +121,7 @@ const chartOptions = ref({
 });
 
 const totalSales = ref(0);
-const inventoryStatus = ref("");
+const totalStocks = ref("");
 const startDate = ref("");
 const endDate = ref("");
 const currentDate = ref("");
@@ -149,8 +149,9 @@ const fetchRealTimeMonthlySales = async () => {
       return date.toLocaleString("default", { month: "long" });
     };
 
-    const labels = realTimeData.map(
-      (item) => getMonthName(parseInt(item.saleMonth)));
+    const labels = realTimeData.map((item) =>
+      getMonthName(parseInt(item.saleMonth))
+    );
     const salesData = realTimeData.map((item) => parseFloat(item.totalSales)); // Ensure data is in the correct format
 
     console.log("labels ", labels);
@@ -199,9 +200,20 @@ const fetchSalesData = async (start, end) => {
 // Fetches current inventory status, independently of the date range for sales/costs
 const fetchCurrentInventoryStatus = async () => {
   const today = new Date().toISOString().split("T")[0];
-  const response = await axios.get(`your_api_endpoint/inventory?date=${today}`);
-  inventoryStatus.value = "In Stock: " + response.data.currentInventoryStatus;
-  currentDate.value = today; // Update the reference date for inventory status display
+  try {
+    const response = await axios.post(
+      "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchStocks",
+      {
+        store_id: userLogin.value.store_id,
+      }
+    );
+    totalStocks.value = "In Stock: " + response.data.totalQuantity;
+    currentDate.value = today; // Update the reference date for inventory status display
+    console.log("Stocks:", totalStocks.value);
+  } catch (error) {
+    console.error("Error fetching sales data:", error);
+    // Handle the error, e.g., by showing an error message to the user.
+  }
 };
 
 const updateDataBasedOnDateRange = async () => {

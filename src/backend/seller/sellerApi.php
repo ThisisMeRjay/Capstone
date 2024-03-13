@@ -44,12 +44,50 @@ switch ($action) {
     case 'fetchRealTimeMonthlySales':
         fetchRealTimeMonthlySales();
         break;
+    case 'fetchStocks':
+        fetchStocks();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
 }
+
+function fetchStocks() {
+    global $conn;
+    header('Content-Type: application/json');
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    
+    if (!isset($data['store_id'])) {
+        echo json_encode(['error' => true, 'message' => 'store_id is missing']);
+        exit;
+    }
+    
+    $storeId = $data['store_id'];
+
+    // Adjusted query with LEFT JOIN to include products table
+    $stmt = $conn->prepare("
+        SELECT SUM(inventory.quantity) AS totalQuantity
+        FROM inventory
+        LEFT JOIN products ON products.product_id = inventory.product_id
+        WHERE products.store_id = ?
+    ");
+    
+    $stmt->bind_param("i", $storeId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if($row = $result->fetch_assoc()) {
+        echo json_encode(['totalQuantity' => $row['totalQuantity']]);
+    } else {
+        echo json_encode(['error' => true, 'message' => 'Failed to fetch inventory status.']);
+    }
+
+    $stmt->close();
+}
+
 
 function fetchRealTimeMonthlySales() {
     global $conn;
@@ -487,7 +525,9 @@ LEFT JOIN
 LEFT JOIN
     users As u ON u.user_id = o.user_id
 WHERE 
-    p.store_id = ?");
+    p.store_id = ?
+ORDER BY 
+    od.order_detail_id");
     $stmt->bind_param("i", $id);
     $stmt->execute();
 
