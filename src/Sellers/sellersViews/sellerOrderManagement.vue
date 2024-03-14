@@ -25,7 +25,7 @@
             <select
               id="status"
               v-model="selectedStatus"
-              @click="filteredOrders"
+              @change="filteredOrders"
               class="shadow border text-gray-900 outline-none text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-32 px-3 py-2.5"
             >
               <option disabled value="">Status</option>
@@ -201,7 +201,7 @@
 </template>
 <script>
 // YourComponent.vue <script> part
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller"; // Adjust the path as necessary
@@ -230,16 +230,24 @@ export default {
 
     const userOrderName = ref(""); // constaining  the name of the order that is being edited in status modal
 
-    let orderIdToEdit = ref(null); // pass the id to this
+    let orderIdToEdit = ref(null);
+
+    const temp_orders = ref([]); // pass the id to this
 
     const filteredOrders = () => {
-      if (!selectedStatus.value) {
-        return orders.value; // Return all orders if no status is selected
+      if (temp_orders.value.length === 0) {
+        temp_orders.value = orders.value;
+      } else {
+        orders.value = temp_orders.value;
       }
-      console.log("selescted status: ", selectedStatus.value);
-      return orders.value.filter(
-        (order) => order.status === selectedStatus.value
-      );
+      if (!selectedStatus.value) {
+        fetchOrders(); // Fetch all orders if no status is selected or reset to default
+      } else {
+        // Filter directly if there's a selected status
+        orders.value = orders.value.filter(
+          (order) => order.status === selectedStatus.value
+        );
+      }
     };
 
     const editStatus = (orderId) => {
@@ -320,6 +328,7 @@ export default {
       selectValue,
       selectedStatus,
       filteredOrders,
+      temp_orders,
 
       editStatus,
       showStatusModal,
