@@ -11,7 +11,9 @@
             class="border rounded-md w-60 shadow flex justify-between items-center px-4"
           >
             <input
-              type="text"
+              type="number"
+              v-model="searchQuery"
+              @change="filterBySearch"
               placeholder="Search by order id"
               class="outline-none placeholder:text-sm placeholder:font-light py-2 pl-2 w-full rounded-full"
             />
@@ -21,14 +23,15 @@
             />
           </div>
 
-          <form class="">
+          <form class="flex justify-center items-center ml-3 text-sm gap-3">
+            <label for="">Status: </label>
             <select
               id="status"
               v-model="selectedStatus"
               @change="filteredOrders"
               class="shadow border text-gray-900 outline-none text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-32 px-3 py-2.5"
             >
-              <option disabled value="">Status</option>
+              <option value="">Default</option>
               <option value="pending">Pending</option>
               <option value="processing">Processing</option>
               <option value="out_for_delivery">Out for Delivery</option>
@@ -234,6 +237,19 @@ export default {
 
     const temp_orders = ref([]); // pass the id to this
 
+    const searchQuery = ref("");
+
+    const filterBySearch = () => {
+      if (!searchQuery.value) {
+        fetchOrders(); // Fetch all orders if no status is selected or reset to default
+      } else {
+        // Filter directly if there's a selected status
+        orders.value = orders.value.filter(
+          (order) => order.order_number === searchQuery.value
+        );
+      }
+    };
+
     const filteredOrders = () => {
       if (temp_orders.value.length === 0) {
         temp_orders.value = orders.value;
@@ -329,6 +345,8 @@ export default {
       selectedStatus,
       filteredOrders,
       temp_orders,
+      searchQuery,
+      filterBySearch,
 
       editStatus,
       showStatusModal,
