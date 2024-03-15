@@ -41,7 +41,7 @@
               </div>
             </div>
             <div class="text-lg font-semibold text-black-500">
-              ${{ finalQuantity }}
+              ₱{{ finalQuantity }}
             </div>
             <div
               class="w-full flex gap-2 justify-start items-center text-sm font-medium text-black-700"
