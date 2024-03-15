@@ -18,6 +18,7 @@
               placeholder="Search..."
               required
               v-focus="isVisible"
+              @keyup.enter="closeModalOnEnter"
             />
           </form>
         </div>
@@ -47,7 +48,8 @@
 
 <script>
 import axios from "axios";
-import { ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import Fuse from "fuse.js";
 
 export default {
   props: {
@@ -67,42 +69,67 @@ export default {
   },
   setup(props, { emit }) {
     const searchQuery = ref("");
-    const searchProduct = ref([]);
+    const products = ref([]);
+
+    const searchrecent = ref([
+      { productName: "intel i9 13gen" },
+      { productName: "intel i9 13gen" },
+    ]);
+
+    const options = {
+      keys: ["product_name", "product_description"],
+      threshold: 0.2,
+    };
+
+    const fetchAllProducts = async () => {
+      try {
+        const url =
+          "http://localhost/Ecommerce/vue-project/src/backend/search.php";
+        const response = await axios.post(url);
+        products.value = response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    onMounted(() => {
+      fetchAllProducts();
+    });
+
+    const fuse = computed(() => new Fuse(products.value, options));
+
+    const performSearch = () => {
+      if (!searchQuery.value.trim()) {
+        return products.value;
+      }
+      const results = fuse.value.search(searchQuery.value);
+      emit(
+        "search-completed",
+        results.map((result) => result.item)
+      );
+      return results.map((result) => result.item);
+    };
+
+    watch(searchQuery, (newValue, oldValue) => {
+      if (newValue.trim() !== oldValue.trim()) {
+        performSearch();
+      }
+    });
+
+    const closeModalOnEnter = () => {
+      close();
+    };
 
     const close = () => {
       emit("update:isVisible", false);
     };
 
-    const searchrecent = ref([
-      {
-        productName: "intel i9 13gen",
-      },
-      {
-        productName: "intel i9 13gen",
-      },
-    ]);
-    const send = async () => {
-      try {
-        const url =
-          "http://localhost/Ecommerce/vue-project/src/backend/search.php";
-        const response = await axios.post(url, { query: searchQuery.value });
-
-        searchProduct.value = response.data;
-        emit("search-completed", searchProduct.value);
-        //   console.log("Response:", searchProduct.value);
-      } catch (error) {
-        console.log(error);
-      }
-
-      searchQuery.value = "";
-      close();
-    };
-
     return {
       searchQuery,
       searchrecent,
-      send,
+      performSearch, // Now using performSearch as a method instead of a computed property
       close,
+      closeModalOnEnter,
     };
   },
 };
