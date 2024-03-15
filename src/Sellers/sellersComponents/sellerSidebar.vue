@@ -83,7 +83,6 @@
         <hr />
         <div class="my-1">
           <button
-            @click="logout"
             class="flex gap-3 justify-start items-center font-semibold hover:bg-slate-400/20 rounded-md text-slate-700 w-full py-2"
           >
             <div class="bg-blue-500/20 shadow-sm rounded-full">
