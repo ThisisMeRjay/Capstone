@@ -48,7 +48,7 @@
           {{ message.content }}
         </p>
       </div>
-      <hr class="boarder"/> 
+      <hr class="border-t-2 border-black"/>
       <div
         class="bg-slate-400/10 rounded-md h-full w-1/2 text-slate-700 shadow my-5 p-4"
       >
