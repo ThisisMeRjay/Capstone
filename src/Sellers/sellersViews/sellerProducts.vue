@@ -229,7 +229,11 @@ const updateDataBasedOnDateRange = async () => {
 // Initialize isDefaultDateRange based on whether the initially set dates match the last 7 days
 onMounted(() => {
   getUserFromLocalStorage();
-  const today = new Date();
+  // Adjust for Philippine time zone (UTC+8)
+  const offset = new Date().getTimezoneOffset() * 60000; // Get timezone offset in milliseconds
+  const philippinesTime = new Date(Date.now() - offset + 3600000 * 8); // Adjust to Philippine time
+
+  const today = philippinesTime;
   const last7Days = new Date(
     today.getFullYear(),
     today.getMonth(),

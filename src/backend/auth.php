@@ -35,12 +35,13 @@ function register()
     $password = $data['password'];
     $contact_number = $data['contact_number'];
     $role = $data['role'];
+    $address = $data['address'];
 
 
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare("INSERT INTO users (username, email, password, contact_number, role) VALUES (?, ?, ? , ?, ?)");
-    $stmt->bind_param("sssss", $customername, $email, $hashed_password, $contact_number, $role);
+    $stmt = $conn->prepare("INSERT INTO users (username, email, password, contact_number, role, address) VALUES (?, ?, ? , ?, ?, ?)");
+    $stmt->bind_param("ssssss", $customername, $email, $hashed_password, $contact_number, $role, $address);
     $stmt->execute();
     if ($stmt->affected_rows > 0) {
         $res['success'] = true;

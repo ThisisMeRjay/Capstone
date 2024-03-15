@@ -143,6 +143,18 @@
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
               </div>
+              <div class="gap-2">
+                <p class="font-semibold">
+                  Address <span class="text-red-500">*</span>
+                </p>
+                <input
+                  type="text"
+                  id="address"
+                  v-model="address"
+                  required
+                  class="w-full p-2 rounded-md my-1 bg-gray-100"
+                />
+              </div>
               <div class="my-5">
                 <button
                   type="submit"
@@ -243,6 +255,7 @@ export default {
     const registerPassword = ref("");
     const contactNumber = ref("");
     const role = ref("customer");
+    const address = ref("");
     const registerResponseMessage = ref("");
 
     const signUp = async () => {
@@ -257,6 +270,7 @@ export default {
             password: registerPassword.value,
             contact_number: contactNumber.value,
             role: role.value,
+            address: address.value,
           },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -284,6 +298,7 @@ export default {
 
       registerResponseMessage,
       name,
+      address,
     };
   },
 };
