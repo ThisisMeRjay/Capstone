@@ -14,7 +14,7 @@
               type="number"
               v-model="searchQuery"
               @change="filterBySearch"
-              placeholder="Search by order id"
+              placeholder="Search by order number"
               class="outline-none placeholder:text-sm placeholder:font-light py-2 pl-2 w-full rounded-full"
             />
             <Icon

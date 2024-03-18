@@ -527,7 +527,7 @@ LEFT JOIN
 WHERE 
     p.store_id = ?
 ORDER BY 
-    od.order_detail_id");
+    od.order_detail_id DESC");
     $stmt->bind_param("i", $id);
     $stmt->execute();
 
