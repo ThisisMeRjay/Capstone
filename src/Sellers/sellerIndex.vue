@@ -3,7 +3,7 @@
     <header
       class="py-5 absolute z-10 w-full top-0 bg-gradient-to-r from-blue-500/75 from-30% via-violet-500/50 shadow-md shadow-blue-400/25 via-60% to-orange-500/25 to-90% font-semibold text-white text-xl px-10"
     >
-      Tabudi
+      LOGO
     </header>
     <div class="min-h-screen">
       <div class="flex justify-center items-center h-full">
@@ -12,7 +12,7 @@
             <h1
               class="text-6xl font-extrabold py-3 text-slate-800 text-transparent bg-gradient-to-tr from-blue-500 from-40% via-violet-500 via-50% to-orange-500 to-80% bg-clip-text"
             >
-              Shopp to the best!
+              TECHHUB
             </h1>
             <img src="../assets/login.svg" alt="" class="sm:w-full sm:h-full" />
           </div>

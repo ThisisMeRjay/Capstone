@@ -69,6 +69,7 @@ import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller";
 import { Bar } from "vue-chartjs";
+import moment from "moment-timezone";
 import {
   Chart as ChartJS,
   Title,
@@ -229,20 +230,18 @@ const updateDataBasedOnDateRange = async () => {
 // Initialize isDefaultDateRange based on whether the initially set dates match the last 7 days
 onMounted(() => {
   getUserFromLocalStorage();
-  // Adjust for Philippine time zone (UTC+8)
-  const offset = new Date().getTimezoneOffset() * 60000; // Get timezone offset in milliseconds
-  const philippinesTime = new Date(Date.now() - offset + 3600000 * 8); // Adjust to Philippine time
 
-  const today = philippinesTime;
-  const last7Days = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - 6
-  );
-  console.log("show ", isDefaultDateRange.value);
+  // Use moment-timezone to set the time to Philippine time zone (UTC+8)
+  const philippinesTime = moment().tz("Asia/Manila");
 
-  startDate.value = last7Days.toISOString().split("T")[0];
-  endDate.value = today.toISOString().split("T")[0];
+  // Format the date as needed for your inputs
+  const todayFormatted = philippinesTime.format("YYYY-MM-DD");
+  const last7DaysFormatted = philippinesTime
+    .subtract(7, "days")
+    .format("YYYY-MM-DD");
+
+  startDate.value = last7DaysFormatted;
+  endDate.value = todayFormatted;
 
   // Fetch both sales data and current inventory status on mount
   fetchSalesData(startDate.value, endDate.value);

@@ -429,47 +429,47 @@ function EditStatus()
     if ($newStatus == 'processing') {
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ?, processing_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("sssi", $newStatus, $estdate, $UpdateDate, $id);
-        $stmt->execute();
     } elseif ($newStatus == 'out_for_delivery') {
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivery_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
-        $stmt->execute();
     } elseif ($newStatus == 'delivered') {
-        // First, update the status and delivered_date
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivered_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
-        $stmt->execute();
-        
-        // Fetch the quantity of the product ordered
-        $stmt = $conn->prepare("SELECT quantity, product_id FROM order_details WHERE order_detail_id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($row = $result->fetch_assoc()) {
-            $quantity = $row['quantity'];
-            $productId = $row['product_id'];
-            
-            // Update the inventory
-            $stmt = $conn->prepare("UPDATE inventory SET quantity = quantity - ? WHERE product_id = ?");
-            $stmt->bind_param("ii", $quantity, $productId);
-            $stmt->execute();
-        }
     } elseif ($newStatus == 'cancelled') {
+        // First, update the order status to 'cancelled'
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, processing_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
         $stmt->execute();
+
+        // Check if the update was successful to proceed with restocking
+        if ($stmt->affected_rows > 0) {
+            // Fetch the quantity and product_id of the cancelled order
+            $stmt = $conn->prepare("SELECT quantity, product_id FROM order_details WHERE order_detail_id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $orderDetails = $result->fetch_assoc();
+
+            // Restock the inventory with the cancelled quantity
+            if ($orderDetails) {
+                $updateInventoryStmt = $conn->prepare("UPDATE inventory SET quantity = quantity + ? WHERE product_id = ?");
+                $updateInventoryStmt->bind_param("ii", $orderDetails['quantity'], $orderDetails['product_id']);
+                $updateInventoryStmt->execute();
+                $updateInventoryStmt->close();
+            }
+        }
     }
 
-    // Check if the update was successful
-    if ($stmt->affected_rows > 0) {
+    if (isset($stmt) && $stmt->affected_rows > 0) {
         echo "Order status updated successfully.";
     } else {
         echo "No order was updated. Please check your input.";
     }
 
-    $stmt->close();
+    if (isset($stmt)) {
+        $stmt->close();
+    }
 }
-
 
 function getProducts()
 {
