@@ -429,12 +429,15 @@ function EditStatus()
     if ($newStatus == 'processing') {
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ?, processing_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("sssi", $newStatus, $estdate, $UpdateDate, $id);
+        $stmt->execute();
     } elseif ($newStatus == 'out_for_delivery') {
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivery_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
+        $stmt->execute();
     } elseif ($newStatus == 'delivered') {
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivered_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
+        $stmt->execute();
     } elseif ($newStatus == 'cancelled') {
         // First, update the order status to 'cancelled'
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, processing_date = ? WHERE order_detail_id = ?");

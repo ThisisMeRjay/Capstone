@@ -381,12 +381,15 @@ function fetchCartItems()
     // Use prepared statement to prevent SQL injection
     $stmt = $conn->prepare("SELECT 
     p.*, 
-    ci.*
+    ci.*,
+    i.location
    
 FROM 
     products AS p
 LEFT JOIN 
     cart_items AS ci ON  ci.product_id = p.product_id
+LEFT JOIN 
+    inventory AS i ON  i.product_id = ci.product_id
 WHERE 
     ci.cart_id = ?");
     $stmt->bind_param("i", $id);

@@ -511,7 +511,7 @@
                 <div v-if="userLogin" class="text-xs text-slate-800">
                   <p>Name: {{ userLogin.username }}</p>
                   <p>Contact No: {{ userLogin.contact_number }}</p>
-                  <p>Address: {{ userLogin.address }}</p>
+                  <p>Address: {{ userLogin.name }}</p>
                 </div>
               </div>
               <div class="bg-slate-200 rounded-md p-2">
@@ -521,21 +521,21 @@
                   :key="index"
                 >
                   <hr class="border my-2 border-gray-700/10" />
-                  <div v-for="product in items" :key="product">
+                  <div>
                     <div class="flex gap-2 justify-start items-center">
                       <div>
                         <img
-                          :src="'data:image/png;base64,' + product.image"
+                          :src="'data:image/png;base64,' + items.image"
                           alt=""
                           class="w-10 h-10 rounded-md"
                         />
                       </div>
                       <div>
                         <span class="text-sm font-semibold">{{
-                          product.product_name
+                          items.product_name
                         }}</span>
-                        <p class="text-xs">{{ product.price }}</p>
-                        <p class="text-xs">x{{ product.quantity }}</p>
+                        <p class="text-xs">{{ items.price }}</p>
+                        <p class="text-xs">x{{ items.quantity }}</p>
                       </div>
                     </div>
                     <div class="my-2">
@@ -543,7 +543,7 @@
                         class="flex gap-2 justify-between items-center border-y p-2 border-cyan-500/50 bg-cyan-300/10"
                       >
                         <span class="text-sm font-medium">Shipping Fee</span>
-                        <p class="text-xs">{{ product.shipping_fee }}</p>
+                        <p class="text-xs">{{ items.shippingFee.toFixed(2) }}</p>
                       </div>
                     </div>
                   </div>

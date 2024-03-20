@@ -87,7 +87,15 @@ function login()
     $password = $post_data['password'];
 
     // Use prepared statements to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email=?");
+    $stmt = $conn->prepare("SELECT    
+    u.*,
+    b.*
+FROM 
+    users AS u
+LEFT JOIN 
+    barangay AS b ON u.barangay_id =  b.barangay_id
+WHERE 
+    email=?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -111,5 +119,4 @@ function login()
     }
     // Encode the final response array and send as HTTP response
     echo json_encode($res);
-
 }

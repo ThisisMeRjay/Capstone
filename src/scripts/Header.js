@@ -208,30 +208,69 @@ export default {
     // shipping fee must come from db
     const selectedPayment = ref("");
 
-    const checkout = () => {
+    const fetchShippingFee = async (item) => {
+      try {
+        const response = await axios.post(
+          "http://localhost/Ecommerce/vue-project/src/backend/testshipping.php?action=ComputeShipping",
+          {
+            productAddress: item.location,
+            customerAddress: userLogin.value.barangay_id,
+            weight: item.weight,
+            length: item.length,
+            width: item.width,
+            height: item.height,
+            baseShippingFee: item.shipping_fee,
+          }
+        );
+        console.log(response.data);
+        return response.data.shippingFee; // Make sure this matches the actual structure of your response
+      } catch (error) {
+        console.error("Error fetching shipping fee:", error);
+        throw error; // Rethrow to handle it in the calling function
+      }
+    };
+
+    const checkout = async () => {
       showPayment.value = true;
       console.log("checked out items value", checkoutItems.value);
 
       // Reset the total price before calculation
       priceTotalPerItem.value = 0;
 
-      // Collect all the checked items and calculate the total price
-      itemsToCheckout.value = checkoutItems.value.map((item) => {
-        // Calculate price per item including shipping fee
-        const pricePerItem =
-          item.quantity * parseFloat(item.price) +
-          parseFloat(item.shipping_fee);
+      // Use Promise.all to wait for all shipping fee fetches to complete
+      const itemsWithShipping = await Promise.all(
+        checkoutItems.value.map(async (item) => {
+          try {
+            // Fetch shipping fee for each item
+            const shippingFeeData = await fetchShippingFee(item);
+            console.log("shipping", shippingFeeData);
+            const shippingFee = parseFloat(shippingFeeData); // Ensure it's a number
 
-        // Add price per item to the total
-        priceTotalPerItem.value += pricePerItem;
+            // Calculate price per item including shipping fee
+            const pricePerItem =
+              item.quantity * parseFloat(item.price) + shippingFee;
 
-        // Return item with pricePerItem if you need it, or just return the item
-        return { item }; // Spread operator to include original item properties
-      });
+            // Add price per item to the total
+            priceTotalPerItem.value += pricePerItem;
 
-      // Assuming priceTotalPerItem is already the total price for all items
-      // No need to add pricePerItem again
+            // Return item with added shipping fee for further processing/display
+            return { ...item, shippingFee }; // Use spread operator to include original item properties
+          } catch (error) {
+            console.error("Error fetching shipping fee for item:", item, error);
+            // Handle the error as needed (e.g., set a default shipping fee, notify the user, etc.)
+            // Return the item without shipping fee or with default fee
+            return { ...item, shippingFee: 0 }; // Assuming default shipping fee is 0
+          }
+        })
+      );
+
+      // After calculating shipping for all items, assign them to itemsToCheckout
+      itemsToCheckout.value = itemsWithShipping;
+
+      // Assign the total price to priceTotalAll
       priceTotalAll.value = priceTotalPerItem.value.toFixed(2);
+
+      console.log("Items to checkout:", itemsToCheckout.value);
     };
 
     const onDelivery = () => {
@@ -372,7 +411,7 @@ export default {
             productId: items.product_id,
             rating: items.userRating,
             comment: items.userComment,
-            order_number:  items.order_number,
+            order_number: items.order_number,
           },
           {
             headers: {
