@@ -276,6 +276,26 @@
             Edit
           </button>
         </div>
+        <!-- Reviews Section -->
+        <div class="py-4">
+          <h1 class="text-lg font-medium text-gray-800">Reviews</h1>
+          <div v-if="reviews.length">
+            <div
+              v-for="(review, index) in reviews"
+              :key="index"
+              class="mt-2 p-2 border rounded-md"
+            >
+              <h2 class="font-semibold">{{ review.username }}</h2>
+              <p>{{ review.comment }}</p>
+              <p>Rating: {{ review.rating }} stars</p>
+              <div class="text-sm text-gray-600">{{ review.created_at }}</div>
+              <hr class="border-t-2 border-gray-300 mt-3" />
+            </div>
+          </div>
+          <div v-else>
+            <p>No reviews yet.</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -295,6 +315,7 @@ export default {
     const refreshPage = () => {
       location.reload(true);
     };
+
     const Products = ref([]);
 
     const deleteProduct = async (deleteId) => {
@@ -303,10 +324,10 @@ export default {
         console.log(deleteId);
         try {
           const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=deleteProduct",
-          {
-            id: deleteId,
-          }
+            "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=deleteProduct",
+            {
+              id: deleteId,
+            }
           );
           console.log("delet message:", response.data);
         } catch (error) {
@@ -352,6 +373,22 @@ export default {
 
     const specifications = ref([{ spec_key: "", spec_value: "" }]);
     const editProductId = ref("");
+    const reviews = ref([]);
+
+    const getReviews = async () => {
+      try {
+        const response = await axios.post(
+          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews",
+          {
+            product_id: editProductId,
+          }
+        );
+        reviews.value = response.data;
+        console.log("Reviews ", reviews.value);
+      } catch (error) {
+        console.error("Error fetching Specs:", error);
+      }
+    };
 
     // Method to add a new specification entry
     const addSpecification = () => {
@@ -380,7 +417,6 @@ export default {
       const productToEdit = Products.value.find(
         (product) => product.product_id === editId
       );
-
       if (productToEdit) {
         // Set the found product to the productEditable ref
         productEditable.value = { ...productToEdit };
@@ -400,6 +436,7 @@ export default {
         Length.value = productEditable.value.length;
         Width.value = productEditable.value.width;
       }
+      getReviews();
     };
 
     const Weight = ref(null);
@@ -441,7 +478,7 @@ export default {
             height: Height.value,
             length: Length.value,
             width: Width.value,
-          },
+          }
         );
         console.log("response after edit ", response.data);
       } catch (error) {
@@ -510,6 +547,7 @@ export default {
     };
 
     return {
+      reviews,
       Weight,
       Height,
       Length,

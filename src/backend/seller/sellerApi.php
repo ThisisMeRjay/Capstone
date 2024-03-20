@@ -47,11 +47,41 @@ switch ($action) {
     case 'fetchStocks':
         fetchStocks();
         break;
+    case 'getReviews':
+        getReviews();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function getReviews() {
+    global $conn;
+    $data = json_decode(file_get_contents("php://input"), true);
+    // Assuming $data['productID'] holds the product ID for which reviews are to be fetched.
+    // If the product ID is not dynamically determined, you can remove the above line.
+    $productID = $data['product_id']; // Fallback to 1 if not provided.
+
+    $stmt = $conn->prepare("SELECT 
+    r.*,
+    u.username 
+FROM reviews AS r 
+LEFT JOIN
+    users AS  u ON r.user_id = u.user_id
+WHERE product_id = ?");
+    $stmt->bind_param("i", $productID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $reviews = []; // Initialize an array to hold the fetched reviews.
+    while ($row = $result->fetch_assoc()) {
+        $reviews[] = $row; // Add each review to the array.
+    }
+    $stmt->close();
+    
+    echo json_encode($reviews); // Encode the array of reviews as JSON and echo it.
 }
 
 function fetchStocks() {
