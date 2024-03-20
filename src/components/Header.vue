@@ -375,10 +375,69 @@
             >
               Logout</button
             ><button
+              @click="ShowProfile()"
               class="py-2 px-4 w-full bg-slate-900/50 hover:bg-slate-900/75 rounded-md"
             >
               Settings
             </button>
+          </div>
+        </div>
+        <!-- Profile Modal -->
+        <div
+          v-if="ShowProfileModal"
+          class="fixed inset-0 z-50 flex items-center justify-center"
+        >
+          <div class="absolute inset-0 bg-black opacity-50"></div>
+          <div class="bg-white p-4 max-w-lg mx-auto rounded-lg shadow-xl z-10">
+            <div class="flex justify-between items-start">
+              <!-- Close button -->
+              <button
+                @click="ShowProfileModal = false"
+                class="text-black hover:text-gray-700 rounded-full px-2 py-1 bg-slate-300"
+              >
+                <span class="text-lg">&times;</span>
+              </button>
+              <!-- Edit button/icon -->
+              <button
+                @click="toggleEdit"
+                class="text-black hover:text-gray-700 rounded px-2 py-1"
+              >
+                <span class="text-lg">Edit</span>
+                <!-- Use an icon here if preferred -->
+              </button>
+            </div>
+            <div class="text-center mt-4">
+              <p class="font-semibold text-lg">Profile Settings</p>
+              <div v-if="isEditing">
+                <input
+                  v-model="userLogin.username"
+                  placeholder="Username"
+                  class="input"
+                />
+                <input
+                  v-model="userLogin.contact_number"
+                  placeholder="Contact Number"
+                  class="input"
+                />
+                <input
+                  v-model="userLogin.address"
+                  placeholder="Address"
+                  class="input"
+                />
+                <input
+                  v-model="userLogin.name"
+                  placeholder="Name"
+                  class="input"
+                />
+                <button @click="saveProfile">Save</button>
+              </div>
+              <div v-else>
+                <p>{{ userLogin.username }}</p>
+                <p>{{ userLogin.contact_number }}</p>
+                <p>{{ userLogin.address }}</p>
+                <p>{{ userLogin.name }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -543,7 +602,9 @@
                         class="flex gap-2 justify-between items-center border-y p-2 border-cyan-500/50 bg-cyan-300/10"
                       >
                         <span class="text-sm font-medium">Shipping Fee</span>
-                        <p class="text-xs">{{ items.shippingFee.toFixed(2) }}</p>
+                        <p class="text-xs">
+                          {{ items.shippingFee.toFixed(2) }}
+                        </p>
                       </div>
                     </div>
                   </div>

@@ -95,6 +95,11 @@ export default {
       refreshPage();
       //  router.push("/admin_dashboard");
     };
+    const ShowProfileModal = ref(false);
+    const ShowProfile = () => { 
+      ShowProfileModal.value = !ShowProfileModal.value;
+    };
+    
     const showSettings = ref(false);
     const showCustomerSettings = () => {
       showSettings.value = !showSettings.value;
@@ -427,7 +432,16 @@ export default {
       }
     };
 
+    const isEditing = ref(false);
+    const toggleEdit = () => {
+      isEditing.value = !isEditing.value;
+    };
+
     return {
+      isEditing,
+      toggleEdit,
+      ShowProfile,
+      ShowProfileModal,
       submitComment,
       //tracking
       showOrderTracking,
