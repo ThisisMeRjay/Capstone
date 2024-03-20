@@ -188,10 +188,14 @@ function SaveProduct() {
     $specifications = $data['specifications'];
     $quantity = $data['quantity'];
     $storeID = $data['store_id'];
+    $weight = $data['weight'];
+    $height = $data['height'];
+    $length = $data['length'];
+    $width = $data['width'];
+    $brgyID = $data['barangay_id'];
 
-    $stmt = $conn->prepare("INSERT INTO products (category_id, product_name, product_description, price, shipping_fee, image, store_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issddsi", $selectedCategory, $productName, $productDescription, $price, $shipping, $imageData, $storeID);
-
+    $stmt = $conn->prepare("INSERT INTO products (category_id, product_name, product_description, price, shipping_fee, image, store_id, weight, height, length, width) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issddsidddd", $selectedCategory, $productName, $productDescription, $price, $shipping, $imageData, $storeID, $weight, $height, $length, $width);
     if ($stmt->execute()) {
         $product_id = $conn->insert_id;
         // Insert specifications as before...
@@ -204,8 +208,8 @@ function SaveProduct() {
         }
         $insertStmt->close();
 
-        $insertquant = $conn->prepare("INSERT INTO inventory (product_id, quantity) VALUES (?, ?)");
-        $insertquant->bind_param("ii", $product_id, $quantity);
+        $insertquant = $conn->prepare("INSERT INTO inventory (product_id, quantity, location) VALUES (?, ?, ?)");
+        $insertquant->bind_param("iii", $product_id, $quantity, $brgyID);
         $insertquant->execute();
         $insertquant->close();
 
@@ -346,20 +350,41 @@ function editProductsInfo() {
     $quantity = $data['quantity'];
     $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data['image']));
     $specifications = $data['specifications'];
+    $brgyID = $data['barangay_id'];
+    $catID = $data['category_id'];
+    $weight = $data['weight'];
+    $height = $data['height'];
+    $length = $data['length'];
+    $width = $data['width'];
+
+    var_dump($product_id, $brgyID, $catID, $weight, $height, $length, $width);
 
     // Begin transaction for atomicity
     $conn->begin_transaction();
     
     try {
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM products WHERE product_id = ?");
+        $stmt->bind_param("i", $product_id);
+        $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+
+        if ($count == 0) {
+            echo "Product ID does not exist.";
+            return; // Exit the function if product_id does not exist
+        }
+
+
         // Update product information in the products table
-        $stmt = $conn->prepare("UPDATE products SET product_name = ?, price = ?, product_description = ?, shipping_fee = ?, image = ? WHERE product_id = ?");
-        $stmt->bind_param("sdsdsi", $product_name, $product_price, $product_description, $shipping_fee, $image, $product_id);
+        $stmt = $conn->prepare("UPDATE products SET category_id = ?, product_name = ?, price = ?, product_description = ?, shipping_fee = ?, image = ?, weight = ?, height = ?, length = ?, width = ? WHERE product_id = ?");
+        $stmt->bind_param("isdsdsidddd", $catID, $product_name, $product_price, $product_description, $shipping_fee, $image, $weight, $height, $length, $width, $product_id);
         $stmt->execute();
         $stmt->close();
     
         // Update quantity in the inventory table
-        $stmt = $conn->prepare("UPDATE inventory SET quantity = ? WHERE product_id = ?");
-        $stmt->bind_param("ii", $quantity, $product_id);
+        $stmt = $conn->prepare("UPDATE inventory SET quantity = ?, location = ? WHERE product_id = ?");
+        $stmt->bind_param("iii", $quantity, $brgyID, $product_id);
         $stmt->execute();
         $stmt->close();
     

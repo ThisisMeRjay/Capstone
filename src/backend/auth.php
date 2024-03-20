@@ -63,12 +63,13 @@ function register()
     $contact_number = $data['contact_number'];
     $role = $data['role'];
     $address = $data['address'];
+    $brgyID = $data['barangay'];
 
 
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare("INSERT INTO users (username, email, password, contact_number, role, address) VALUES (?, ?, ? , ?, ?, ?)");
-    $stmt->bind_param("ssssss", $customername, $email, $hashed_password, $contact_number, $role, $address);
+    $stmt = $conn->prepare("INSERT INTO users (username, email, password, contact_number, role, address, barangay_id) VALUES (?, ?, ?, ? , ?, ?, ?)");
+    $stmt->bind_param("ssssssi", $customername, $email, $hashed_password, $contact_number, $role, $address, $brgyID);
     $stmt->execute();
     if ($stmt->affected_rows > 0) {
         $res['success'] = true;

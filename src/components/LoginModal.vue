@@ -158,8 +158,9 @@
                 <select
                   class="w-full p-2 rounded-md my-1 border outline-none"
                   v-model="selectedBarangay"
+                  required
                 >
-                  <option disabled value="" selected>Select Barangay</option>
+                  <option value="" disabled selected>Select Barangay</option>
                   <option
                     v-for="brgy in barangay"
                     :key="brgy.barangay_id"
@@ -230,7 +231,7 @@ export default {
     },
   },
   setup(props, { emit }) {
-    const selectedBarangay = ref([]);
+    const selectedBarangay = ref("");
     const barangay = ref([]);
 
     const GetBarangays = async () => {
@@ -291,6 +292,7 @@ export default {
 
     const signUp = async () => {
       try {
+        console.log("barangay id: ", selectedBarangay.value);
         const url =
           "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=register";
         const res = await axios.post(
@@ -302,6 +304,7 @@ export default {
             contact_number: contactNumber.value,
             role: role.value,
             address: address.value,
+            barangay: selectedBarangay.value,
           },
           { headers: { "Content-Type": "application/json" } }
         );

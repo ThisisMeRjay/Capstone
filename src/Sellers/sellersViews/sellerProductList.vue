@@ -74,6 +74,21 @@
 
         <!-- Form Content -->
         <div class="space-y-2">
+          <div class="my-4">
+            <h1 class="text-sm font-medium">Category:</h1>
+            <select
+              class="w-full p-2 rounded-md my-1 border outline-none"
+              v-model="selectedCategory"
+            >
+              <option
+                v-for="category in categories"
+                :key="category.category_id"
+                :value="category.category_id"
+              >
+                {{ category.category_name }}
+              </option>
+            </select>
+          </div>
           <!-- Product Name -->
           <div>
             <label for="productName" class="text-sm">Product Name:</label>
@@ -112,14 +127,6 @@
             </div>
           </div>
           <div class="py-2">
-            <p for="" class="text-sm">Price:</p>
-            <input
-              type="number"
-              v-model="product_price"
-              class="p-2 rounded-md w-full"
-            />
-          </div>
-          <div class="py-2">
             <p for="" class="text-sm">Product Description:</p>
             <input
               type="text"
@@ -128,12 +135,62 @@
             />
           </div>
           <div class="py-2">
-            <p for="" class="text-sm">Shipping Fee:</p>
+            <p for="" class="text-sm">Price:</p>
+            <input
+              type="number"
+              v-model="product_price"
+              class="p-2 rounded-md w-full"
+            />
+          </div>
+          <div class="py-2">
+            <p for="" class="text-sm">Base Shipping Fee:</p>
             <input
               type="number"
               v-model="shipping_fee"
               class="p-2 rounded-md w-full"
             />
+          </div>
+          <div class="gap-5 flex items-end">
+            <div>
+              <h1 class="text-xs font-medium">Weight (kg):</h1>
+              <div class="flex items-center">
+                <input
+                  type="number"
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="Weight"
+                />
+              </div>
+            </div>
+            <div>
+              <h1 class="text-xs font-medium">Height (cm):</h1>
+              <div class="flex items-center">
+                <input
+                  type="number"
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="Height"
+                />
+              </div>
+            </div>
+            <div>
+              <h1 class="text-xs font-medium">Length (cm):</h1>
+              <div class="flex items-center">
+                <input
+                  type="number"
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="Length"
+                />
+              </div>
+            </div>
+            <div>
+              <h1 class="text-xs font-medium">Width (cm):</h1>
+              <div class="flex items-center">
+                <input
+                  type="number"
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="Width"
+                />
+              </div>
+            </div>
           </div>
           <div class="py-2">
             <p for="" class="text-sm">Stocks:</p>
@@ -143,7 +200,22 @@
               class="p-2 rounded-md w-full"
             />
           </div>
-
+          <div>
+            <h1 class="text-sm font-medium">Product location:</h1>
+            <select
+              class="w-full p-2 rounded-md my-1 border outline-none"
+              v-model="selectedBarangay"
+              required
+            >
+              <option
+                v-for="brgy in barangay"
+                :key="brgy.barangay_id"
+                :value="brgy.barangay_id"
+              >
+                {{ brgy.name }}
+              </option>
+            </select>
+          </div>
           <h1>Specifications</h1>
           <div
             v-for="(spec, index) in specifications"
@@ -321,8 +393,19 @@ export default {
         shipping_fee.value = productEditable.value.shipping_fee;
         quantity.value = productEditable.value.quantity;
         image.value = productEditable.value.image;
+        selectedBarangay.value = productEditable.value.location;
+        selectedCategory.value = productEditable.value.category_id;
+        Weight.value = productEditable.value.weight;
+        Height.value = productEditable.value.height;
+        Length.value = productEditable.value.length;
+        Width.value = productEditable.value.width;
       }
     };
+
+    const Weight = ref(null);
+    const Height = ref(null);
+    const Length = ref(null);
+    const Width = ref(null);
 
     const handleEditProduct = async () => {
       console.log(editProductId.value);
@@ -333,12 +416,18 @@ export default {
       console.log(quantity.value);
       console.log(specifications.value);
       console.log(image.value);
+      console.log(selectedBarangay.value);
+      console.log(selectedCategory.value);
+      console.log(Weight.value);
+      console.log(Height.value);
+      console.log(Length.value);
+      console.log(Width.value);
 
       try {
         const response = await axios.put(
           "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=editProductsInfo",
           {
-            product_id: editProductId,
+            product_id: editProductId.value,
             product_name: product_name.value,
             product_price: product_price.value,
             product_description: product_description.value,
@@ -346,7 +435,13 @@ export default {
             quantity: quantity.value,
             image: image.value,
             specifications: specifications.value,
-          }
+            barangay_id: selectedBarangay.value,
+            category_id: selectedCategory.value,
+            weight: Weight.value,
+            height: Height.value,
+            length: Length.value,
+            width: Width.value,
+          },
         );
         console.log("response after edit ", response.data);
       } catch (error) {
@@ -355,10 +450,43 @@ export default {
       refreshPage();
     };
 
+    const selectedBarangay = ref("");
+    const barangay = ref([]);
+
+    const GetBarangays = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+        );
+        barangay.value = res.data;
+        console.log("barangaysss: ", res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    const selectedCategory = ref("");
+    const categories = ref([]);
+    const message = ref({ content: "", type: "success" });
+
+    const getCategories = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchcategories"
+        );
+        categories.value = response.data;
+        console.log("categories ", categories.value);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
     // Now userLogin is directly accessible here, and it's reactive
     onMounted(() => {
       getUserFromLocalStorage(); // Initialize userLogin from localStorage when component mounts
       fetchProducts(); // Then fetch orders
+      GetBarangays();
+      getCategories();
     });
 
     const fetchProducts = async () => {
@@ -382,6 +510,16 @@ export default {
     };
 
     return {
+      Weight,
+      Height,
+      Length,
+      Width,
+
+      selectedCategory,
+      categories,
+      message,
+      barangay,
+      selectedBarangay,
       Products,
       editData,
 

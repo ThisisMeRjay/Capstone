@@ -48,7 +48,7 @@
           {{ message.content }}
         </p>
       </div>
-      <hr class="border-t-2 border-black"/>
+      <hr class="border-t-2 border-black" />
       <div
         class="bg-slate-400/10 rounded-md h-full w-1/2 text-slate-700 shadow my-5 p-4"
       >
@@ -129,7 +129,7 @@
               </div>
             </div>
             <div>
-              <h1 class="text-sm font-medium">Shipping fee:</h1>
+              <h1 class="text-sm font-medium">Base Shipping fee:</h1>
               <div
                 class="flex justify-start items-center bg-slate-50 border rounded-md"
               >
@@ -142,6 +142,48 @@
               </div>
             </div>
           </div>
+          <div class="gap-5 flex items-end">
+            <div>
+              <h1 class="text-sm font-medium">Weight (kg):</h1>
+              <div class="flex items-center">
+                <input
+                  type="number"
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="Weight"
+                />
+              </div>
+            </div>
+            <div>
+              <h1 class="text-sm font-medium">Height (cm):</h1>
+              <div class="flex items-center">
+                <input
+                  type="number"
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="Height"
+                />
+              </div>
+            </div>
+            <div>
+              <h1 class="text-sm font-medium">Length (cm):</h1>
+              <div class="flex items-center">
+                <input
+                  type="number"
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="Length"
+                />
+              </div>
+            </div>
+            <div>
+              <h1 class="text-sm font-medium">Width (cm):</h1>
+              <div class="flex items-center">
+                <input
+                  type="number"
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="Width"
+                />
+              </div>
+            </div>
+          </div>
           <div class="my-4">
             <h1 class="text-sm font-medium">Stocks/Quantity:</h1>
             <input
@@ -149,6 +191,23 @@
               class="w-full p-2 rounded-md my-1 border outline-none"
               v-model="quantity"
             />
+          </div>
+          <div>
+            <h1 class="text-sm font-medium">Product location:</h1>
+            <select
+              class="w-full p-2 rounded-md my-1 border outline-none"
+              v-model="selectedBarangay"
+              required
+            >
+              <option value="" disabled selected>Select Barangay</option>
+              <option
+                v-for="brgy in barangay"
+                :key="brgy.barangay_id"
+                :value="brgy.barangay_id"
+              >
+                {{ brgy.name }}
+              </option>
+            </select>
           </div>
           <!-- specifications here -->
           <div class="my-4">
@@ -216,6 +275,10 @@ export default {
     const price = ref(null);
     const shipping = ref(null);
     const quantity = ref(null);
+    const Weight = ref(null);
+    const Height = ref(null);
+    const Length = ref(null);
+    const Width = ref(null);
     const saveProduct = async () => {
       // Implementation to save the product along with specifications
       console.log("selectedCategory:", selectedCategory.value);
@@ -227,6 +290,7 @@ export default {
       console.log("quantity:", quantity.value);
       console.log("Product and specifications saved:", specifications.value);
       console.log("Store ID:", userLogin.value.store_id);
+      console.log("barangay ID:", selectedBarangay.value);
 
       try {
         const response = await axios.post(
@@ -241,6 +305,11 @@ export default {
             quantity: quantity.value,
             specifications: specifications.value,
             store_id: userLogin.value.store_id,
+            weight: Weight.value,
+            height: Height.value,
+            length: Length.value,
+            width: Width.value,
+            barangay_id: selectedBarangay.value,
           }
         );
         console.log(response.data);
@@ -298,9 +367,25 @@ export default {
       }
     };
 
+    const selectedBarangay = ref("");
+    const barangay = ref([]);
+
+    const GetBarangays = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+        );
+        barangay.value = res.data;
+        console.log("barangaysss: ", res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
     onMounted(() => {
       getUserFromLocalStorage();
       getCategories(); // Initialize userLogin from localStorage when component mounts
+      GetBarangays();
     });
 
     const refreshPage = () => {
@@ -324,6 +409,12 @@ export default {
     };
 
     return {
+      Weight,
+      Height,
+      Length, 
+      Width,
+      selectedBarangay,
+      barangay,
       UploadImage,
       showimage,
       image,
