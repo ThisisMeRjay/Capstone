@@ -211,7 +211,7 @@ export default {
     const fetchShippingFee = async (item) => {
       try {
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/testshipping.php?action=ComputeShipping",
+          "http://localhost/Ecommerce/vue-project/src/backend/Shipping.php?action=ComputeShipping",
           {
             productAddress: item.location,
             customerAddress: userLogin.value.barangay_id,

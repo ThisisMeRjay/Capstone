@@ -511,7 +511,7 @@
                 <div v-if="userLogin" class="text-xs text-slate-800">
                   <p>Name: {{ userLogin.username }}</p>
                   <p>Contact No: {{ userLogin.contact_number }}</p>
-                  <p>Address: {{ userLogin.name }}</p>
+                  <p>Address: {{ userLogin.address }}, {{ userLogin.name }}</p>
                 </div>
               </div>
               <div class="bg-slate-200 rounded-md p-2">

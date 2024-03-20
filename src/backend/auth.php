@@ -17,11 +17,38 @@ switch ($action) {
     case 'login':
         login();
         break;
+    case 'getBrgy':
+        getBrgy();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+function getBrgy()
+{
+    global $conn;
+    
+    // Assuming $conn is a valid mysqli connection object
+    $stmt = $conn->prepare("SELECT * FROM barangay");
+    if ($stmt === false) {
+        // Handle error, perhaps log it or notify someone
+        echo json_encode(["error" => "Error preparing statement"]);
+        return;
+    }
+
+    $executed = $stmt->execute();
+    if (!$executed) {
+        // Handle execution error
+        echo json_encode(["error" => "Error executing statement"]);
+        return;
+    }
+
+    $result = $stmt->get_result();
+    $barangays = $result->fetch_all(MYSQLI_ASSOC); // Fetch data as an associative array
+
+    echo json_encode($barangays); // Correctly encode the fetched data as JSON
 }
 
 global $globalUser;

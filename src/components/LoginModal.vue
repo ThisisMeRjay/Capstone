@@ -151,9 +151,23 @@
                   type="text"
                   id="address"
                   v-model="address"
+                  placeholder="Municipality"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
+                <select
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="selectedBarangay"
+                >
+                  <option disabled value="" selected>Select Barangay</option>
+                  <option
+                    v-for="brgy in barangay"
+                    :key="brgy.barangay_id"
+                    :value="brgy.barangay_id"
+                  >
+                    {{ brgy.name }}
+                  </option>
+                </select>
               </div>
               <div class="my-5">
                 <button
@@ -216,6 +230,23 @@ export default {
     },
   },
   setup(props, { emit }) {
+    const selectedBarangay = ref([]);
+    const barangay = ref([]);
+
+    const GetBarangays = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+        );
+        barangay.value = res.data;
+        console.log("barangaysss: ", res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    onMounted(GetBarangays);
+
     const loginEmail = ref("");
     const loginPassword = ref("");
     const router = useRouter();
@@ -286,6 +317,10 @@ export default {
     };
 
     return {
+      GetBarangays,
+      barangay,
+      selectedBarangay,
+
       loginEmail,
       loginPassword,
       signIn,
