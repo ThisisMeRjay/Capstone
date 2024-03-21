@@ -96,10 +96,10 @@ export default {
       //  router.push("/admin_dashboard");
     };
     const ShowProfileModal = ref(false);
-    const ShowProfile = () => { 
+    const ShowProfile = () => {
       ShowProfileModal.value = !ShowProfileModal.value;
     };
-    
+
     const showSettings = ref(false);
     const showCustomerSettings = () => {
       showSettings.value = !showSettings.value;
@@ -435,9 +435,29 @@ export default {
     const isEditing = ref(false);
     const toggleEdit = () => {
       isEditing.value = !isEditing.value;
+      GetBarangays();
+    };
+
+    const selectedBarangay = ref("");
+    const barangay = ref([]);
+
+    const GetBarangays = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+        );
+        barangay.value = res.data;
+        selectedBarangay.value = userLogin.value.barangay_id;
+        console.log("barangaysss: ", res.data);
+      } catch (err) {
+        console.log(err);
+      }
     };
 
     return {
+      GetBarangays,
+      selectedBarangay,
+      barangay,
       isEditing,
       toggleEdit,
       ShowProfile,

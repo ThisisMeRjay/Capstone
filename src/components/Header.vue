@@ -370,15 +370,16 @@
             class="bg-slate-700 text-slate-100 p-2 rounded-md shadow-xl shadow-slate-800/50 font-semibold"
           >
             <button
-              @click="Logout()"
-              class="py-2 px-4 w-full bg-slate-900/50 hover:bg-slate-900/75 rounded-md my-1"
-            >
-              Logout</button
-            ><button
               @click="ShowProfile()"
               class="py-2 px-4 w-full bg-slate-900/50 hover:bg-slate-900/75 rounded-md"
             >
-              Settings
+              Profile
+            </button>
+            <button
+              @click="Logout()"
+              class="py-2 px-4 w-full bg-slate-900/50 hover:bg-slate-900/75 rounded-md my-1"
+            >
+              Logout
             </button>
           </div>
         </div>
@@ -393,7 +394,7 @@
               <!-- Close button -->
               <button
                 @click="ShowProfileModal = false"
-                class="text-black hover:text-gray-700 rounded-full px-2 py-1 bg-slate-300"
+                class="text-black hover:text-gray-700 rounded-full px-3 py-1 bg-slate-300"
               >
                 <span class="text-lg">&times;</span>
               </button>
@@ -406,36 +407,96 @@
                 <!-- Use an icon here if preferred -->
               </button>
             </div>
-            <div class="text-center mt-4">
-              <p class="font-semibold text-lg">Profile Settings</p>
-              <div v-if="isEditing">
-                <input
-                  v-model="userLogin.username"
-                  placeholder="Username"
-                  class="input"
-                />
-                <input
-                  v-model="userLogin.contact_number"
-                  placeholder="Contact Number"
-                  class="input"
-                />
-                <input
-                  v-model="userLogin.address"
-                  placeholder="Address"
-                  class="input"
-                />
-                <input
-                  v-model="userLogin.name"
-                  placeholder="Name"
-                  class="input"
-                />
-                <button @click="saveProfile">Save</button>
+            <div class="text-center mt-4 m-10">
+              <p class="font-semibold text-lg mb-4">Profile Settings</p>
+              <div v-if="isEditing" class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <label for="username" class="mr-2">Name:</label>
+                  <input
+                    id="username"
+                    v-model="userLogin.username"
+                    placeholder="Username"
+                    class="input border-b-2 border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <label for="contact_number" class="mr-2">Contact No:</label>
+                  <input
+                    id="contact_number"
+                    v-model="userLogin.contact_number"
+                    placeholder="Contact Number"
+                    class="input border-b-2 border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <label for="address" class="mr-2">Municipality:</label>
+                  <input
+                    id="address"
+                    v-model="userLogin.address"
+                    placeholder="Address"
+                    class="input border-b-2 border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <label for="barangay" class="mr-2">Barangay:</label>
+                  <select
+                    id="barangay"
+                    class="input border-b-2 border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+                    v-model="selectedBarangay"
+                    required
+                  >
+                    <option value="" disabled selected>Select Barangay</option>
+                    <option
+                      v-for="brgy in barangay"
+                      :key="brgy.barangay_id"
+                      :value="brgy.barangay_id"
+                    >
+                      {{ brgy.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="text-right mt-4">
+                  <button
+                    @click="saveProfile"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
-              <div v-else>
-                <p>{{ userLogin.username }}</p>
-                <p>{{ userLogin.contact_number }}</p>
-                <p>{{ userLogin.address }}</p>
-                <p>{{ userLogin.name }}</p>
+
+              <div v-else class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="mr-2">Name:</span>
+                  <p class="border-b-2 border-gray-300 p-2 w-3/4">
+                    {{ userLogin.username }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <span class="mr-2">Contact No:</span>
+                  <p class="border-b-2 border-gray-300 p-2 w-3/4">
+                    {{ userLogin.contact_number }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <span class="mr-2">Municipality:</span>
+                  <p class="border-b-2 border-gray-300 p-2 w-3/4">
+                    {{ userLogin.address }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <span class="mr-2">Barangay:</span>
+                  <p class="border-b-2 border-gray-300 p-2 w-3/4">
+                    {{ userLogin.name }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
