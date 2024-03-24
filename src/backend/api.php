@@ -382,7 +382,8 @@ function fetchCartItems()
     $stmt = $conn->prepare("SELECT 
     p.*, 
     ci.*,
-    i.location
+    i.location,
+    b.*
    
 FROM 
     products AS p
@@ -390,6 +391,8 @@ LEFT JOIN
     cart_items AS ci ON  ci.product_id = p.product_id
 LEFT JOIN 
     inventory AS i ON  i.product_id = ci.product_id
+LEFT JOIN 
+    barangay AS b ON  b.barangay_id = i.location
 WHERE 
     ci.cart_id = ?");
     $stmt->bind_param("i", $id);

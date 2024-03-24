@@ -4,6 +4,7 @@ import { Icon } from "@iconify/vue";
 import { onMounted, ref, computed, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { getDistance } from "geolib";
 export default {
   components: {
     Icon,
@@ -214,27 +215,40 @@ export default {
     // shipping fee must come from db
     const selectedPayment = ref("");
 
-    const fetchShippingFee = async (item) => {
+    const fetchShippingFee = (item) => {
       try {
-        const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/Shipping.php?action=ComputeShipping",
-          {
-            productAddress: item.location,
-            customerAddress: userLogin.value.barangay_id,
-            weight: item.weight,
-            length: item.length,
-            width: item.width,
-            height: item.height,
-            baseShippingFee: item.shipping_fee,
-          }
-        );
-        console.log(response.data);
-        return response.data.shippingFee; // Make sure this matches the actual structure of your response
+        const productLocation = {
+          latitude: parseFloat(item.lat),
+          longitude: parseFloat(item.lon),
+        };
+        const customerLocation = {
+          latitude: parseFloat(userLogin.value.lat),
+          longitude: parseFloat(userLogin.value.lon),
+        };
+    
+        const distance = getDistance(productLocation, customerLocation);
+    
+        // Parse values as floats to ensure numerical operations
+        const baseShippingFee = parseFloat(item.shipping_fee);
+        const weight = parseFloat(item.weight);
+        const length = parseFloat(item.length);
+        const width = parseFloat(item.width);
+        const height = parseFloat(item.height);
+        const weightFactor = 0.5;
+        const volumeFactor = 0.2;
+        const distanceFactor = 0.01;
+    
+        const volume = (length * width * height) / 1000000; // Volume in cubic meters
+    
+        // Ensure the entire calculation is treated as a numerical operation
+        const shippingFee = baseShippingFee + (distance * distanceFactor) + (weight * weightFactor) + (volume * volumeFactor);
+    
+        return shippingFee;
       } catch (error) {
-        console.error("Error fetching shipping fee:", error);
-        throw error; // Rethrow to handle it in the calling function
+        console.error("Error calculating shipping fee:", error);
+        throw error;
       }
-    };
+    };    
 
     const checkout = async () => {
       showPayment.value = true;
@@ -246,11 +260,12 @@ export default {
       // Use Promise.all to wait for all shipping fee fetches to complete
       const itemsWithShipping = await Promise.all(
         checkoutItems.value.map(async (item) => {
+          console.log("product loc", item);
           try {
             // Fetch shipping fee for each item
             const shippingFeeData = await fetchShippingFee(item);
-            console.log("shipping", shippingFeeData);
             const shippingFee = parseFloat(shippingFeeData); // Ensure it's a number
+            console.log("shipping", shippingFeeData);
 
             // Calculate price per item including shipping fee
             const pricePerItem =
@@ -488,7 +503,7 @@ export default {
             user_id: userLogin.value.user_id,
           }
         );
-        profile.value = res.data.user_profile
+        profile.value = res.data.user_profile;
         console.log("profile: ", res.data);
       } catch (err) {
         console.log(err);
@@ -512,12 +527,14 @@ export default {
         );
         console.log("edit feedback: ", res.data);
         // Assuming you want to show the alert right after logging the response
-        alert("Profile updated successfully. Please log in again to see the updates.");
+        alert(
+          "Profile updated successfully. Please log in again to see the updates."
+        );
       } catch (err) {
         console.error(err);
         alert("Failed to update profile.");
       }
-    };    
+    };
 
     return {
       saveProfile,
