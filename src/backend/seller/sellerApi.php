@@ -1,6 +1,6 @@
 <?php
 
-include('../db.php');
+include ('../db.php');
 
 // Set headers for CORS
 header("Access-Control-Allow-Origin: http://localhost:5173"); // Update this to match your Vue.js development server URL
@@ -9,7 +9,7 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 
 
 $res = ['error' => false];
-$action = isset($_GET['action']) ? $_GET['action'] : '';
+$action = isset ($_GET['action']) ? $_GET['action'] : '';
 switch ($action) {
     case 'getOrders':
         getOrders();
@@ -57,7 +57,8 @@ switch ($action) {
         break;
 }
 
-function getReviews() {
+function getReviews()
+{
     global $conn;
     $data = json_decode(file_get_contents("php://input"), true);
     // Assuming $data['productID'] holds the product ID for which reviews are to be fetched.
@@ -69,32 +70,35 @@ function getReviews() {
     u.username 
 FROM reviews AS r 
 LEFT JOIN
-    users AS  u ON r.user_id = u.user_id
-WHERE product_id = ?");
+    users AS u ON r.user_id = u.user_id
+WHERE product_id = ?
+ORDER BY r.rating DESC");
+
     $stmt->bind_param("i", $productID);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     $reviews = []; // Initialize an array to hold the fetched reviews.
     while ($row = $result->fetch_assoc()) {
         $reviews[] = $row; // Add each review to the array.
     }
     $stmt->close();
-    
+
     echo json_encode($reviews); // Encode the array of reviews as JSON and echo it.
 }
 
-function fetchStocks() {
+function fetchStocks()
+{
     global $conn;
     header('Content-Type: application/json');
 
     $data = json_decode(file_get_contents("php://input"), true);
-    
-    if (!isset($data['store_id'])) {
+
+    if (!isset ($data['store_id'])) {
         echo json_encode(['error' => true, 'message' => 'store_id is missing']);
         exit;
     }
-    
+
     $storeId = $data['store_id'];
 
     // Adjusted query with LEFT JOIN to include products table
@@ -104,12 +108,12 @@ function fetchStocks() {
         LEFT JOIN products ON products.product_id = inventory.product_id
         WHERE products.store_id = ?
     ");
-    
+
     $stmt->bind_param("i", $storeId);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if($row = $result->fetch_assoc()) {
+    if ($row = $result->fetch_assoc()) {
         echo json_encode(['totalQuantity' => $row['totalQuantity']]);
     } else {
         echo json_encode(['error' => true, 'message' => 'Failed to fetch inventory status.']);
@@ -119,13 +123,14 @@ function fetchStocks() {
 }
 
 
-function fetchRealTimeMonthlySales() {
+function fetchRealTimeMonthlySales()
+{
     global $conn;
     header('Content-Type: application/json'); // Ensure JSON response
 
     $data = json_decode(file_get_contents("php://input"), true);
 
-    if (!isset($data['store_id'])) {
+    if (!isset ($data['store_id'])) {
         echo json_encode(['error' => true, 'message' => 'store_id is missing']);
         exit;
     }
@@ -151,7 +156,7 @@ function fetchRealTimeMonthlySales() {
     $result = $stmt->get_result();
 
     $monthlySales = [];
-    while($row = $result->fetch_assoc()) {
+    while ($row = $result->fetch_assoc()) {
         $monthlySales[] = $row;
     }
 
@@ -159,14 +164,15 @@ function fetchRealTimeMonthlySales() {
     $stmt->close();
 }
 
-function fetchSalesData() {
+function fetchSalesData()
+{
     global $conn;
     $data = json_decode(file_get_contents("php://input"), true);
     // Fetch the 'start', 'end', and 'store_id' from the query parameters
     $startDate = $data['start'];
     $endDate = $data['end'];
     $storeId = $data['store_id']; // Dynamic store_id
-    
+
     // Ensure the start and end dates include the entire day
     $startDate .= " 00:00:00";
     $endDate .= " 23:59:59";
@@ -187,13 +193,13 @@ function fetchSalesData() {
 
     // Execute the query
     $stmt->execute();
-    
+
     // Get the result
     $result = $stmt->get_result();
-    
+
     // Fetch the data
     $value = $result->fetch_assoc();
-    
+
     // Assuming you want to return the sum as a part of a JSON response
     echo json_encode([
         'totalSales' => $value['totalSales'] ? $value['totalSales'] : 0
@@ -203,7 +209,8 @@ function fetchSalesData() {
     $stmt->close();
 }
 
-function SaveProduct() {
+function SaveProduct()
+{
     global $conn;
     // Decode the JSON body from the request
     $data = json_decode(file_get_contents("php://input"), true);
@@ -252,13 +259,14 @@ function SaveProduct() {
 }
 
 
-function AddCategory() {
+function AddCategory()
+{
     global $conn;
     // Decode the JSON body from the request
     $data = json_decode(file_get_contents("php://input"), true);
 
     // Check if the necessary data is available
-    if (isset($data['category_name']) && isset($data['category_description'])) {
+    if (isset ($data['category_name']) && isset ($data['category_description'])) {
         $catname = $conn->real_escape_string($data['category_name']);
         $catdesc = $conn->real_escape_string($data['category_description']);
 
@@ -274,7 +282,7 @@ function AddCategory() {
             http_response_code(409); // Conflict
             echo json_encode(['error' => 'Category name already exists.']);
             return;
-        } 
+        }
 
         // Proceed with insertion since the category name does not exist
         $stmt = $conn->prepare("INSERT INTO categories (category_name, category_description) VALUES (?, ?)");
@@ -296,7 +304,8 @@ function AddCategory() {
     }
 }
 
-function deleteProduct() {
+function deleteProduct()
+{
     global $conn;
     $data = json_decode(file_get_contents("php://input"), true);
     $product_id = $data['id'];
@@ -365,12 +374,13 @@ function fetchcategories()
     echo json_encode($cat);
 }
 
-function editProductsInfo() {
+function editProductsInfo()
+{
     global $conn;
-    
+
     // Decode the JSON object from the request
     $data = json_decode(file_get_contents("php://input"), true);
-    
+
     // Extract product details from the data
     $product_id = $data['product_id'];
     $product_name = $data['product_name'];
@@ -391,7 +401,7 @@ function editProductsInfo() {
 
     // Begin transaction for atomicity
     $conn->begin_transaction();
-    
+
     try {
         $stmt = $conn->prepare("SELECT COUNT(*) FROM products WHERE product_id = ?");
         $stmt->bind_param("i", $product_id);
@@ -411,19 +421,19 @@ function editProductsInfo() {
         $stmt->bind_param("isdsdsidddd", $catID, $product_name, $product_price, $product_description, $shipping_fee, $image, $weight, $height, $length, $width, $product_id);
         $stmt->execute();
         $stmt->close();
-    
+
         // Update quantity in the inventory table
         $stmt = $conn->prepare("UPDATE inventory SET quantity = ?, location = ? WHERE product_id = ?");
         $stmt->bind_param("iii", $quantity, $brgyID, $product_id);
         $stmt->execute();
         $stmt->close();
-    
+
         // Delete existing specifications for the product
         $stmt = $conn->prepare("DELETE FROM product_specifications WHERE product_id = ?");
         $stmt->bind_param("i", $product_id);
         $stmt->execute();
         $stmt->close();
-    
+
         // Insert new/updated specifications
         $insertStmt = $conn->prepare("INSERT INTO product_specifications (product_id, spec_key, spec_value) VALUES (?, ?, ?)");
         foreach ($specifications as $spec) {
@@ -433,7 +443,7 @@ function editProductsInfo() {
             $insertStmt->execute();
         }
         $insertStmt->close();
-    
+
         // Commit the transaction
         $conn->commit();
         echo "Product, inventory, and specifications updated successfully.";
@@ -466,7 +476,7 @@ function getSpecs()
     while ($row = $result->fetch_assoc()) {
         $res[] = $row;
     }
-    
+
     echo json_encode($res);
 }
 
@@ -518,13 +528,13 @@ function EditStatus()
         }
     }
 
-    if (isset($stmt) && $stmt->affected_rows > 0) {
+    if (isset ($stmt) && $stmt->affected_rows > 0) {
         echo "Order status updated successfully.";
     } else {
         echo "No order was updated. Please check your input.";
     }
 
-    if (isset($stmt)) {
+    if (isset ($stmt)) {
         $stmt->close();
     }
 }
@@ -560,7 +570,7 @@ WHERE
         $row['image'] = base64_encode($row['image']);
         $res[] = $row;
     }
-    
+
     echo json_encode($res);
 }
 
@@ -600,6 +610,6 @@ ORDER BY
         $row['image'] = base64_encode($row['image']);
         $res[] = $row;
     }
-    
+
     echo json_encode($res);
 }

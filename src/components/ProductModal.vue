@@ -1,11 +1,13 @@
 <template>
   <div
     v-if="isVisible"
+    @click="closeModal()"
     class="fixed inset-0 flex items-center justify-center bg-gray-500 border-2 border-zinc-300 bg-opacity-75 z-20"
   >
     <div
       class="bg-white rounded-lg shadow-xl max-w-lg overflow-auto p-6 relative"
       style="max-height: 90vh"
+      @click.stop
     >
       <button
         @click="closeModal()"
@@ -179,6 +181,7 @@ export default {
     const isHeartRed = reactive([]);
     const closeModal = () => {
       emit("update:isVisible", false);
+      reviews.value = [];
     };
 
     const increment = () => {
