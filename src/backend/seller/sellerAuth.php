@@ -1,6 +1,6 @@
 <?php
 
-include('../db.php');
+include ('../db.php');
 
 // Set headers for CORS
 header("Access-Control-Allow-Origin: http://localhost:5173"); // Update this to match your Vue.js development server URL
@@ -9,7 +9,7 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 
 
 $res = ['error' => false];
-$action = isset($_GET['action']) ? $_GET['action'] : '';
+$action = isset ($_GET['action']) ? $_GET['action'] : '';
 switch ($action) {
     case 'register':
         register();
@@ -17,11 +17,32 @@ switch ($action) {
     case 'login':
         login();
         break;
+    case 'getLogo':
+        getLogo();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function getLogo()
+{
+    global $conn;
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    $userID = $data['store_id']; // Example user ID, replace with dynamic data if necessary.
+
+    // Prepare the SQL statement.
+    $stmt = $conn->prepare("SELECT * FROM store_logo WHERE store_id = ?");
+    $stmt->bind_param("i", $userID);
+    $executed = $stmt->execute();
+    $result = $stmt->get_result();// Fetch data as an associative array
+    $row = $result->fetch_assoc();
+    $row['logo'] = base64_encode($row['logo']);
+
+    echo json_encode($row);
 }
 
 global $globalUser;
@@ -68,7 +89,6 @@ function login()
     $stmt->execute();
     $result = $stmt->get_result();
     $store = $result->fetch_array();
-
     if ($store) {
         if (password_verify($store_password, $store['store_password'])) {
             $_SESSION['store'] = $store;

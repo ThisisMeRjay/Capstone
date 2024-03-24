@@ -98,6 +98,7 @@ export default {
     const ShowProfileModal = ref(false);
     const ShowProfile = () => {
       ShowProfileModal.value = !ShowProfileModal.value;
+      getUserprofile();
     };
 
     const showSettings = ref(false);
@@ -454,7 +455,77 @@ export default {
       }
     };
 
+    const profile = ref("");
+    const showuserprofile = ref(false);
+
+    const handleImageChange = (event) => {
+      const file = event.target.files[0];
+      showuserprofile.value = true;
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        profile.value = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+    const fileInput = ref(null);
+    const triggerFileInput = () => {
+      // Programmatically click the file input
+      if (fileInput.value) {
+        fileInput.value.click();
+      }
+    };
+
+    const getUserprofile = async () => {
+      try {
+        console.log("id", userLogin.value.user_id);
+        const res = await axios.post(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getProfile",
+          {
+            user_id: userLogin.value.user_id,
+          }
+        );
+        profile.value = res.data.user_profile
+        console.log("profile: ", res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    onMounted(getUserprofile);
+
+    const saveProfile = async () => {
+      try {
+        const res = await axios.put(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=SaveEditprofile",
+          {
+            username: userLogin.value.username,
+            contact_number: userLogin.value.contact_number,
+            address: userLogin.value.address,
+            barangay_id: selectedBarangay.value,
+            user_id: userLogin.value.user_id,
+            profile: profile.value,
+          }
+        );
+        console.log("edit feedback: ", res.data);
+        // Assuming you want to show the alert right after logging the response
+        alert("Profile updated successfully. Please log in again to see the updates.");
+      } catch (err) {
+        console.error(err);
+        alert("Failed to update profile.");
+      }
+    };    
+
     return {
+      saveProfile,
+      triggerFileInput,
+      fileInput,
+      handleImageChange,
+      profile,
+      showuserprofile,
       GetBarangays,
       selectedBarangay,
       barangay,

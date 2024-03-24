@@ -1,7 +1,13 @@
 <template>
   <div class="bg-gray-100/10 shadow h-screen w-60">
     <div class="h-full">
-      <div class="py-3 px-3 font-semibold text-gray-700"><h1>Logo</h1></div>
+      <div class="py-3 px-3 font-semibold text-gray-700">
+        <img
+          :src="'data:image/png;base64,' + logo"
+          class="w-12 h-12 rounded-full mr-2"
+          :alt="userLogin.store_name"
+        />
+      </div>
       <div class="px-2">
         <hr />
         <h1 class="font-semibold text-gray-500 py-3">Main Menu</h1>
@@ -85,8 +91,12 @@
           <button
             class="flex gap-3 justify-start items-center font-semibold hover:bg-slate-400/20 rounded-md text-slate-700 w-full py-2"
           >
-            <div class="bg-blue-500/20 shadow-sm rounded-full">
-              <Icon icon="typcn:user" class="text-3xl text-blue-500" />
+            <div>
+              <img
+                :src="'data:image/png;base64,' + logo"
+                class="w-12 h-12 rounded-full mr-2"
+                :alt="userLogin.store_name"
+              />
             </div>
             {{ userLogin.store_name }}
           </button>
@@ -106,9 +116,10 @@
   </div>
 </template>
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
 export default {
   components: {
     Icon,
@@ -132,7 +143,29 @@ export default {
       return null;
     };
     getUserFromLocalStorage();
+
+    const logo = ref("");
+    const getUserprofile = async () => {
+      try {
+        console.log("id", userLogin.value.store_id);
+        const res = await axios.post(
+          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=getLogo",
+          {
+            store_id: userLogin.value.store_id,
+          }
+        );
+        logo.value = res.data.logo;
+        console.log("profile: ", res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    onMounted(getUserprofile);
+
     return {
+      logo,
+      getUserprofile,
       logout,
       userLogin,
     };

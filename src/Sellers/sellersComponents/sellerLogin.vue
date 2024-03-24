@@ -81,7 +81,7 @@ export default {
           },
           { headers: { "Content-Type": "application/json" } }
         );
-
+        console.log("res data: ", res.data.store);
         name.value = res.data.store;
         localStorage.setItem("seller", JSON.stringify(name.value));
 

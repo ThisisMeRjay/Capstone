@@ -353,9 +353,9 @@
           class="flex gap-2 justify-start mx-5 items-center"
         >
           <img
-            src="@/assets/profile.jpg"
-            alt=""
-            class="w-10 h-10 rounded-full mr-2"
+            :src="'data:image/png;base64,' + profile"
+            class="w-12 h-12 rounded-full mr-2"
+            :alt="userLogin.username"
           />
 
           <div>
@@ -403,20 +403,68 @@
                 @click="toggleEdit"
                 class="text-black hover:text-gray-700 rounded px-2 py-1"
               >
-                <span class="text-lg">Edit</span>
+                <span
+                  v-if="isEditing"
+                  class="text-md hover:text-blue-500 cursor-pointer"
+                  >Back</span
+                >
+                <span v-else class="text-md hover:text-blue-500 cursor-pointer"
+                  >Edit</span
+                >
                 <!-- Use an icon here if preferred -->
               </button>
             </div>
             <div class="text-center mt-4 m-10">
               <p class="font-semibold text-lg mb-4">Profile Settings</p>
               <div v-if="isEditing" class="space-y-4">
+                <!-- Image Upload -->
+                <div class="py-2">
+                  <input
+                    id="userprofile"
+                    type="file"
+                    @change="handleImageChange"
+                    class="hidden"
+                    ref="fileInput"
+                  />
+                  <!-- Parent div for relative positioning -->
+                  <div class="mb-6 flex justify-center">
+                    <div
+                      class="relative inline-block"
+                      style="width: 60px; height: 60px"
+                    >
+                      <img
+                        v-if="showuserprofile"
+                        :src="profile"
+                        class="object-cover rounded-full shadow"
+                        :alt="userLogin.username"
+                        style="width: 100%; height: 100%"
+                        @click="triggerFileInput"
+                      />
+                      <img
+                        v-else
+                        :src="'data:image/png;base64,' + profile"
+                        class="object-cover rounded-full shadow"
+                        :alt="userLogin.username"
+                        style="width: 100%; height: 100%"
+                        @click="triggerFileInput"
+                      />
+                      <!-- Iconify edit icon positioned absolutely within the relative parent -->
+                      <div
+                        class="absolute bottom-0 right-0 bg-gray-300 rounded-full p-1 cursor-pointer transform translate-x-1/2 -translate-y-1/2"
+                        @click="triggerFileInput"
+                      >
+                        <Icon icon="lucide:edit" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div class="flex items-center justify-between">
                   <label for="username" class="mr-2">Name:</label>
                   <input
                     id="username"
                     v-model="userLogin.username"
                     placeholder="Username"
-                    class="input border-b-2 border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+                    class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -426,7 +474,7 @@
                     id="contact_number"
                     v-model="userLogin.contact_number"
                     placeholder="Contact Number"
-                    class="input border-b-2 border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+                    class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -436,7 +484,7 @@
                     id="address"
                     v-model="userLogin.address"
                     placeholder="Address"
-                    class="input border-b-2 border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+                    class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -444,7 +492,7 @@
                   <label for="barangay" class="mr-2">Barangay:</label>
                   <select
                     id="barangay"
-                    class="input border-b-2 border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+                    class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
                     v-model="selectedBarangay"
                     required
                   >
@@ -470,30 +518,42 @@
               </div>
 
               <div v-else class="space-y-4">
+                <!-- Image Upload -->
+                <div class="py-2">
+                  <!-- Display the selected or default image -->
+                  <div class="mb-6 flex justify-center">
+                    <img
+                      :src="'data:image/png;base64,' + profile"
+                      class="object-cover rounded-full shadow"
+                      :alt="userLogin.username"
+                      style="width: 60px; height: 60px"
+                    />
+                  </div>
+                </div>
                 <div class="flex items-center justify-between">
                   <span class="mr-2">Name:</span>
-                  <p class="border-b-2 border-gray-300 p-2 w-3/4">
+                  <p class="border-2 rounded-lg border-gray-300 p-2 w-3/4">
                     {{ userLogin.username }}
                   </p>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <span class="mr-2">Contact No:</span>
-                  <p class="border-b-2 border-gray-300 p-2 w-3/4">
+                  <p class="border-2 rounded-lg border-gray-300 p-2 w-3/4">
                     {{ userLogin.contact_number }}
                   </p>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <span class="mr-2">Municipality:</span>
-                  <p class="border-b-2 border-gray-300 p-2 w-3/4">
+                  <p class="border-2 rounded-lg border-gray-300 p-2 w-3/4">
                     {{ userLogin.address }}
                   </p>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <span class="mr-2">Barangay:</span>
-                  <p class="border-b-2 border-gray-300 p-2 w-3/4">
+                  <p class="border-2 rounded-lg border-gray-300 p-2 w-3/4">
                     {{ userLogin.name }}
                   </p>
                 </div>
