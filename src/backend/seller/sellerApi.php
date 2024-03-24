@@ -539,11 +539,14 @@ function getProducts()
     // Use prepared statement to prevent SQL injection
     $stmt = $conn->prepare("SELECT 
     p.*, 
-    i.*
+    i.*,
+    b.*
 FROM 
     products AS p
 LEFT JOIN
     inventory AS i ON  p.product_id = i.product_id
+LEFT JOIN
+    barangay AS b ON  i.location = b.barangay_id
 WHERE 
     p.store_id = ?");
     $stmt->bind_param("i", $id);

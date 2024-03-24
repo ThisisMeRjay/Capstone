@@ -114,34 +114,24 @@
               v-model="productDescription"
             />
           </div>
-          <div class="my-4 flex gap-2 justify-start items-center">
-            <div>
-              <h1 class="text-sm font-medium">Price:</h1>
-              <div
-                class="flex justify-start items-center bg-slate-50 border rounded-md"
+          <div>
+            <h1 class="text-sm font-medium">Product location:</h1>
+            <select
+              class="w-full p-2 rounded-md my-1 border outline-none"
+              v-model="selectedBarangay"
+              required
+            >
+              <option value="" disabled selected>Select Barangay</option>
+              <option
+                v-for="brgy in barangay"
+                :key="brgy.barangay_id"
+                :value="brgy.barangay_id"
               >
-                <p class="px-2 font-medium">₱</p>
-                <input
-                  type="number"
-                  class="w-full p-2 bg-slate-50 rounded-md outline-none"
-                  v-model="price"
-                />
-              </div>
-            </div>
-            <div>
-              <h1 class="text-sm font-medium">Base Shipping fee:</h1>
-              <div
-                class="flex justify-start items-center bg-slate-50 border rounded-md"
-              >
-                <p class="px-2 font-medium">₱</p>
-                <input
-                  type="number"
-                  class="w-full p-2 bg-slate-50 rounded-md outline-none"
-                  v-model="shipping"
-                />
-              </div>
-            </div>
+                {{ brgy.name }}
+              </option>
+            </select>
           </div>
+
           <div class="gap-5 flex items-end">
             <div>
               <h1 class="text-sm font-medium">Weight (kg):</h1>
@@ -184,6 +174,168 @@
               </div>
             </div>
           </div>
+          <div class="my-4 flex gap-2 justify-start items-center">
+            <div>
+              <h1 class="text-sm font-medium">Price:</h1>
+              <div
+                class="flex justify-start items-center bg-slate-50 border rounded-md"
+              >
+                <p class="px-2 font-medium">₱</p>
+                <input
+                  type="number"
+                  class="w-full p-2 bg-slate-50 rounded-md outline-none"
+                  v-model="price"
+                />
+              </div>
+            </div>
+            <div>
+              <h1 class="text-sm font-medium">Base Shipping fee:</h1>
+              <div
+                class="flex justify-start items-center bg-slate-50 border rounded-md"
+              >
+                <p class="px-2 font-medium">₱</p>
+                <input
+                  type="number"
+                  class="w-full p-2 bg-slate-50 rounded-md outline-none"
+                  v-model="shipping"
+                />
+              </div>
+            </div>
+          </div>
+          <!-- test button -->
+          <button
+            @click="triggertesting"
+            class="text-sm p-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md"
+          >
+            Test Shipping fee first?
+          </button>
+          <!-- Base Shipping Fee Modal -->
+          <div
+            v-if="showBaseShippingModal"
+            class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center"
+            @click="showBaseShippingModal = false"
+          >
+            <div
+              class="bg-white w-full max-w-md mx-4 p-6 rounded-lg shadow-lg"
+              @click.stop
+            >
+              <h2 class="text-2xl font-bold mb-6 text-gray-800">
+                Calculate Shipping Fee
+              </h2>
+              <div class="gap-5 flex items-end">
+                <div>
+                  <h1 class="text-xs font-medium">Weight (kg):</h1>
+                  <div class="flex items-center">
+                    <input
+                      type="number"
+                      class="w-full p-2 rounded-md my-1 border outline-none"
+                      v-model="Weight"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <h1 class="text-xs font-medium">Height (cm):</h1>
+                  <div class="flex items-center">
+                    <input
+                      type="number"
+                      class="w-full p-2 rounded-md my-1 border outline-none"
+                      v-model="Height"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <h1 class="text-xs font-medium">Length (cm):</h1>
+                  <div class="flex items-center">
+                    <input
+                      type="number"
+                      class="w-full p-2 rounded-md my-1 border outline-none"
+                      v-model="Length"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <h1 class="text-xs font-medium">Width (cm):</h1>
+                  <div class="flex items-center">
+                    <input
+                      type="number"
+                      class="w-full p-2 rounded-md my-1 border outline-none"
+                      v-model="Width"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="mb-4">
+                <label
+                  for="baseFeeInput"
+                  class="block mb-2 text-sm font-medium text-gray-700"
+                  >Sample Base Shipping Fee:</label
+                >
+                <input
+                  id="baseFeeInput"
+                  type="number"
+                  v-model="shipping"
+                  class="block w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Enter base fee"
+                />
+              </div>
+              <div>
+                <h1 class="text-sm font-medium">Product location:</h1>
+                <select
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="subrgy"
+                  required
+                >
+                  <option
+                    v-for="brgy in barangay"
+                    :key="brgy.barangay_id"
+                    :value="brgy"
+                  >
+                    {{ brgy.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <h1 class="text-sm font-medium">Customer Location:</h1>
+                <select
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="customerbarangay"
+                  required
+                >
+                  <option
+                    v-for="brgy in barangay"
+                    :key="brgy.barangay_id"
+                    :value="brgy"
+                  >
+                    {{ brgy.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="flex justify-between items-center">
+                <button
+                  @click="
+                    fetchShippingFee(
+                      Height,
+                      Weight,
+                      Length,
+                      Width,
+                      shipping
+                    )
+                  "
+                  class="inline-flex items-center justify-center px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Test Shipping Fee
+                </button>
+                <span
+                  v-if="shippingtestResult > 0"
+                  class="text-sm font-semibold text-gray-900"
+                >
+                  Fee:
+                  <span class="text-green-600">{{ shippingtestResult }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
           <div class="my-4">
             <h1 class="text-sm font-medium">Stocks/Quantity:</h1>
             <input
@@ -192,23 +344,7 @@
               v-model="quantity"
             />
           </div>
-          <div>
-            <h1 class="text-sm font-medium">Product location:</h1>
-            <select
-              class="w-full p-2 rounded-md my-1 border outline-none"
-              v-model="selectedBarangay"
-              required
-            >
-              <option value="" disabled selected>Select Barangay</option>
-              <option
-                v-for="brgy in barangay"
-                :key="brgy.barangay_id"
-                :value="brgy.barangay_id"
-              >
-                {{ brgy.name }}
-              </option>
-            </select>
-          </div>
+
           <!-- specifications here -->
           <div class="my-4">
             <h1 class="text-base font-semibold">Specifications</h1>
@@ -250,10 +386,11 @@
 </template>
 <script>
 // YourComponent.vue <script> part
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller"; // Adjust the path as necessary
+import { getDistance } from "geolib";
 
 export default {
   components: {
@@ -408,10 +545,91 @@ export default {
       reader.readAsDataURL(file);
     };
 
+    const showBaseShippingModal = ref(false);
+    const subrgy = ref(null); // Assuming you want to store a single object, not an array
+    const customerbarangay = ref(null);
+    const shippingtestResult = ref(null);
+
+    // Define your watcher at the top level
+    watch(selectedBarangay, (newVal) => {
+      // This watcher will update `subrgy` whenever `selectedBarangay` changes
+      subrgy.value =
+        barangay.value.find((brgy) => brgy.barangay_id === newVal) || null;
+    });
+
+    const triggertesting = () => {
+      // Your method can now simply focus on logic unrelated to watching `selectedBarangay`
+      showBaseShippingModal.value = !showBaseShippingModal.value;
+    };
+
+    const fetchShippingFee = (Height, Weight, Length, Width, shipping_fee) => {
+      console.log("test", subrgy.value);
+      console.log("test2", shipping_fee);
+      if (!subrgy.value || !customerbarangay.value) {
+        console.error("subrgy or customerbarangay is not defined");
+        return;
+      }
+
+      try {
+        // Assuming you have `product` and `customer` objects available
+        // You need to ensure they are correctly populated from `subrgy` or other sources
+        const productLocation = {
+          latitude: parseFloat(subrgy.value.lat),
+          longitude: parseFloat(subrgy.value.lon),
+        };
+        // Similar approach for `customerLocation`
+        const customerLocation = {
+          latitude: parseFloat(customerbarangay.value.lat), // This is likely incorrect; adjust according to your data structure
+          longitude: parseFloat(customerbarangay.value.lon), // Adjust as necessary
+        };
+
+        // Calculate distance (ensure your getDistance function returns meters for more accuracy)
+        const distanceMeters = getDistance(productLocation, customerLocation);
+        console.log("Distance (meters):", distanceMeters);
+
+        // Parse additional values as floats to ensure numerical operations
+        const baseShippingFee = parseFloat(shipping_fee); // Base fee could include handling, smallest package fee, etc.
+        const weightKg = parseFloat(Weight); // Assuming weight is in kilograms
+        const dimensionsCm = {
+          length: parseFloat(Length),
+          width: parseFloat(Width),
+          height: parseFloat(Height),
+        }; // Assuming dimensions are in centimeters
+
+        // Constants for calculation
+        const weightFactor = 1; // Cost per kilogram
+        const volumeFactor = 0.005; // Cost per cubic centimeter (for more granularity)
+        const distanceFactor = 0.001; // Cost per meter
+
+        // Calculate volume in cubic centimeters (for more granularity)
+        const volumeCm3 =
+          dimensionsCm.length * dimensionsCm.width * dimensionsCm.height;
+
+        // Compute the shipping fee
+        const shippingFee =
+          baseShippingFee +
+          distanceMeters * distanceFactor +
+          weightKg * weightFactor +
+          volumeCm3 * volumeFactor;
+
+        console.log("Shipping Fee:", shippingFee.toFixed(2));
+        shippingtestResult.value = shippingFee.toFixed(2);
+      } catch (error) {
+        console.error("Error calculating shipping fee:", error);
+        throw error;
+      }
+    };
+
     return {
+      shippingtestResult,
+      customerbarangay,
+      subrgy,
+      fetchShippingFee,
+      triggertesting,
+      showBaseShippingModal,
       Weight,
       Height,
-      Length, 
+      Length,
       Width,
       selectedBarangay,
       barangay,

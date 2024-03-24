@@ -237,7 +237,7 @@ export default {
         const dimensionsCm = {length: parseFloat(item.length), width: parseFloat(item.width), height: parseFloat(item.height)}; // Assuming dimensions are in centimeters
     
         // Constants for calculation
-        const weightFactor = 10; // Cost per kilogram
+        const weightFactor = 1; // Cost per kilogram
         const volumeFactor = 0.005; // Cost per cubic centimeter (for more granularity)
         const distanceFactor = 0.001; // Cost per meter
     
@@ -274,6 +274,7 @@ export default {
             // Fetch shipping fee for each item
             const shippingFeeData = await fetchShippingFee(item);
             const shippingFee = parseFloat(shippingFeeData); // Ensure it's a number
+            computedshippingFee.value = shippingFeeData;
             console.log("shipping", shippingFeeData);
 
             // Calculate price per item including shipping fee
@@ -321,6 +322,7 @@ export default {
       console.log("click");
     };
 
+    const computedshippingFee = ref(null);
     const submitOrder = async () => {
       console.log(priceTotalAll.value); // Assuming priceTotalAll is a reactive reference
       console.log(selectedPayment.value); // Assuming selectedPayment is a reactive reference
@@ -343,7 +345,7 @@ export default {
         parseFloat(
           (
             parseFloat(item.price) * item.quantity +
-            parseFloat(item.shipping_fee)
+            parseFloat(computedshippingFee.value)
           ).toFixed(2)
         )
       );
