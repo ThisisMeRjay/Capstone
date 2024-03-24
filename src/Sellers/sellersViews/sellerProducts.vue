@@ -7,9 +7,7 @@
     <!-- Date Range Selection with Labels -->
     <div class="mb-4 flex items-end gap-4">
       <div class="flex items-center gap-3">
-        <label for="startDate" class="block text-sm font-medium text-slate-700"
-          >From:</label
-        >
+        <label for="startDate" class="block text-sm font-medium text-slate-700">From:</label>
         <input
           id="startDate"
           type="date"
@@ -19,9 +17,7 @@
         />
       </div>
       <div class="flex items-center gap-3">
-        <label for="endDate" class="block text-sm font-medium text-slate-700"
-          >To:</label
-        >
+        <label for="endDate" class="block text-sm font-medium text-slate-700">To:</label>
         <input
           id="endDate"
           type="date"
@@ -57,8 +53,8 @@
         </div>
       </div>
     </div>
-    <!-- chart -->
-    <div>
+    <!-- Chart -->
+    <div class="chart-container" style="position: relative; height:60vh; width:80vw">
       <Bar id="my-chart-id" :options="chartOptions" :data="chartData" />
     </div>
   </div>
@@ -105,6 +101,7 @@ const chartData = ref({
 
 const chartOptions = ref({
   responsive: true,
+  maintainAspectRatio: false, // Add this line
   plugins: {
     title: {
       display: true,
@@ -117,7 +114,7 @@ const chartOptions = ref({
         bottom: 20,
       },
     },
-    // Include other plugins here if needed
+    // Add other plugin options as needed
   },
 });
 
