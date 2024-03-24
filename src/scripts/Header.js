@@ -217,6 +217,7 @@ export default {
 
     const fetchShippingFee = (item) => {
       try {
+        // Ensure coordinates are parsed as floats
         const productLocation = {
           latitude: parseFloat(item.lat),
           longitude: parseFloat(item.lon),
@@ -226,27 +227,35 @@ export default {
           longitude: parseFloat(userLogin.value.lon),
         };
     
-        const distance = getDistance(productLocation, customerLocation);
+        // Calculate distance (ensure your getDistance function returns meters for more accuracy)
+        const distanceMeters = getDistance(productLocation, customerLocation);
+        console.log("Distance (meters):", distanceMeters);
     
-        // Parse values as floats to ensure numerical operations
-        const baseShippingFee = parseFloat(item.shipping_fee);
-        const weight = parseFloat(item.weight);
-        const length = parseFloat(item.length);
-        const width = parseFloat(item.width);
-        const height = parseFloat(item.height);
-        const weightFactor = 0.5;
-        const volumeFactor = 0.2;
-        const distanceFactor = 0.01;
+        // Parse additional values as floats to ensure numerical operations
+        const baseShippingFee = parseFloat(item.shipping_fee); // Base fee could include handling, smallest package fee, etc.
+        const weightKg = parseFloat(item.weight); // Assuming weight is in kilograms
+        const dimensionsCm = {length: parseFloat(item.length), width: parseFloat(item.width), height: parseFloat(item.height)}; // Assuming dimensions are in centimeters
     
-        const volume = (length * width * height) / 1000000; // Volume in cubic meters
+        // Constants for calculation
+        const weightFactor = 10; // Cost per kilogram
+        const volumeFactor = 0.005; // Cost per cubic centimeter (for more granularity)
+        const distanceFactor = 0.001; // Cost per meter
     
-        // Ensure the entire calculation is treated as a numerical operation
-        const shippingFee = baseShippingFee + (distance * distanceFactor) + (weight * weightFactor) + (volume * volumeFactor);
+        // Calculate volume in cubic centimeters (for more granularity)
+        const volumeCm3 = dimensionsCm.length * dimensionsCm.width * dimensionsCm.height;
     
-        return shippingFee;
+        // Compute the shipping fee
+        const shippingFee =
+          baseShippingFee +
+          (distanceMeters * distanceFactor) +
+          (weightKg * weightFactor) +
+          (volumeCm3 * volumeFactor);
+    
+        console.log("Shipping Fee:", shippingFee.toFixed(2));
+        return shippingFee.toFixed(2); // Return the shipping fee formatted as a string with two decimal places
       } catch (error) {
         console.error("Error calculating shipping fee:", error);
-        throw error;
+        throw error; // Rethrow to ensure that calling functions are aware of the error
       }
     };    
 
