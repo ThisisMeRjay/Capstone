@@ -3,7 +3,7 @@
     <header
       class="py-5 absolute z-10 w-full top-0 bg-gradient-to-r from-blue-500/75 from-30% via-violet-500/50 shadow-md shadow-blue-400/25 via-60% to-orange-500/25 to-90% font-semibold text-white text-xl px-10"
     >
-      LOGO
+      <img src="../assets/logo.jpg" alt="" class="w-12 h-12 rounded-full mr-2"/>
     </header>
     <div class="min-h-screen">
       <div class="flex justify-center items-center h-full">

@@ -175,7 +175,7 @@
                   type="submit"
                   class="bg-sky-900 w-full font-semibold text-lg text-white px-5 py-2 rounded-md"
                 >
-                  Sign In
+                  Register
                 </button>
                 <div class="flex justify-center gap-2 py-2">
                   <p>Already have account?</p>
