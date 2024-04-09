@@ -20,8 +20,8 @@ switch ($action) {
     case 'getLogo':
         getLogo();
         break;
-    case 'SaveEditProfile':
-        SaveEditProfile();
+    case 'save':
+        save();
         break;
     default:
         $res['error'] = true;
@@ -30,7 +30,7 @@ switch ($action) {
         break;
 }
 
-function SaveEditProfile()
+function save()
 {
     global $conn;
 

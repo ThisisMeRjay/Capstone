@@ -347,7 +347,7 @@ export default {
     const saveProfile = async () => {
       try {
         const res = await axios.put(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=SaveEditprofile",
+          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=save",
           {
             store_id: userLogin.value.store_id,
             store_name: userLogin.value.store_name,
