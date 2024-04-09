@@ -7,9 +7,7 @@
     <!-- Date Range Selection with Labels -->
     <div class="mb-4 flex items-end gap-4">
       <div class="flex items-center gap-3">
-        <label for="startDate" class="block text-sm font-medium text-slate-700"
-          >From:</label
-        >
+        <label for="startDate" class="block text-sm font-medium text-slate-700">From:</label>
         <input
           id="startDate"
           type="date"
@@ -19,9 +17,7 @@
         />
       </div>
       <div class="flex items-center gap-3">
-        <label for="endDate" class="block text-sm font-medium text-slate-700"
-          >To:</label
-        >
+        <label for="endDate" class="block text-sm font-medium text-slate-700">To:</label>
         <input
           id="endDate"
           type="date"
@@ -57,8 +53,8 @@
         </div>
       </div>
     </div>
-    <!-- chart -->
-    <div>
+    <!-- Chart -->
+    <div class="chart-container" style="position: relative; height:60vh; width:80vw">
       <Bar id="my-chart-id" :options="chartOptions" :data="chartData" />
     </div>
   </div>
@@ -69,6 +65,7 @@ import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller";
 import { Bar } from "vue-chartjs";
+import moment from "moment-timezone";
 import {
   Chart as ChartJS,
   Title,
@@ -104,6 +101,7 @@ const chartData = ref({
 
 const chartOptions = ref({
   responsive: true,
+  maintainAspectRatio: false, // Add this line
   plugins: {
     title: {
       display: true,
@@ -116,7 +114,7 @@ const chartOptions = ref({
         bottom: 20,
       },
     },
-    // Include other plugins here if needed
+    // Add other plugin options as needed
   },
 });
 
@@ -229,16 +227,18 @@ const updateDataBasedOnDateRange = async () => {
 // Initialize isDefaultDateRange based on whether the initially set dates match the last 7 days
 onMounted(() => {
   getUserFromLocalStorage();
-  const today = new Date();
-  const last7Days = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - 6
-  );
-  console.log("show ", isDefaultDateRange.value);
 
-  startDate.value = last7Days.toISOString().split("T")[0];
-  endDate.value = today.toISOString().split("T")[0];
+  // Use moment-timezone to set the time to Philippine time zone (UTC+8)
+  const philippinesTime = moment().tz("Asia/Manila");
+
+  // Format the date as needed for your inputs
+  const todayFormatted = philippinesTime.format("YYYY-MM-DD");
+  const last7DaysFormatted = philippinesTime
+    .subtract(7, "days")
+    .format("YYYY-MM-DD");
+
+  startDate.value = last7DaysFormatted;
+  endDate.value = todayFormatted;
 
   // Fetch both sales data and current inventory status on mount
   fetchSalesData(startDate.value, endDate.value);

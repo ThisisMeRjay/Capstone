@@ -206,7 +206,7 @@ function CheckoutOrder()
     $data = json_decode(file_get_contents("php://input"), true);
 
     $stmt = $conn->prepare("INSERT INTO orders (user_id, total_price, item) VALUES (?, ?, ?)");
-    $stmt->bind_param("sis", $user_id, $total_price, $item); // Changed "sssss" to "sisss" assuming user_id is an integer
+    $stmt->bind_param("sis", $user_id, $total_price, $item);
 
     // Set parameters and execute
     $user_id = $data['user_id'];
@@ -218,20 +218,22 @@ function CheckoutOrder()
     $order_id = $conn->insert_id;
     $payment = $data['payment_method'];
 
-    // Insert into the second table (order_details)
     $stmt = $conn->prepare("INSERT INTO order_details (order_number, order_id, product_id, quantity, total_price_products, payment_method) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("iiidds",$order_number, $order_id, $product_id, $quantity, $price, $payment); // Assumed correction to parameter types
+    $stmt->bind_param("iiidds", $order_number, $order_id, $product_id, $quantity, $price, $payment);
 
     foreach ($data['product_id'] as $key => $product_id) {
         $quantity = $data['quantity'][$key];
         $price = $data['price'][$key];
         $order_number = generateUniqueOrderNumber($conn);
     
-        // Re-bind the parameters for each iteration
-        $stmt->bind_param("iiidds",$order_number, $order_id, $product_id, $quantity, $price, $payment);
-    
-        // Execute the statement for each set of data
+        $stmt->bind_param("iiidds", $order_number, $order_id, $product_id, $quantity, $price, $payment);
         $stmt->execute();
+
+        // Deduct the ordered quantity from the inventory
+        $updateInventoryStmt = $conn->prepare("UPDATE inventory SET quantity = quantity - ? WHERE product_id = ?");
+        $updateInventoryStmt->bind_param("ii", $quantity, $product_id);
+        $updateInventoryStmt->execute();
+        $updateInventoryStmt->close();
 
         // Delete the product from cart_items
         $deleteStmt = $conn->prepare("DELETE FROM cart_items WHERE product_id = ?");
@@ -379,12 +381,18 @@ function fetchCartItems()
     // Use prepared statement to prevent SQL injection
     $stmt = $conn->prepare("SELECT 
     p.*, 
-    ci.*
+    ci.*,
+    i.location,
+    b.*
    
 FROM 
     products AS p
 LEFT JOIN 
     cart_items AS ci ON  ci.product_id = p.product_id
+LEFT JOIN 
+    inventory AS i ON  i.product_id = ci.product_id
+LEFT JOIN 
+    barangay AS b ON  b.barangay_id = i.location
 WHERE 
     ci.cart_id = ?");
     $stmt->bind_param("i", $id);

@@ -1,9 +1,14 @@
 <template>
   <div
     v-if="isVisible"
+    @click="closeModal()"
     class="fixed inset-0 flex items-center justify-center bg-gray-500 border-2 border-zinc-300 bg-opacity-75 z-20"
   >
-    <div class="bg-white rounded-lg shadow-xl max-w-lg mx-auto p-6 relative">
+    <div
+      class="bg-white rounded-lg shadow-xl max-w-lg overflow-auto p-6 relative"
+      style="max-height: 90vh"
+      @click.stop
+    >
       <button
         @click="closeModal()"
         class="bg-slate-700/20 absolute right-3 top-3 p-2 rounded-full"
@@ -41,7 +46,7 @@
               </div>
             </div>
             <div class="text-lg font-semibold text-black-500">
-              ${{ finalQuantity }}
+              ₱{{ finalQuantity }}
             </div>
             <div
               class="w-full flex gap-2 justify-start items-center text-sm font-medium text-black-700"
@@ -128,6 +133,32 @@
           </li>
         </ul>
       </div>
+      <!-- Reviews Section -->
+      <div class="py-4">
+        <div class="flex justify-between">
+          <p class="text-md font-medium text-blue-500">
+            Customer reviews
+          </p>
+          <p
+          @click="getReviews(product.product_id)"
+          class="text-md font-medium text-blue-800 hover:text-blue-600 cursor-pointer"
+        >
+          view
+        </p>
+        </div>
+        <div v-if="reviews.length">
+          <div
+            v-for="(review, index) in reviews"
+            :key="index"
+            class="mt-2 p-2 border rounded-md"
+          >
+            <h2 class="font-semibold">{{ review.username }}</h2>
+            <p>{{ review.comment }}</p>
+            <p>Rating: {{ review.rating }} stars</p>
+            <div class="text-sm text-gray-600">{{ review.created_at }}</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -150,6 +181,7 @@ export default {
     const isHeartRed = reactive([]);
     const closeModal = () => {
       emit("update:isVisible", false);
+      reviews.value = [];
     };
 
     const increment = () => {
@@ -221,11 +253,30 @@ export default {
       console.log(isHeartRed[productId]);
     };
 
+    const reviews = ref([]);
+
+    const getReviews = async (productID) => {
+      try {
+        const response = await axios.post(
+          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews",
+          {
+            product_id: productID,
+          }
+        );
+        reviews.value = response.data;
+        console.log("Reviews ", reviews.value);
+      } catch (error) {
+        console.error("Error fetching Specs:", error);
+      }
+    };
+
     onMounted(() => {
       heart();
     });
 
     return {
+      getReviews,
+      reviews,
       quantity,
       increment,
       decrement,

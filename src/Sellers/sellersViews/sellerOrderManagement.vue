@@ -14,7 +14,7 @@
               type="number"
               v-model="searchQuery"
               @change="filterBySearch"
-              placeholder="Search by order id"
+              placeholder="Search by order number"
               class="outline-none placeholder:text-sm placeholder:font-light py-2 pl-2 w-full rounded-full"
             />
             <Icon
@@ -312,7 +312,7 @@ export default {
       }
       refreshPage();
     };
-    // Now userLogin is directly accessible here, and it's reactive
+    // Now userLogin is directly accessible here  , and it's reactive
     onMounted(() => {
       getUserFromLocalStorage();
       fetchOrders();

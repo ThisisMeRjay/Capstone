@@ -143,12 +143,39 @@
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
               </div>
+              <div class="gap-2">
+                <p class="font-semibold">
+                  Address <span class="text-red-500">*</span>
+                </p>
+                <input
+                  type="text"
+                  id="address"
+                  v-model="address"
+                  placeholder="Municipality"
+                  required
+                  class="w-full p-2 rounded-md my-1 bg-gray-100"
+                />
+                <select
+                  class="w-full p-2 rounded-md my-1 border outline-none"
+                  v-model="selectedBarangay"
+                  required
+                >
+                  <option value="" disabled selected>Select Barangay</option>
+                  <option
+                    v-for="brgy in barangay"
+                    :key="brgy.barangay_id"
+                    :value="brgy.barangay_id"
+                  >
+                    {{ brgy.name }}
+                  </option>
+                </select>
+              </div>
               <div class="my-5">
                 <button
                   type="submit"
                   class="bg-sky-900 w-full font-semibold text-lg text-white px-5 py-2 rounded-md"
                 >
-                  Sign In
+                  Register
                 </button>
                 <div class="flex justify-center gap-2 py-2">
                   <p>Already have account?</p>
@@ -204,6 +231,23 @@ export default {
     },
   },
   setup(props, { emit }) {
+    const selectedBarangay = ref("");
+    const barangay = ref([]);
+
+    const GetBarangays = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+        );
+        barangay.value = res.data;
+        console.log("barangaysss: ", res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    onMounted(GetBarangays);
+
     const loginEmail = ref("");
     const loginPassword = ref("");
     const router = useRouter();
@@ -243,10 +287,12 @@ export default {
     const registerPassword = ref("");
     const contactNumber = ref("");
     const role = ref("customer");
+    const address = ref("");
     const registerResponseMessage = ref("");
 
     const signUp = async () => {
       try {
+        console.log("barangay id: ", selectedBarangay.value);
         const url =
           "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=register";
         const res = await axios.post(
@@ -257,6 +303,8 @@ export default {
             password: registerPassword.value,
             contact_number: contactNumber.value,
             role: role.value,
+            address: address.value,
+            barangay: selectedBarangay.value,
           },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -272,6 +320,10 @@ export default {
     };
 
     return {
+      GetBarangays,
+      barangay,
+      selectedBarangay,
+
       loginEmail,
       loginPassword,
       signIn,
@@ -284,6 +336,7 @@ export default {
 
       registerResponseMessage,
       name,
+      address,
     };
   },
 };

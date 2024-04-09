@@ -4,6 +4,7 @@ import { Icon } from "@iconify/vue";
 import { onMounted, ref, computed, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { getDistance } from "geolib";
 export default {
   components: {
     Icon,
@@ -95,9 +96,17 @@ export default {
       refreshPage();
       //  router.push("/admin_dashboard");
     };
+    const ShowProfileModal = ref(false);
+    const ShowProfile = () => {
+      ShowProfileModal.value = !ShowProfileModal.value;
+      isSidebarOpen.value = !isSidebarOpen.value;
+      getUserprofile();
+    };
+
     const showSettings = ref(false);
     const showCustomerSettings = () => {
       showSettings.value = !showSettings.value;
+      isSidebarOpen.value = !isSidebarOpen.value;
       //console.log("click");
     };
     const checkedItems = ref({});
@@ -208,30 +217,93 @@ export default {
     // shipping fee must come from db
     const selectedPayment = ref("");
 
-    const checkout = () => {
+    const fetchShippingFee = (item) => {
+      try {
+        // Ensure coordinates are parsed as floats
+        const productLocation = {
+          latitude: parseFloat(item.lat),
+          longitude: parseFloat(item.lon),
+        };
+        const customerLocation = {
+          latitude: parseFloat(userLogin.value.lat),
+          longitude: parseFloat(userLogin.value.lon),
+        };
+    
+        // Calculate distance (ensure your getDistance function returns meters for more accuracy)
+        const distanceMeters = getDistance(productLocation, customerLocation);
+        console.log("Distance (meters):", distanceMeters);
+    
+        // Parse additional values as floats to ensure numerical operations
+        const baseShippingFee = parseFloat(item.shipping_fee); // Base fee could include handling, smallest package fee, etc.
+        const weightKg = parseFloat(item.weight); // Assuming weight is in kilograms
+        const dimensionsCm = {length: parseFloat(item.length), width: parseFloat(item.width), height: parseFloat(item.height)}; // Assuming dimensions are in centimeters
+    
+        // Constants for calculation
+        const weightFactor = 1; // Cost per kilogram
+        const volumeFactor = 0.005; // Cost per cubic centimeter (for more granularity)
+        const distanceFactor = 0.001; // Cost per meter
+    
+        // Calculate volume in cubic centimeters (for more granularity)
+        const volumeCm3 = dimensionsCm.length * dimensionsCm.width * dimensionsCm.height;
+    
+        // Compute the shipping fee
+        const shippingFee =
+          baseShippingFee +
+          (distanceMeters * distanceFactor) +
+          (weightKg * weightFactor) +
+          (volumeCm3 * volumeFactor);
+    
+        console.log("Shipping Fee:", shippingFee.toFixed(2));
+        return shippingFee.toFixed(2); // Return the shipping fee formatted as a string with two decimal places
+      } catch (error) {
+        console.error("Error calculating shipping fee:", error);
+        throw error; // Rethrow to ensure that calling functions are aware of the error
+      }
+    };    
+
+    const checkout = async () => {
       showPayment.value = true;
       console.log("checked out items value", checkoutItems.value);
 
       // Reset the total price before calculation
       priceTotalPerItem.value = 0;
 
-      // Collect all the checked items and calculate the total price
-      itemsToCheckout.value = checkoutItems.value.map((item) => {
-        // Calculate price per item including shipping fee
-        const pricePerItem =
-          item.quantity * parseFloat(item.price) +
-          parseFloat(item.shipping_fee);
+      // Use Promise.all to wait for all shipping fee fetches to complete
+      const itemsWithShipping = await Promise.all(
+        checkoutItems.value.map(async (item) => {
+          console.log("product loc", item);
+          try {
+            // Fetch shipping fee for each item
+            const shippingFeeData = await fetchShippingFee(item);
+            const shippingFee = parseFloat(shippingFeeData); // Ensure it's a number
+            computedshippingFee.value = shippingFeeData;
+            console.log("shipping", shippingFeeData);
 
-        // Add price per item to the total
-        priceTotalPerItem.value += pricePerItem;
+            // Calculate price per item including shipping fee
+            const pricePerItem =
+              item.quantity * parseFloat(item.price) + shippingFee;
 
-        // Return item with pricePerItem if you need it, or just return the item
-        return { item }; // Spread operator to include original item properties
-      });
+            // Add price per item to the total
+            priceTotalPerItem.value += pricePerItem;
 
-      // Assuming priceTotalPerItem is already the total price for all items
-      // No need to add pricePerItem again
+            // Return item with added shipping fee for further processing/display
+            return { ...item, shippingFee }; // Use spread operator to include original item properties
+          } catch (error) {
+            console.error("Error fetching shipping fee for item:", item, error);
+            // Handle the error as needed (e.g., set a default shipping fee, notify the user, etc.)
+            // Return the item without shipping fee or with default fee
+            return { ...item, shippingFee: 0 }; // Assuming default shipping fee is 0
+          }
+        })
+      );
+
+      // After calculating shipping for all items, assign them to itemsToCheckout
+      itemsToCheckout.value = itemsWithShipping;
+
+      // Assign the total price to priceTotalAll
       priceTotalAll.value = priceTotalPerItem.value.toFixed(2);
+
+      console.log("Items to checkout:", itemsToCheckout.value);
     };
 
     const onDelivery = () => {
@@ -252,6 +324,7 @@ export default {
       console.log("click");
     };
 
+    const computedshippingFee = ref(null);
     const submitOrder = async () => {
       console.log(priceTotalAll.value); // Assuming priceTotalAll is a reactive reference
       console.log(selectedPayment.value); // Assuming selectedPayment is a reactive reference
@@ -274,7 +347,7 @@ export default {
         parseFloat(
           (
             parseFloat(item.price) * item.quantity +
-            parseFloat(item.shipping_fee)
+            parseFloat(computedshippingFee.value)
           ).toFixed(2)
         )
       );
@@ -372,7 +445,7 @@ export default {
             productId: items.product_id,
             rating: items.userRating,
             comment: items.userComment,
-            order_number:  items.order_number,
+            order_number: items.order_number,
           },
           {
             headers: {
@@ -388,7 +461,108 @@ export default {
       }
     };
 
+    const isEditing = ref(false);
+    const toggleEdit = () => {
+      isEditing.value = !isEditing.value;
+      GetBarangays();
+    };
+
+    const selectedBarangay = ref("");
+    const barangay = ref([]);
+
+    const GetBarangays = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+        );
+        barangay.value = res.data;
+        selectedBarangay.value = userLogin.value.barangay_id;
+        console.log("barangaysss: ", res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    const profile = ref("");
+    const showuserprofile = ref(false);
+
+    const handleImageChange = (event) => {
+      const file = event.target.files[0];
+      showuserprofile.value = true;
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        profile.value = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+    const fileInput = ref(null);
+    const triggerFileInput = () => {
+      // Programmatically click the file input
+      if (fileInput.value) {
+        fileInput.value.click();
+      }
+    };
+
+    const getUserprofile = async () => {
+      try {
+        console.log("id", userLogin.value.user_id);
+        const res = await axios.post(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getProfile",
+          {
+            user_id: userLogin.value.user_id,
+          }
+        );
+        profile.value = res.data.user_profile;
+        console.log("profile: ", res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    onMounted(getUserprofile);
+
+    const saveProfile = async () => {
+      try {
+        const res = await axios.put(
+          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=SaveEditprofile",
+          {
+            username: userLogin.value.username,
+            contact_number: userLogin.value.contact_number,
+            address: userLogin.value.address,
+            barangay_id: selectedBarangay.value,
+            user_id: userLogin.value.user_id,
+            profile: profile.value,
+          }
+        );
+        console.log("edit feedback: ", res.data);
+        // Assuming you want to show the alert right after logging the response
+        alert(
+          "Profile updated successfully. Please log in again to see the updates."
+        );
+      } catch (err) {
+        console.error(err);
+        alert("Failed to update profile.");
+      }
+    };
+
     return {
+      saveProfile,
+      triggerFileInput,
+      fileInput,
+      handleImageChange,
+      profile,
+      showuserprofile,
+      GetBarangays,
+      selectedBarangay,
+      barangay,
+      isEditing,
+      toggleEdit,
+      ShowProfile,
+      ShowProfileModal,
       submitComment,
       //tracking
       showOrderTracking,

@@ -20,6 +20,17 @@
               v-focus="isVisible"
               @keyup.enter="closeModalOnEnter"
             />
+            <!-- Add the following div for autocomplete suggestions -->
+            <div class="autocomplete-suggestions mt-1">
+              <p
+                v-for="(suggestion, index) in autocompleteSuggestions"
+                :key="index"
+                class="p-2 cursor-pointer hover:bg-gray-100"
+                @click="selectSuggestion(suggestion)"
+              >
+                {{ suggestion.product_name }}
+              </p>
+            </div>
           </form>
         </div>
         <div class="items-center px-4 py-3 flex justify-between"></div>
@@ -151,7 +162,21 @@ export default {
       close(); // Optionally close the modal after searching
     };
 
+    const autocompleteSuggestions = computed(() => {
+      const trimmedQuery = searchQuery.value.trim();
+      if (!trimmedQuery) return [];
+      return fuse.value.search(trimmedQuery).map((result) => result.item);
+    });
+
+    const selectSuggestion = (suggestion) => {
+      searchQuery.value = suggestion.product_name; // Modify this line according to your needs
+      performSearch();
+      close(); // Optionally close the modal after selecting a suggestion
+    };
+
     return {
+      autocompleteSuggestions,
+      selectSuggestion,
       searchQuery,
       performSearch, // Now using performSearch as a method instead of a computed property
       close,

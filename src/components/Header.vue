@@ -353,9 +353,16 @@
           class="flex gap-2 justify-start mx-5 items-center"
         >
           <img
-            src="@/assets/profile.jpg"
-            alt=""
-            class="w-10 h-10 rounded-full mr-2"
+            v-if="profile"
+            :src="'data:image/png;base64,' + profile"
+            class="w-12 h-12 rounded-full mr-2"
+            :alt="userLogin.username"
+          />
+          <img
+            v-else
+            src="../assets/profile.jpg"
+            class="w-12 h-12 rounded-full mr-4"
+            :alt="userLogin.username"
           />
 
           <div>
@@ -370,15 +377,205 @@
             class="bg-slate-700 text-slate-100 p-2 rounded-md shadow-xl shadow-slate-800/50 font-semibold"
           >
             <button
+              @click="ShowProfile()"
+              class="py-2 px-4 w-full bg-slate-900/50 hover:bg-slate-900/75 rounded-md"
+            >
+              Profile
+            </button>
+            <button
               @click="Logout()"
               class="py-2 px-4 w-full bg-slate-900/50 hover:bg-slate-900/75 rounded-md my-1"
             >
-              Logout</button
-            ><button
-              class="py-2 px-4 w-full bg-slate-900/50 hover:bg-slate-900/75 rounded-md"
-            >
-              Settings
+              Logout
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Profile Modal -->
+    <div
+      v-if="ShowProfileModal"
+      class="fixed inset-0 z-50 flex items-center justify-center"
+    >
+      <div class="absolute inset-0 bg-black opacity-50"></div>
+      <div
+        class="bg-white p-4 sm:max-w-lg max-w-80 mx-auto rounded-lg shadow-xl z-10"
+      >
+        <div class="flex justify-between items-start">
+          <!-- Close button -->
+          <button
+            @click="ShowProfileModal = false"
+            class="text-black hover:text-gray-700 rounded-full px-3 py-1 bg-slate-300"
+          >
+            <span class="text-lg">&times;</span>
+          </button>
+          <!-- Edit button/icon -->
+          <button
+            @click="toggleEdit"
+            class="text-black hover:text-gray-700 rounded px-2 py-1"
+          >
+            <span
+              v-if="isEditing"
+              class="text-md hover:text-blue-500 cursor-pointer"
+              >Back</span
+            >
+            <span v-else class="text-md hover:text-blue-500 cursor-pointer"
+              >Edit</span
+            >
+            <!-- Use an icon here if preferred -->
+          </button>
+        </div>
+        <div class="text-center mt-4 m-10">
+          <p class="font-semibold text-lg mb-4">Profile Settings</p>
+          <div v-if="isEditing" class="space-y-4">
+            <!-- Image Upload -->
+            <div class="py-2">
+              <input
+                id="userprofile"
+                type="file"
+                @change="handleImageChange"
+                class="hidden"
+                ref="fileInput"
+              />
+              <!-- Parent div for relative positioning -->
+              <div class="mb-6 flex justify-center">
+                <div
+                  class="relative inline-block"
+                  style="width: 60px; height: 60px"
+                >
+                  <img
+                    v-if="showuserprofile"
+                    :src="profile"
+                    class="object-cover rounded-full shadow"
+                    :alt="userLogin.username"
+                    style="width: 100%; height: 100%"
+                    @click="triggerFileInput"
+                  />
+                  <img
+                    v-else
+                    :src="'data:image/png;base64,' + profile"
+                    class="object-cover rounded-full shadow"
+                    :alt="userLogin.username"
+                    style="width: 100%; height: 100%"
+                    @click="triggerFileInput"
+                  />
+                  <!-- Iconify edit icon positioned absolutely within the relative parent -->
+                  <div
+                    class="absolute bottom-0 right-0 bg-gray-300 rounded-full p-1 cursor-pointer transform translate-x-1/2 -translate-y-1/2"
+                    @click="triggerFileInput"
+                  >
+                    <Icon icon="lucide:edit" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <label for="username" class="mr-2">Name:</label>
+              <input
+                id="username"
+                v-model="userLogin.username"
+                placeholder="Username"
+                class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <div class="flex items-center justify-between">
+              <label for="contact_number" class="mr-2">Contact No:</label>
+              <input
+                id="contact_number"
+                v-model="userLogin.contact_number"
+                placeholder="Contact Number"
+                class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <div class="flex items-center justify-between">
+              <label for="address" class="mr-2">Municipality:</label>
+              <input
+                id="address"
+                v-model="userLogin.address"
+                placeholder="Address"
+                class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <div class="flex items-center justify-between">
+              <label for="barangay" class="mr-2">Barangay:</label>
+              <select
+                id="barangay"
+                class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+                v-model="selectedBarangay"
+                required
+              >
+                <option value="" disabled selected>Select Barangay</option>
+                <option
+                  v-for="brgy in barangay"
+                  :key="brgy.barangay_id"
+                  :value="brgy.barangay_id"
+                >
+                  {{ brgy.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="text-right mt-4">
+              <button
+                @click="saveProfile"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="space-y-4">
+            <!-- Image Upload -->
+            <div class="py-2">
+              <!-- Display the selected or default image -->
+              <div class="mb-6 flex justify-center">
+                <img
+                  v-if="profile"
+                  :src="'data:image/png;base64,' + profile"
+                  class="object-cover rounded-full shadow"
+                  :alt="userLogin.username"
+                  style="width: 60px; height: 60px"
+                />
+                <img
+                  v-else
+                  src="../assets/profile.jpg"
+                  class="object-cover rounded-full shadow"
+                  :alt="userLogin.username"
+                  style="width: 60px; height: 60px"
+                />
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="mr-2">Name:</span>
+              <p class="border-2 rounded-lg border-gray-300 p-2 w-3/4">
+                {{ userLogin.username }}
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="mr-2">Contact No:</span>
+              <p class="border-2 rounded-lg border-gray-300 p-2 w-3/4">
+                {{ userLogin.contact_number }}
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="mr-2">Municipality:</span>
+              <p class="border-2 rounded-lg border-gray-300 p-2 w-3/4">
+                {{ userLogin.address }}
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="mr-2">Barangay:</span>
+              <p class="border-2 rounded-lg border-gray-300 p-2 w-52">
+                {{ userLogin.name }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -511,7 +708,7 @@
                 <div v-if="userLogin" class="text-xs text-slate-800">
                   <p>Name: {{ userLogin.username }}</p>
                   <p>Contact No: {{ userLogin.contact_number }}</p>
-                  <p>Address: {{ userLogin.address }}</p>
+                  <p>Address: {{ userLogin.address }}, {{ userLogin.name }}</p>
                 </div>
               </div>
               <div class="bg-slate-200 rounded-md p-2">
@@ -521,21 +718,21 @@
                   :key="index"
                 >
                   <hr class="border my-2 border-gray-700/10" />
-                  <div v-for="product in items" :key="product">
+                  <div>
                     <div class="flex gap-2 justify-start items-center">
                       <div>
                         <img
-                          :src="'data:image/png;base64,' + product.image"
+                          :src="'data:image/png;base64,' + items.image"
                           alt=""
                           class="w-10 h-10 rounded-md"
                         />
                       </div>
                       <div>
                         <span class="text-sm font-semibold">{{
-                          product.product_name
+                          items.product_name
                         }}</span>
-                        <p class="text-xs">{{ product.price }}</p>
-                        <p class="text-xs">x{{ product.quantity }}</p>
+                        <p class="text-xs">{{ items.price }}</p>
+                        <p class="text-xs">x{{ items.quantity }}</p>
                       </div>
                     </div>
                     <div class="my-2">
@@ -543,7 +740,9 @@
                         class="flex gap-2 justify-between items-center border-y p-2 border-cyan-500/50 bg-cyan-300/10"
                       >
                         <span class="text-sm font-medium">Shipping Fee</span>
-                        <p class="text-xs">{{ product.shipping_fee }}</p>
+                        <p class="text-xs">
+                          {{ items.shippingFee.toFixed(2) }}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -644,9 +843,21 @@
         'translate-x-0': isSidebarOpen,
         'translate-x-full': !isSidebarOpen,
       }"
-      class="sm:hidden fixed w-72 inset-y-0 right-0 bg-sky-800 z-50 transition-transform duration-300 ease-in-out"
+      class="sm:hidden fixed w-72 inset-y-0 right-0 bg-sky-800 z-40 transition-transform duration-300 ease-in-out"
     >
-      <div class="flex flex-col items-end p-4">
+      <div class="flex justify-between items-center p-4">
+        <div v-if="userLogin.length !== 0">
+          <button
+            @click="ShowProfile()"
+            class="flex gap-2 justify-start mx-5 items-center"
+          >
+            <img
+              :src="'data:image/png;base64,' + profile"
+              class="w-12 h-12 rounded-full mr-2"
+              :alt="userLogin.username"
+            />
+          </button>
+        </div>
         <!-- Close Button -->
         <div
           class="cursor-pointer text-red-400 bg-red-500/20 rounded-full p-2"
@@ -675,13 +886,25 @@
             <h1 class="text-base font-medium">Cart</h1>
           </div>
 
-          <!-- Sign In -->
-          <div
-            class="flex items-center gap-2 p-2 rounded-md hover:bg-slate-800/50 w-full text-white hover:font-bold"
-            @click="Handlesignin"
-          >
-            <Icon icon="bi:person" class="text-xl" />
-            <h1 class="text-base font-medium">Sign in</h1>
+          <div>
+            <!-- logout -->
+            <div
+              class="flex items-center gap-2 p-2 rounded-md hover:bg-slate-800/50 w-full text-white hover:font-bold"
+              @click="Logout()"
+              v-if="userLogin.length !== 0"
+            >
+              <Icon icon="bi:person" class="text-xl" />
+              <h1 class="text-base font-medium">Logout</h1>
+            </div>
+            <!-- Sign In -->
+            <div
+              class="flex items-center gap-2 p-2 rounded-md hover:bg-slate-800/50 w-full text-white hover:font-bold"
+              @click="Handlesignin"
+              v-else
+            >
+              <Icon icon="bi:person" class="text-xl" />
+              <h1 class="text-base font-medium">Sign in</h1>
+            </div>
           </div>
         </div>
       </div>
@@ -695,20 +918,6 @@ export default {
 };
 </script>
 <style scoped>
-/* WebKit (Chrome, Safari, Edge) */
-*::-webkit-scrollbar {
-  width: 0;
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 14px;
-  border: 3px solid var(--primary);
-}
 .ratings button {
   margin: 0 5px;
   background-color: transparent;

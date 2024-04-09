@@ -13,10 +13,10 @@
       >
         Category
       </button>
-      <RouterLink
-        to="/"
+      <button
+        @click="fetchProducts"
         class="bg-blue-500 py-2 text-slate-100 px-4 rounded-full font-semibold shadow"
-        >Home</RouterLink
+        >Home</button
       >
     </div>
   </div>
@@ -28,14 +28,6 @@
     >
       <div class="min-h-screen">
         <p class="px-3 pt-5 pb-3 text-sm text-sky-800">Catergories</p>
-        <div>
-          <button
-            @click="fetchProducts"
-            class="px-5 bg-slate-500/10 w-full py-2 text-sm hover:bg-slate-500/20 text-left mb-3"
-          >
-            All
-          </button>
-        </div>
         <div v-for="item in categories" :key="item.category_id">
           <div
             v-for="(cat, index) in item"
