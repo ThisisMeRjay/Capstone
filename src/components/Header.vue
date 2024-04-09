@@ -534,7 +534,15 @@
               <!-- Display the selected or default image -->
               <div class="mb-6 flex justify-center">
                 <img
+                  v-if="profile"
                   :src="'data:image/png;base64,' + profile"
+                  class="object-cover rounded-full shadow"
+                  :alt="userLogin.username"
+                  style="width: 60px; height: 60px"
+                />
+                <img
+                  v-else
+                  src="../assets/profile.jpg"
                   class="object-cover rounded-full shadow"
                   :alt="userLogin.username"
                   style="width: 60px; height: 60px"

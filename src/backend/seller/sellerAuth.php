@@ -9,7 +9,7 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 
 
 $res = ['error' => false];
-$action = isset ($_GET['action']) ? $_GET['action'] : '';
+$action = isset($_GET['action']) ? $_GET['action'] : '';
 switch ($action) {
     case 'register':
         register();
@@ -20,6 +20,9 @@ switch ($action) {
     case 'getLogo':
         getLogo();
         break;
+    case 'SaveEditProfile':
+        SaveEditProfile();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
@@ -27,6 +30,52 @@ switch ($action) {
         break;
 }
 
+function SaveEditProfile()
+{
+    global $conn;
+
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    $store_name = $data['store_name'];
+    $contactNumber = $data['store_contact_number']; // Renamed for clarity
+    $storeID = $data['store_id']; // Assuming this is provided correctly.
+    $logo = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data['logo']));
+
+    // Start a transaction
+    $conn->begin_transaction();
+
+    try {
+        // Update users table
+        $stmt = $conn->prepare("UPDATE user_store SET store_name = ?, store_contact_number = ? WHERE store_id = ?");
+        if (!$stmt) {
+            throw new Exception("Prepare statement failed: " . $conn->error);
+        }
+        $stmt->bind_param("sii", $store_name, $contactNumber, $storeID);
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        // Update profile table
+        $stmt = $conn->prepare("UPDATE store_logo SET logo = ? WHERE store_id = ?");
+        if (!$stmt) {
+            throw new Exception("Prepare statement failed: " . $conn->error);
+        }
+        $stmt->bind_param("si", $logo, $storeID);
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        // If everything is fine, commit the transaction
+        $conn->commit();
+
+        echo json_encode(['success' => true, 'message' => 'Profile updated successfully']);
+    } catch (Exception $e) {
+        // If an error occurs, roll back the transaction
+        $conn->rollback();
+
+        echo json_encode(['success' => false, 'message' => 'Failed to update profile: ' . $e->getMessage()]);
+    }
+}
 function getLogo()
 {
     global $conn;
@@ -58,18 +107,42 @@ function register()
     $store_role = $data['role'];
     $hashed_password = password_hash($store_password, PASSWORD_DEFAULT);
 
+    // Prepare the statement for inserting store information
     $stmt = $conn->prepare("INSERT INTO user_store (store_name, store_email, store_password, store_contact_number, store_role) VALUES (?, ?, ? , ?, ?)");
     $stmt->bind_param("sssss", $store_name, $store_email, $hashed_password, $store_contact_number, $store_role);
+
+    // Execute the query
     $stmt->execute();
+
+    // Check if the insertion was successful
     if ($stmt->affected_rows > 0) {
-        $res['success'] = true;
-        $res['message'] = 'Registered successfully.';
+        // Retrieve the store_id of the newly inserted store
+        $store_id = $conn->insert_id;
+
+        // Prepare the statement for inserting into store_log
+        $stmt = $conn->prepare("INSERT INTO store_log (store_id) VALUES (?)");
+        $stmt->bind_param("i", $store_id);
+
+        // Execute the query
+        $stmt->execute();
+
+        // Check if the second insertion was successful
+        if ($stmt->affected_rows > 0) {
+            $res['success'] = true;
+            $res['message'] = 'Registered successfully.';
+        } else {
+            $res['success'] = false;
+            $res['message'] = 'Failed to add to store_log.';
+        }
     } else {
         $res['success'] = false;
         $res['message'] = 'Failed to add seller.';
     }
 
+    // Close the prepared statement
     $stmt->close();
+
+    // Output the response
     echo json_encode($res);
 }
 function login()

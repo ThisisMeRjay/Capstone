@@ -163,6 +163,9 @@ function register()
         $stmt = $conn->prepare("INSERT INTO cart (cart_id, user_id) VALUES (?, ?)");
         $stmt->bind_param("ii", $id, $id);
         $stmt->execute();
+        $stmt = $conn->prepare("INSERT INTO profile (user_id) VALUES (?)");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
         if ($stmt->affected_rows > 0) {
             $res['success'] = true;
             $res['message'] = 'Added successfully.';
