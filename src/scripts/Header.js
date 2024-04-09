@@ -99,12 +99,14 @@ export default {
     const ShowProfileModal = ref(false);
     const ShowProfile = () => {
       ShowProfileModal.value = !ShowProfileModal.value;
+      isSidebarOpen.value = !isSidebarOpen.value;
       getUserprofile();
     };
 
     const showSettings = ref(false);
     const showCustomerSettings = () => {
       showSettings.value = !showSettings.value;
+      isSidebarOpen.value = !isSidebarOpen.value;
       //console.log("click");
     };
     const checkedItems = ref({});
