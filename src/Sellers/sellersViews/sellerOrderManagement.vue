@@ -42,9 +42,9 @@
         </div>
 
         <div class="my-5 w-full">
-          <div class="relative w-full overflow-x-auto shadow rounded-md">
+          <div class="relative w-[1200px] overflow-x-auto shadow-md rounded-md">
             <table
-              class="w-full text-sm text-left rtl:text-right text-gray-900 rounded-md"
+              class="min-w-full text-sm text-left rtl:text-right text-gray-900 rounded-md"
             >
               <thead
                 class="text-xs text-slate-800 bg-slate-100/20 uppercase rounded-md"
@@ -149,7 +149,7 @@
       @submit.prevent="handleEditStatusOrder"
       class="w-72 bg-gray-200 p-5 rounded-md shadow"
     >
-      <div>
+      <div v-if="barangayname.length > 0">
         <p class="text-sm">Customer Information:</p>
         <p class="bg-gray-500/20 rounded-md my-2 p-2">
           Name :{{ editableOrderStatus.username }}
@@ -157,8 +157,12 @@
         <p class="bg-gray-500/20 rounded-md my-2 p-2">
           Contact no: {{ editableOrderStatus.contact_number }}
         </p>
-        <p class="bg-gray-500/20 rounded-md my-2 p-2">
-          Address: {{ editableOrderStatus.address }}
+        <p
+          class="bg-gray-500/20 rounded-md my-2 p-2"
+          v-for="barangay in barangayname"
+          :key="barangay.barangay_id"
+        >
+          Address: {{ barangay.name }},{{ editableOrderStatus.address }}
         </p>
       </div>
       <div>
@@ -266,7 +270,8 @@ export default {
       }
     };
 
-    const editStatus = (orderId) => {
+    const barangayname = ref([]);
+    const editStatus = async (orderId) => {
       orderIdToEdit.value = orderId;
       const orderToEdit = orders.value.find(
         (order) => order.order_detail_id === orderId
@@ -277,6 +282,19 @@ export default {
         userOrderName.value = editableOrderStatus.value.username;
         selectValue.value = editableOrderStatus.value.status;
         console.log("info", editableOrderStatus.value);
+        try {
+          const response = await axios.post(
+            "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=barangay",
+            {
+              id: orderToEdit.barangay_id,
+            }
+          );
+          // Assuming you might want to do something with the response here
+          barangayname.value = response.data;
+          console.log(response.data);
+        } catch (error) {
+          console.error("Error getting barangay:", error);
+        }
       }
     };
     const closeEditStatusModal = () => {
@@ -339,6 +357,7 @@ export default {
     };
 
     return {
+      barangayname,
       orders,
       editData,
       selectValue,

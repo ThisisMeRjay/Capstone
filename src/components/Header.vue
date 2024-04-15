@@ -32,7 +32,7 @@
       class="fixed z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 justify-center items-center flex"
     >
       <div class="overflow-scroll bg-slate-100 h-[500px] rounded-md">
-        <div class="p-5 bg-slate-100 rounded-md h-full w-96 text-slate-800">
+        <div class="p-5 bg-slate-100 rounded-md h-full w-[600px] text-slate-800">
           <div class="h-full">
             <h1 class="font-semibold text-lg">Order Tracking</h1>
             <hr class="my-2" />
@@ -45,7 +45,7 @@
               </h1>
               <hr class="my-2" />
               <div
-                class="p-2 rounded-md bg-slate-400/10 my-2"
+                class="p-2 rounded-md bg-slate-400/10 my-2 w-full"
                 v-for="(items, index) in orderData"
                 :key="index"
               >
@@ -77,13 +77,13 @@
                     </div>
                   </div>
                   <div>
-                    <div v-if="items.status === 5" class="my-4">
+                    <div v-if="items.status === 6" class="my-4">
                       <span
                         class="text-red-500 text-sm bg-red-400/10 p-2 rounded"
                         >Order Cancelled.</span
                       >
                     </div>
-                    <div v-if="items.status !== 5">
+                    <div v-if="items.status !== 6">
                       <div
                         class="mb-5 flex justify-between items-center bg-blue-300/20 rounded-md p-1"
                       >
@@ -134,7 +134,7 @@
                                 class="text-lg text-blue-600"
                               />
                             </div>
-                            Processing
+                            Confirmed
                           </span>
                         </li>
                         <li
@@ -149,11 +149,26 @@
                                 class="text-lg text-blue-600"
                               />
                             </div>
+                            Processing
+                          </span>
+                        </li>
+                        <li
+                          class="flex md:w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-2 xl:after:mx-2 dark:after:border-gray-600"
+                        >
+                          <span
+                            class="flex text-xs items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200"
+                          >
+                            <div v-if="items.status >= 4">
+                              <Icon
+                                icon="lets-icons:check-fill"
+                                class="text-lg text-blue-600"
+                              />
+                            </div>
                             Out for delivery
                           </span>
                         </li>
                         <li class="flex items-center text-xs">
-                          <div v-if="items.status >= 4">
+                          <div v-if="items.status >= 5">
                             <Icon
                               icon="lets-icons:check-fill"
                               class="text-lg text-blue-600"
@@ -183,6 +198,18 @@
                           class="bg-blue-500/10 rounded-md p-1 my-1"
                         >
                           <p class="text-xs font-light">
+                            {{ items.confirmed_date }}
+                          </p>
+                          <p class="text-sm font-light text-blue-600">
+                            Your order has been confirmed! We are preparing your
+                            items for shipment.
+                          </p>
+                        </div>
+                        <div
+                          v-if="items.status >= 3"
+                          class="bg-blue-500/10 rounded-md p-1 my-1"
+                        >
+                          <p class="text-xs font-light">
                             {{ items.processing_date }}
                           </p>
                           <p class="text-sm font-light text-blue-600">
@@ -191,7 +218,7 @@
                           </p>
                         </div>
                         <div
-                          v-if="items.status >= 3"
+                          v-if="items.status >= 4"
                           class="bg-blue-500/10 rounded-md p-1 my-1"
                         >
                           <p class="text-xs font-light">
@@ -203,7 +230,7 @@
                           </p>
                         </div>
                         <div
-                          v-if="items.status >= 4"
+                          v-if="items.status >= 5"
                           class="bg-blue-500/10 rounded-md p-1 my-1"
                         >
                           <p class="text-xs font-light">
@@ -225,7 +252,7 @@
                       </div>
                       <!-- ratings and comment here -->
                       <div
-                        v-if="items.status === 4 && items.comment === null"
+                        v-if="items.status === 5 && items.comment === null"
                         class="rating-and-comment"
                       >
                         <div class="ratings flex justify-center">

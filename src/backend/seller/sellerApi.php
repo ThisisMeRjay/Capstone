@@ -50,11 +50,34 @@ switch ($action) {
     case 'getReviews':
         getReviews();
         break;
+    case 'barangay':
+        barangay();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function barangay()
+{
+    global $conn;
+    $data = json_decode(file_get_contents("php://input"), true);
+    $ID = $data['id'];
+
+    $stmt = $conn->prepare("SELECT * FROM barangay WHERE barangay_id = ?");
+    $stmt->bind_param("i", $ID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $brgy = []; // Initialize an array to hold the fetched reviews.
+    while ($row = $result->fetch_assoc()) {
+        $brgy[] = $row; // Add each review to the array.
+    }
+    $stmt->close();
+
+    echo json_encode($brgy);
 }
 
 function getReviews()

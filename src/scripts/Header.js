@@ -415,10 +415,11 @@ export default {
 
     const statusMapping = {
       pending: 1,
-      processing: 2,
-      out_for_delivery: 3,
-      delivered: 4,
-      cancelled: 5,
+      confirmed: 2,
+      processing: 3,
+      out_for_delivery: 4,
+      delivered: 5,
+      cancelled: 6,
     };
 
     const showOrderTracking = ref(false);
