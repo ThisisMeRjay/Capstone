@@ -514,9 +514,13 @@ function EditStatus()
     $UpdateDate = $data['date'];
     var_dump($newStatus);
 
-    if ($newStatus == 'processing') {
-        $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ?, processing_date = ? WHERE order_detail_id = ?");
+    if ($newStatus == 'confirmed') {
+        $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ?, confirmed_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("sssi", $newStatus, $estdate, $UpdateDate, $id);
+        $stmt->execute();
+    } elseif ($newStatus == 'processing') {
+        $stmt = $conn->prepare("UPDATE order_details SET status = ?, processing_date = ? WHERE order_detail_id = ?");
+        $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
         $stmt->execute();
     } elseif ($newStatus == 'out_for_delivery') {
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivery_date = ? WHERE order_detail_id = ?");

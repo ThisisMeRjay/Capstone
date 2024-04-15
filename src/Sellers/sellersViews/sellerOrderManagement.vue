@@ -33,6 +33,7 @@
             >
               <option value="">Default</option>
               <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
               <option value="processing">Processing</option>
               <option value="out_for_delivery">Out for Delivery</option>
               <option value="delivered">Delivered</option>
@@ -61,6 +62,7 @@
                   <th scope="col" class="px-6 py-3">PRICE</th>
                   <th scope="col" class="px-6 py-3">PAYMENT METHOD</th>
                   <th scope="col" class="px-6 py-3">ORDER DATE</th>
+                  <th scope="col" class="px-6 py-3">date confirmed</th>
                   <th scope="col" class="px-6 py-3">ESTIMATED DELIVERY</th>
                   <th scope="col" class="px-6 py-3">date processed</th>
                   <th scope="col" class="px-6 py-3">out for delivery</th>
@@ -88,6 +90,8 @@
                       :class="{
                         'text-orange-500 bg-orange-300/10':
                           item.status === 'pending',
+                        'text-gray-500 bg-yellow-300/10':
+                          item.status === 'confirmed',
                         'text-yellow-500 bg-yellow-300/10':
                           item.status === 'processing',
                         'text-blue-500 bg-blue-300/10':
@@ -110,7 +114,10 @@
                     </p>
                   </td>
                   <td class="px-6 py-4">
-                    {{ item.created_at }}
+                    {{ item.date_purchased }}
+                  </td>
+                  <td class="px-6 py-4">
+                    {{ item.confirmed_date }}
                   </td>
                   <td class="px-6 py-4">
                     {{ item.estimated_delivery }}
@@ -171,13 +178,14 @@
         </h1>
         <select v-model="selectValue" class="w-full p-2 rounded-md">
           <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
           <option value="processing">Processing</option>
           <option value="out_for_delivery">Out for delivery</option>
           <option value="delivered">Delivered</option>
           <option value="cancelled">Cancelled</option>
         </select>
       </div>
-      <div v-if="selectValue === 'pending' || selectValue === 'processing'">
+      <div v-if="selectValue === 'pending' || selectValue === 'confirmed'">
         <h1 class="text-lg font-semibold text-blue-400 mt-4">
           Estimated Delivery Date:
         </h1>
