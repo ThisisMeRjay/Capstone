@@ -198,6 +198,7 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { Icon } from "@iconify/vue";
 import ProductModal from "@/components/ProductModal.vue";
+import { API_URL } from "@/config";
 export default {
   components: {
     Icon,
@@ -208,6 +209,8 @@ export default {
   props: ["products"],
 
   setup(props) {
+    const url = API_URL;
+
     const minPrice = ref(0);
     const maxPrice = ref(0);
 
@@ -251,7 +254,7 @@ export default {
     const GetStorename = async () => {
       try {
         const response = await axios.get(
-          "http://localhost/Ecommerce/vue-project/src/backend/api.php?action=getStorename"
+          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=getStorename`
         );
         storeName.value = response.data;
         console.log(response.data);
@@ -299,7 +302,7 @@ export default {
       console.log("specs id", productId);
       try {
         const response = await axios.get(
-          `http://localhost/Ecommerce/vue-project/src/backend/api.php?action=getProductSpecifications&id=${productId}`
+          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=getProductSpecifications&id=${productId}`
         );
         return response.data;
       } catch (error) {
@@ -315,7 +318,7 @@ export default {
     const getCategories = async () => {
       try {
         const response = await axios.get(
-          "http://localhost/Ecommerce/vue-project/src/backend/api.php?action=fetchcategories"
+          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=fetchcategories`
         );
         categories.value = response.data;
 
@@ -345,7 +348,7 @@ export default {
       temp_data_for_category.value = "";
       try {
         const response = await axios.get(
-          "http://localhost/Ecommerce/vue-project/src/backend/api.php?action=getProducts"
+          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=getProducts`
         );
         //  console.log("API Response Data:", response.data);
         products.value = response.data;

@@ -450,12 +450,14 @@ import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller"; // Adjust the path as necessary
 import { getDistance } from "geolib";
-
+import { API_URL } from "@/config";
 export default {
   components: {
     Icon,
   },
   setup() {
+    const url = API_URL;
+
     const refreshPage = () => {
       location.reload(true);
     };
@@ -468,7 +470,7 @@ export default {
         console.log(deleteId);
         try {
           const response = await axios.post(
-            "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=deleteProduct",
+            `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=deleteProduct`,
             {
               id: deleteId,
             }
@@ -522,7 +524,7 @@ export default {
     const getReviews = async () => {
       try {
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews",
+          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews`,
           {
             product_id: editProductId,
           }
@@ -546,7 +548,7 @@ export default {
     const editProduct = async (editId) => {
       try {
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getSpecs",
+          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getSpecs`,
           {
             id: editId,
           }
@@ -606,7 +608,7 @@ export default {
 
       try {
         const response = await axios.put(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=editProductsInfo",
+          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=editProductsInfo`,
           {
             product_id: editProductId.value,
             product_name: product_name.value,
@@ -637,7 +639,7 @@ export default {
     const GetBarangays = async () => {
       try {
         const res = await axios.get(
-          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+          `http://${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
         );
         barangay.value = res.data;
         console.log("barangaysss: ", res.data);
@@ -653,7 +655,7 @@ export default {
     const getCategories = async () => {
       try {
         const response = await axios.get(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchcategories"
+          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchcategories`
         );
         categories.value = response.data;
         console.log("categories ", categories.value);
@@ -674,7 +676,7 @@ export default {
       console.log("seller ", userLogin.value.store_id);
       try {
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getProducts",
+          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getProducts`,
           {
             store_id: userLogin.value.store_id,
           }

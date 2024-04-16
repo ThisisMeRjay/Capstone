@@ -67,7 +67,6 @@
                   <th scope="col" class="px-6 py-3">date processed</th>
                   <th scope="col" class="px-6 py-3">out for delivery</th>
                   <th scope="col" class="px-6 py-3">delivered</th>
-                  <th scope="col" class="px-6 py-3">EDIT</th>
                 </tr>
               </thead>
               <tbody class="text-center">
@@ -86,7 +85,8 @@
                   <td class="px-6 py-4">{{ item.product_name }}</td>
                   <td class="px-6 py-4">
                     <p
-                      class="shadow px-3 py-1 text-center rounded-full"
+                      @click="editStatus(item.order_detail_id)"
+                      class="shadow px-3 py-1 text-center rounded-full flex gap-1 cursor-pointer hover:bg-slate-200 transition"
                       :class="{
                         'text-orange-500 bg-orange-300/10':
                           item.status === 'pending',
@@ -103,6 +103,10 @@
                       }"
                     >
                       {{ item.status }}
+                      <Icon
+                        icon="material-symbols:edit"
+                        class="text-lg text-green-500"
+                      />
                     </p>
                   </td>
                   <td class="px-6 py-4">{{ item.quantity }}</td>
@@ -130,14 +134,6 @@
                   </td>
                   <td class="px-6 py-4">
                     {{ item.delivered_date }}
-                  </td>
-                  <td class="px-6 py-4">
-                    <button @click="editStatus(item.order_detail_id)">
-                      <Icon
-                        icon="material-symbols:edit"
-                        class="text-lg text-green-500"
-                      />
-                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -221,12 +217,14 @@ import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller"; // Adjust the path as necessary
 import moment from "moment-timezone";
-
+import { API_URL } from "@/config";
 export default {
   components: {
     Icon,
   },
   setup() {
+    const url = API_URL;
+    
     const refreshPage = () => {
       location.reload(true);
     };
@@ -289,10 +287,13 @@ export default {
         editableOrderStatus.value = orderToEdit; // Direct assignment without spreading
         userOrderName.value = editableOrderStatus.value.username;
         selectValue.value = editableOrderStatus.value.status;
+        if (editableOrderStatus.value.status == "delivered" || editableOrderStatus.value.status == "out_for_delivery") {
+          showStatusModal.value = false;
+        }
         console.log("info", editableOrderStatus.value);
         try {
           const response = await axios.post(
-            "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=barangay",
+            `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=barangay`,
             {
               id: orderToEdit.barangay_id,
             }
@@ -323,7 +324,7 @@ export default {
 
       try {
         const response = await axios.put(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus",
+          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
           {
             id: orderIdToEdit.value,
             status: selectValue.value,
@@ -348,7 +349,7 @@ export default {
       console.log("seller ", userLogin.value.store_id);
       try {
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getOrders",
+          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getOrders`,
           {
             store_id: userLogin.value.store_id,
           }

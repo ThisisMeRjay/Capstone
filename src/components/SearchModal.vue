@@ -57,7 +57,7 @@
 import axios from "axios";
 import { computed, onMounted, ref, watch } from "vue";
 import Fuse from "fuse.js";
-
+import { API_URL } from "@/config";
 export default {
   props: {
     isVisible: {
@@ -75,6 +75,8 @@ export default {
     },
   },
   setup(props, { emit }) {
+    const url = API_URL;
+
     const searchQuery = ref("");
     const products = ref([]);
 
@@ -89,9 +91,9 @@ export default {
 
     const fetchAllProducts = async () => {
       try {
-        const url =
-          "http://localhost/Ecommerce/vue-project/src/backend/search.php";
-        const response = await axios.post(url);
+        const urli =
+          `http://${url}/Ecommerce/vue-project/src/backend/search.php`;
+        const response = await axios.post(urli);
         products.value = response.data;
       } catch (error) {
         console.error(error);

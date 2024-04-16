@@ -103,8 +103,11 @@
 <script>
 import axios from "axios";
 import { ref } from "vue";
+import { API_URL } from "@/config";
 export default {
   setup() {
+    const url = API_URL;
+
     const registerEmail = ref("");
     const registerName = ref("");
     const registerPassword = ref("");
@@ -113,10 +116,10 @@ export default {
     const registerResponseMessage = ref("");
     const signUp = async () => {
       try {
-        const url =
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=register";
+        const urli =
+          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=register`;
         const res = await axios.post(
-          url,
+          urli,
           {
             name: registerName.value,
             email: registerEmail.value,

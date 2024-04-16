@@ -167,6 +167,7 @@
 import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { ref, watch, onMounted, reactive } from "vue";
+import { API_URL } from "@/config";
 export default {
   props: {
     isVisible: Boolean,
@@ -176,6 +177,8 @@ export default {
     Icon,
   },
   setup(props, { emit }) {
+    const url = API_URL;
+
     const quantity = ref(1);
     const finalQuantity = ref("");
     const isHeartRed = reactive([]);
@@ -230,7 +233,7 @@ export default {
         }
 
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/api.php?action=addCart",
+          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=addCart`,
           {
             product_id: id,
             quantity: quantity.value,
@@ -258,7 +261,7 @@ export default {
     const getReviews = async (productID) => {
       try {
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews",
+          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews`,
           {
             product_id: productID,
           }
