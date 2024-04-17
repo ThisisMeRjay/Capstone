@@ -92,7 +92,7 @@ export default {
     const fetchAllProducts = async () => {
       try {
         const urli =
-          `http://${url}/Ecommerce/vue-project/src/backend/search.php`;
+          `${url}/Ecommerce/vue-project/src/backend/search.php`;
         const response = await axios.post(urli);
         products.value = response.data;
       } catch (error) {

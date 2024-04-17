@@ -233,7 +233,7 @@ export default {
         }
 
         const response = await axios.post(
-          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=addCart`,
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=addCart`,
           {
             product_id: id,
             quantity: quantity.value,
@@ -261,7 +261,7 @@ export default {
     const getReviews = async (productID) => {
       try {
         const response = await axios.post(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews`,
           {
             product_id: productID,
           }

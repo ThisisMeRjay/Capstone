@@ -240,7 +240,7 @@ export default {
     const GetBarangays = async () => {
       try {
         const res = await axios.get(
-          `http://${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
         );
         barangay.value = res.data;
         console.log("barangaysss: ", res.data);
@@ -262,7 +262,7 @@ export default {
     const signIn = async () => {
       try {
         const urli =
-          `http://${url}/Ecommerce/vue-project/src/backend/auth.php?action=login`;
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=login`;
         const res = await axios.post(
           urli,
           {
@@ -297,7 +297,7 @@ export default {
       try {
         console.log("barangay id: ", selectedBarangay.value);
         const urli =
-          `http://${url}/Ecommerce/vue-project/src/backend/auth.php?action=register`;
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=register`;
         const res = await axios.post(
           urli,
           {

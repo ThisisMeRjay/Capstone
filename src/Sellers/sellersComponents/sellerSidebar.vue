@@ -299,7 +299,7 @@ export default {
       try {
         console.log("id", userLogin.value.store_id);
         const res = await axios.post(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=getLogo`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=getLogo`,
           {
             store_id: userLogin.value.store_id,
           }
@@ -350,7 +350,7 @@ export default {
     const saveProfile = async () => {
       try {
         const res = await axios.put(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=save`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=save`,
           {
             store_id: userLogin.value.store_id,
             store_name: userLogin.value.store_name,

@@ -427,7 +427,7 @@ export default {
 
       try {
         const response = await axios.post(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=SaveProduct`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=SaveProduct`,
           {
             selectedCategory: selectedCategory.value,
             image: image.value,
@@ -468,7 +468,7 @@ export default {
       }
       try {
         const response = await axios.post(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=AddCategory`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=AddCategory`,
           {
             category_name: newCategory.value.category_name,
             category_description: newCategory.value.category_description,
@@ -491,7 +491,7 @@ export default {
     const getCategories = async () => {
       try {
         const response = await axios.get(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchcategories`
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchcategories`
         );
         categories.value = response.data;
         console.log("categories ", categories.value);
@@ -506,7 +506,7 @@ export default {
     const GetBarangays = async () => {
       try {
         const res = await axios.get(
-          `http://${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
         );
         barangay.value = res.data;
         console.log("barangaysss: ", res.data);

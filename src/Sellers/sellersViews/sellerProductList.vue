@@ -470,7 +470,7 @@ export default {
         console.log(deleteId);
         try {
           const response = await axios.post(
-            `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=deleteProduct`,
+            `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=deleteProduct`,
             {
               id: deleteId,
             }
@@ -524,7 +524,7 @@ export default {
     const getReviews = async () => {
       try {
         const response = await axios.post(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews`,
           {
             product_id: editProductId,
           }
@@ -548,7 +548,7 @@ export default {
     const editProduct = async (editId) => {
       try {
         const response = await axios.post(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getSpecs`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getSpecs`,
           {
             id: editId,
           }
@@ -608,7 +608,7 @@ export default {
 
       try {
         const response = await axios.put(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=editProductsInfo`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=editProductsInfo`,
           {
             product_id: editProductId.value,
             product_name: product_name.value,
@@ -639,7 +639,7 @@ export default {
     const GetBarangays = async () => {
       try {
         const res = await axios.get(
-          `http://${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
         );
         barangay.value = res.data;
         console.log("barangaysss: ", res.data);
@@ -655,7 +655,7 @@ export default {
     const getCategories = async () => {
       try {
         const response = await axios.get(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchcategories`
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchcategories`
         );
         categories.value = response.data;
         console.log("categories ", categories.value);
@@ -676,7 +676,7 @@ export default {
       console.log("seller ", userLogin.value.store_id);
       try {
         const response = await axios.post(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getProducts`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getProducts`,
           {
             store_id: userLogin.value.store_id,
           }

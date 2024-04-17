@@ -131,7 +131,7 @@ const isDefaultDateRange = ref(true);
 const fetchRealTimeMonthlySales = async () => {
   try {
     const response = await axios.post(
-      `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchRealTimeMonthlySales`,
+      `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchRealTimeMonthlySales`,
       { store_id: userLogin.value.store_id }
     );
 
@@ -183,7 +183,7 @@ const fetchSalesData = async (start, end) => {
   console.log("end ", end);
   try {
     const response = await axios.post(
-      `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchSalesData`,
+      `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchSalesData`,
       {
         start: start,
         end: end,
@@ -203,7 +203,7 @@ const fetchCurrentInventoryStatus = async () => {
   const today = new Date().toISOString().split("T")[0];
   try {
     const response = await axios.post(
-      `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchStocks`,
+      `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchStocks`,
       {
         store_id: userLogin.value.store_id,
       }

@@ -254,7 +254,7 @@ export default {
     const GetStorename = async () => {
       try {
         const response = await axios.get(
-          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=getStorename`
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=getStorename`
         );
         storeName.value = response.data;
         console.log(response.data);
@@ -302,7 +302,7 @@ export default {
       console.log("specs id", productId);
       try {
         const response = await axios.get(
-          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=getProductSpecifications&id=${productId}`
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=getProductSpecifications&id=${productId}`
         );
         return response.data;
       } catch (error) {
@@ -318,7 +318,7 @@ export default {
     const getCategories = async () => {
       try {
         const response = await axios.get(
-          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=fetchcategories`
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=fetchcategories`
         );
         categories.value = response.data;
 
@@ -348,7 +348,7 @@ export default {
       temp_data_for_category.value = "";
       try {
         const response = await axios.get(
-          `http://${url}/Ecommerce/vue-project/src/backend/api.php?action=getProducts`
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=getProducts`
         );
         //  console.log("API Response Data:", response.data);
         products.value = response.data;

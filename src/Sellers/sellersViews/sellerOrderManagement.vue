@@ -287,13 +287,13 @@ export default {
         editableOrderStatus.value = orderToEdit; // Direct assignment without spreading
         userOrderName.value = editableOrderStatus.value.username;
         selectValue.value = editableOrderStatus.value.status;
-        if (editableOrderStatus.value.status == "delivered" || editableOrderStatus.value.status == "out_for_delivery") {
+        if (editableOrderStatus.value.status == "delivered" || editableOrderStatus.value.status == "out_for_delivery" || editableOrderStatus.value.status == "processing") {
           showStatusModal.value = false;
         }
         console.log("info", editableOrderStatus.value);
         try {
           const response = await axios.post(
-            `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=barangay`,
+            `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=barangay`,
             {
               id: orderToEdit.barangay_id,
             }
@@ -324,7 +324,7 @@ export default {
 
       try {
         const response = await axios.put(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
           {
             id: orderIdToEdit.value,
             status: selectValue.value,
@@ -349,7 +349,7 @@ export default {
       console.log("seller ", userLogin.value.store_id);
       try {
         const response = await axios.post(
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getOrders`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getOrders`,
           {
             store_id: userLogin.value.store_id,
           }

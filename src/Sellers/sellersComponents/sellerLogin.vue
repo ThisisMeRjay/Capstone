@@ -75,7 +75,7 @@ export default {
     const signIn = async () => {
       try {
         const urli =
-          `http://${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=login`;
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=login`;
         const res = await axios.post(
           urli,
           {
