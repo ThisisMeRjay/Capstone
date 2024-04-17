@@ -38,15 +38,13 @@
               <td class="px-6 py-4">{{ item.shipping_fee }}</td>
               <td class="px-6 py-4">{{ item.ratings }}</td>
               <td class="px-6 py-4">{{ item.quantity }}</td>
-              <td class="px-6 py-4">
+              <td class="px-6 py-4 flex gap-5">
                 <button @click="deleteProduct(item.product_id)">
                   <Icon
                     icon="material-symbols:delete"
                     class="text-lg text-red-500"
                   />
                 </button>
-              </td>
-              <td class="px-6 py-4">
                 <button @click="editProduct(item.product_id)">
                   <Icon
                     icon="material-symbols:edit"

@@ -50,7 +50,7 @@
     </div>
 
     <div class="bg-white cursor-pointer">
-      <div class="w-full px-4 sm:pt-10">
+      <div class="w-full px-4 sm:pt-5">
         <div>
           <!--  -->
           <router-view> </router-view>

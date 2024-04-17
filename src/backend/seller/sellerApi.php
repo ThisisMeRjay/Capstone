@@ -51,11 +51,52 @@ switch ($action) {
     case 'barangay':
         barangay();
         break;
+    case 'getOrdersAdmin':
+        getOrdersAdmin();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function getOrdersAdmin()
+{
+    global $conn;
+
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    // Use prepared statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT 
+    od.*, 
+    o.*,
+    p.*,
+    u.*
+FROM 
+order_details AS od
+LEFT JOIN 
+orders AS o ON o.order_id = od.order_id
+LEFT JOIN
+    products AS p ON  p.product_id = od.product_id
+LEFT JOIN
+    users As u ON u.user_id = o.user_id
+WHERE 
+    od.status = 'processing' OR od.status = 'out_for_delivery' OR od.status = 'delivered'
+ORDER BY 
+    od.order_detail_id DESC");
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $stmt->close();
+
+    $res = [];
+    while ($row = $result->fetch_assoc()) {
+        $row['image'] = base64_encode($row['image']);
+        $res[] = $row;
+    }
+
+    echo json_encode($res);
 }
 
 function barangay()
