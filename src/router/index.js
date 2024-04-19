@@ -127,6 +127,17 @@ const router = createRouter({
       ],
     },
     {
+      path: "/rider_index",
+      name: "rider_index",
+      component: () => import("../rider/riderIndex.vue"),
+      children: [
+        {
+          path: "",
+          redirect: { name: "rider_index" },
+        },
+      ],
+    },
+    {
       path: "/:catchAll(.*)",
       name: "notFound",
       component: () => import("../views/NotFound.vue"),
