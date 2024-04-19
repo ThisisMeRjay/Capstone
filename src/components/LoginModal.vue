@@ -101,6 +101,7 @@
                   type="name"
                   id="name"
                   v-model="registerName"
+                  placeholder="full name"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
@@ -113,6 +114,7 @@
                   type="email"
                   id="email"
                   v-model="registerEmail"
+                  placeholder="email"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
@@ -125,6 +127,7 @@
                   type="password"
                   v-model="registerPassword"
                   id="password"
+                  placeholder="password"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
@@ -169,6 +172,32 @@
                     {{ brgy.name }}
                   </option>
                 </select>
+              </div>
+              <div class="gap-2 mt-2">
+                <p class="font-semibold">
+                  Zone <span class="text-red-500">*</span>
+                </p>
+                <input
+                  type="zone"
+                  id="zone"
+                  v-model="registerZone"
+                  placeholder="Zone 7"
+                  required
+                  class="w-full p-2 rounded-md my-1 bg-gray-100"
+                />
+              </div>
+              <div class="gap-2 mt-2">
+                <p class="font-semibold">
+                  House no. <span class="text-red-500">*</span>
+                </p>
+                <input
+                  type="houseno"
+                  id="houseno"
+                  v-model="registerHouseno"
+                  placeholder="House no."
+                  required
+                  class="w-full p-2 rounded-md my-1 bg-gray-100"
+                />
               </div>
               <div class="my-5">
                 <button
@@ -285,11 +314,13 @@ export default {
         }
       } catch {}
     };
+    const registerZone = ref("");
+    const registerHouseno = ref("");
     const registerEmail = ref("");
     const registerName = ref("");
     const registerPassword = ref("");
     const contactNumber = ref("");
-    const role = ref("customer");
+    const customerRole = 'customer';
     const address = ref("");
     const registerResponseMessage = ref("");
 
@@ -305,9 +336,11 @@ export default {
             email: registerEmail.value,
             password: registerPassword.value,
             contact_number: contactNumber.value,
-            role: role.value,
+            role: customerRole,
             address: address.value,
             barangay: selectedBarangay.value,
+            zone: registerZone.value,
+            house_no: registerHouseno.value,
           },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -326,6 +359,7 @@ export default {
       GetBarangays,
       barangay,
       selectedBarangay,
+      customerRole,
 
       loginEmail,
       loginPassword,
@@ -336,6 +370,8 @@ export default {
       registerPassword,
       contactNumber,
       signUp,
+      registerZone,
+      registerHouseno,
 
       registerResponseMessage,
       name,

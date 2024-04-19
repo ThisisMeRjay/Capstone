@@ -135,12 +135,14 @@ function register()
     $role = $data['role'];
     $address = $data['address'];
     $brgyID = $data['barangay'];
+    $Zone = $data['zone'];
+    $Houseno = $data['house_no'];
 
 
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare("INSERT INTO users (username, email, password, contact_number, role, address, barangay_id) VALUES (?, ?, ?, ? , ?, ?, ?)");
-    $stmt->bind_param("ssssssi", $customername, $email, $hashed_password, $contact_number, $role, $address, $brgyID);
+    $stmt = $conn->prepare("INSERT INTO users (username, email, password, contact_number, role, address, Zone, House_no, barangay_id) VALUES (?, ?, ?, ? , ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssssii", $customername, $email, $hashed_password, $contact_number, $role, $address, $Zone, $Houseno, $brgyID);
     $stmt->execute();
     if ($stmt->affected_rows > 0) {
         $res['success'] = true;
