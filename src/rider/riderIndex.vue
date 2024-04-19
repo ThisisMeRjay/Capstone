@@ -13,20 +13,56 @@
       />
     </header>
 
-    <aside v-if="showBar" class="bg-blue-100 fixed top-0 right-0 w-64 h-screen">
-      <div class="flex justify-between items-center p-2">
-        <h1 class="font-semibold text-lg">Menu</h1>
-        <div
-          @click="showAside"
-          class="p-2 rounded-full bg-gray-700/20 text-red-500"
-        >
-          <Icon icon="ic:round-close" class="text-xl" />
+    <div>
+      <div
+        @click="showAside"
+        v-if="showBar"
+        class="backdrop-blur-sm bg-gray-700/10 fixed z-10 top-0 left-0 w-full h-full"
+      ></div>
+      <aside
+        v-if="showBar"
+        class="bg-blue-100 fixed z-20 top-0 right-0 w-64 h-screen"
+      >
+        <div class="flex justify-between items-center shadow p-2">
+          <h1 class="font-semibold text-lg">Menu</h1>
+          <div
+            @click="showAside"
+            class="p-2 rounded-full bg-gray-700/20 text-red-500"
+          >
+            <Icon icon="ic:round-close" class="text-xl" />
+          </div>
         </div>
-      </div>
-    </aside>
+        <div>
+          <RouterLink to="/menu1">
+            <div
+              class="w-full hover:bg-gray-700/10 transition hover:shadow hover:text-blue-500 hover:font-medium p-2 mt-3"
+            >
+              <h1 class="">Dashboard</h1>
+            </div>
+          </RouterLink>
+          <RouterLink to="/menu2">
+            <div
+              class="w-full hover:bg-gray-700/10 transition hover:shadow hover:text-blue-500 hover:font-medium p-2"
+            >
+              <h1 class="">Click menu 1</h1>
+            </div>
+          </RouterLink>
+          <RouterLink to="/menu3">
+            <div
+              class="w-full hover:bg-gray-700/10 transition hover:shadow hover:text-blue-500 hover:font-medium p-2"
+            >
+              <h1 class="">Click menu 1</h1>
+            </div>
+          </RouterLink>
+        </div>
+      </aside>
+    </div>
 
     <main>
       <h1 class="font-medium p-2 text-sm">Your Items to deliver</h1>
+      <!--  -->
+      <router-view> </router-view>
+      <!--  -->
     </main>
   </div>
 </template>
@@ -39,6 +75,7 @@ export default {
   },
   setup() {
     const showBar = ref(false);
+
     const showAside = () => {
       showBar.value = !showBar.value;
     };

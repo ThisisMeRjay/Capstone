@@ -133,7 +133,22 @@ const router = createRouter({
       children: [
         {
           path: "",
-          redirect: { name: "rider_index" },
+          redirect: { name: "menu1" },
+        },
+        {
+          path: "/menu1",
+          name: "menu1",
+          component: () => import("../rider/views/menu1.vue"),
+        },
+        {
+          path: "/menu2",
+          name: "menu2",
+          component: () => import("../rider/views/menu2.vue"),
+        },
+        {
+          path: "/menu3",
+          name: "menu3",
+          component: () => import("../rider/views/menu3.vue"),
         },
       ],
     },
