@@ -32,7 +32,9 @@
       class="fixed z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 justify-center items-center flex"
     >
       <div class="overflow-scroll bg-slate-100 h-[500px] rounded-md">
-        <div class="p-5 bg-slate-100 rounded-md h-full w-[600px] text-slate-800">
+        <div
+          class="p-5 bg-slate-100 rounded-md h-full w-[600px] text-slate-800"
+        >
           <div class="h-full">
             <h1 class="font-semibold text-lg">Order Tracking</h1>
             <hr class="my-2" />
@@ -50,10 +52,17 @@
                 :key="index"
               >
                 <div>
-                  <div>
+                  <div class="flex justify-between items-center">
                     <span class="font-semibold text-slate-800"
                       >#{{ items.order_number }}</span
                     >
+                    <button
+                      v-if="items.status === 1"
+                      class="bg-gray-500/10 px-4 py-1 rounded-md text-red-500 shadow hover:bg-gray-500/20"
+                      @click="cancelOrder(items.order_detail_id)"
+                    >
+                      Cancel
+                    </button>
                   </div>
                   <div class="my-2 flex gap-2 justify-start items-center">
                     <div>

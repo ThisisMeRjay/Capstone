@@ -5,6 +5,8 @@ import { onMounted, ref, computed, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { getDistance } from "geolib";
+import { API_URL } from "@/config";
+import moment from "moment-timezone";
 export default {
   components: {
     Icon,
@@ -33,7 +35,7 @@ export default {
     },
   },
   setup(props) {
-    const url = "192.168.1.19";
+    const url = API_URL;
 
     const showCart = ref(false);
     const isSidebarOpen = ref(false);
@@ -230,38 +232,43 @@ export default {
           latitude: parseFloat(userLogin.value.lat),
           longitude: parseFloat(userLogin.value.lon),
         };
-    
+
         // Calculate distance (ensure your getDistance function returns meters for more accuracy)
         const distanceMeters = getDistance(productLocation, customerLocation);
         console.log("Distance (meters):", distanceMeters);
-    
+
         // Parse additional values as floats to ensure numerical operations
         const baseShippingFee = parseFloat(item.shipping_fee); // Base fee could include handling, smallest package fee, etc.
         const weightKg = parseFloat(item.weight); // Assuming weight is in kilograms
-        const dimensionsCm = {length: parseFloat(item.length), width: parseFloat(item.width), height: parseFloat(item.height)}; // Assuming dimensions are in centimeters
-    
+        const dimensionsCm = {
+          length: parseFloat(item.length),
+          width: parseFloat(item.width),
+          height: parseFloat(item.height),
+        }; // Assuming dimensions are in centimeters
+
         // Constants for calculation
         const weightFactor = 1; // Cost per kilogram
         const volumeFactor = 0.005; // Cost per cubic centimeter (for more granularity)
         const distanceFactor = 0.001; // Cost per meter
-    
+
         // Calculate volume in cubic centimeters (for more granularity)
-        const volumeCm3 = dimensionsCm.length * dimensionsCm.width * dimensionsCm.height;
-    
+        const volumeCm3 =
+          dimensionsCm.length * dimensionsCm.width * dimensionsCm.height;
+
         // Compute the shipping fee
         const shippingFee =
           baseShippingFee +
-          (distanceMeters * distanceFactor) +
-          (weightKg * weightFactor) +
-          (volumeCm3 * volumeFactor);
-    
+          distanceMeters * distanceFactor +
+          weightKg * weightFactor +
+          volumeCm3 * volumeFactor;
+
         console.log("Shipping Fee:", shippingFee.toFixed(2));
         return shippingFee.toFixed(2); // Return the shipping fee formatted as a string with two decimal places
       } catch (error) {
         console.error("Error calculating shipping fee:", error);
         throw error; // Rethrow to ensure that calling functions are aware of the error
       }
-    };    
+    };
 
     const checkout = async () => {
       showPayment.value = true;
@@ -422,6 +429,11 @@ export default {
       out_for_delivery: 4,
       delivered: 5,
       cancelled: 6,
+      return_requested: 7,
+      return_approved: 8,
+      return_in_progress: 9,
+      return_completed: 10,
+      return_declined: 11,
     };
 
     const showOrderTracking = ref(false);
@@ -552,7 +564,51 @@ export default {
       }
     };
 
+    const cancelOrder = async (ID) => {
+      // Add a confirmation dialog before proceeding with the cancellation
+      if (!confirm("Are you sure you want to cancel this order?")) {
+        console.log("Order cancellation aborted by user.");
+        return; // Stop execution if the user does not confirm
+      }
+
+      // Get the current date and time in "Asia/Manila" timezone
+      const dateToUpdate = moment()
+        .tz("Asia/Manila")
+        .format("YYYY-MM-DD HH:mm:ss");
+      console.log("Date of cancellation: ", dateToUpdate);
+
+      try {
+        const Cstatus = "cancelled"; // Define the new status as 'cancelled'
+        // Make an HTTP PUT request using axios to update the order status
+        const response = await axios.put(
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
+          {
+            id: ID,
+            status: Cstatus,
+            estimated_delivery: 0,
+            date: dateToUpdate,
+          }
+        );
+
+        console.log("Response from server:", response.data);
+        if (response.status === 200) {
+          alert("Order has been successfully cancelled.");
+        } else {
+          alert("Failed to cancel the order. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error editing status:", error);
+        alert(
+          "An error occurred while cancelling the order. Please try again."
+        );
+      }
+
+      // Refresh the page to reflect the changes
+      refreshPage();
+    };
+
     return {
+      cancelOrder,
       saveProfile,
       triggerFileInput,
       fileInput,

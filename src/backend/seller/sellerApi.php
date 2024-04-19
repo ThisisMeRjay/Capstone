@@ -72,13 +72,16 @@ function getOrdersAdmin()
     od.*, 
     o.*,
     p.*,
-    u.*
+    u.*,
+    us.store_name
 FROM 
 order_details AS od
 LEFT JOIN 
 orders AS o ON o.order_id = od.order_id
 LEFT JOIN
     products AS p ON  p.product_id = od.product_id
+LEFT JOIN
+    user_store AS us ON  p.store_id = us.store_id
 LEFT JOIN
     users As u ON u.user_id = o.user_id
 WHERE 
@@ -542,67 +545,84 @@ function getSpecs()
     echo json_encode($res);
 }
 
-function EditStatus()
-{
+function EditStatus() {
     global $conn;
 
     $data = json_decode(file_get_contents("php://input"), true);
     $id = $data['id'];
     $newStatus = $data['status'];
-    $estdate = $data['estimated_delivery'];
+    $estdate = $data['estimated_delivery'] ?? null; // Using null coalescing for optional parameters
     $UpdateDate = $data['date'];
     var_dump($newStatus);
 
-    if ($newStatus == 'confirmed') {
-        $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ?, confirmed_date = ? WHERE order_detail_id = ?");
-        $stmt->bind_param("sssi", $newStatus, $estdate, $UpdateDate, $id);
-        $stmt->execute();
-    } elseif ($newStatus == 'processing') {
-        $stmt = $conn->prepare("UPDATE order_details SET status = ?, processing_date = ? WHERE order_detail_id = ?");
-        $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
-        $stmt->execute();
-    } elseif ($newStatus == 'out_for_delivery') {
-        $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivery_date = ? WHERE order_detail_id = ?");
-        $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
-        $stmt->execute();
-    } elseif ($newStatus == 'delivered') {
-        $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivered_date = ? WHERE order_detail_id = ?");
-        $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
-        $stmt->execute();
-    } elseif ($newStatus == 'cancelled') {
-        // First, update the order status to 'cancelled'
-        $stmt = $conn->prepare("UPDATE order_details SET status = ?, processing_date = ? WHERE order_detail_id = ?");
-        $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
-        $stmt->execute();
-
-        // Check if the update was successful to proceed with restocking
-        if ($stmt->affected_rows > 0) {
-            // Fetch the quantity and product_id of the cancelled order
-            $stmt = $conn->prepare("SELECT quantity, product_id FROM order_details WHERE order_detail_id = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $orderDetails = $result->fetch_assoc();
-
-            // Restock the inventory with the cancelled quantity
-            if ($orderDetails) {
-                $updateInventoryStmt = $conn->prepare("UPDATE inventory SET quantity = quantity + ? WHERE product_id = ?");
-                $updateInventoryStmt->bind_param("ii", $orderDetails['quantity'], $orderDetails['product_id']);
-                $updateInventoryStmt->execute();
-                $updateInventoryStmt->close();
+    switch ($newStatus) {
+        case 'pending':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("si", $newStatus, $id);
+            break;
+        case 'confirmed':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ?, confirmed_date = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("sssi", $newStatus, $estdate, $UpdateDate, $id);
+            break;
+        case 'processing':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ?, processing_date = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
+            break;
+        case 'ready_to_pickup':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("si", $newStatus, $id);
+            break;
+        case 'out_for_delivery':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivery_date = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
+            break;
+        case 'delivered':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivered_date = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
+            break;
+        case 'cancelled':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ?, cancelled_date = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
+            if ($stmt->execute() && $stmt->affected_rows > 0) {
+                // Assuming inventory needs to be updated upon cancellation
+                $stmt = $conn->prepare("SELECT quantity, product_id FROM order_details WHERE order_detail_id = ?");
+                $stmt->bind_param("i", $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($row = $result->fetch_assoc()) {
+                    $updateInventoryStmt = $conn->prepare("UPDATE inventory SET quantity = quantity + ? WHERE product_id = ?");
+                    $updateInventoryStmt->bind_param("ii", $row['quantity'], $row['product_id']);
+                    $updateInventoryStmt->execute();
+                    $updateInventoryStmt->close();
+                }
             }
-        }
+            break;
+        case 'delayed':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("ssi", $newStatus, $estdate, $id);
+            break;
+        case 'return_in_progress':
+        case 'return_completed':
+        case 'return_declined':
+        case 'return_requested':
+        case 'return_approved':
+        case 'reserved_for_rider':
+        case 'closed':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("si", $newStatus, $id);
+            break;
+        default:
+            echo "Status not recognized";
+            return;  // Exit the function if the status is not recognized
     }
 
-    if (isset ($stmt) && $stmt->affected_rows > 0) {
+    if ($stmt->execute()) {
         echo "Order status updated successfully.";
     } else {
         echo "No order was updated. Please check your input.";
     }
 
-    if (isset ($stmt)) {
-        $stmt->close();
-    }
+    $stmt->close();
 }
 
 function getProducts()

@@ -35,15 +35,26 @@
               <option value="pending">Pending</option>
               <option value="confirmed">Confirmed</option>
               <option value="processing">Processing</option>
+              <option value="ready_to_pickup">Ready to Pick Up</option>
+              <option value="pick_up">Pick Up</option>
               <option value="out_for_delivery">Out for Delivery</option>
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
+              <option value="delayed">Delayed</option>
+              <option value="return_in_progress">Return in Progress</option>
+              <option value="return_completed">Return Completed</option>
+              <option value="return_requested">Return Requested</option>
+              <option value="return_declined">Return Declined</option>
+              <option value="return_approved">Return Approved</option>
+              <option value="closed">Closed</option>
             </select>
           </form>
         </div>
 
         <div class="my-5 w-full">
-          <div class="relative max-w-[1200px] max-h-[570px] overflow-x-auto shadow-md rounded-md">
+          <div
+            class="relative max-w-[1200px] max-h-[570px] overflow-x-auto shadow-md rounded-md"
+          >
             <table
               class="min-w-full text-sm text-left rtl:text-right text-gray-900 rounded-md"
             >
@@ -53,7 +64,9 @@
                 <tr
                   class="text-center bg-gray-100/10 border-b border-gray-600/50"
                 >
-                  <th scope="col" class="px-6 py-2 sticky left-0 bg-gray-100">Order Number</th>
+                  <th scope="col" class="px-6 py-2 sticky left-0 bg-gray-100">
+                    Order Number
+                  </th>
                   <th scope="col" class="px-6 py-2">Product name</th>
                   <th scope="col" class="px-6 py-2">STATUS</th>
                   <th scope="col" class="px-6 py-2">QUANTITY</th>
@@ -61,10 +74,7 @@
                   <th scope="col" class="px-6 py-2">PRICE</th>
                   <th scope="col" class="px-6 py-2">PAYMENT METHOD</th>
                   <th scope="col" class="px-6 py-2">ORDER DATE</th>
-                  <th scope="col" class="px-6 py-2">date confirmed</th>
                   <th scope="col" class="px-6 py-2">ESTIMATED DELIVERY</th>
-                  <th scope="col" class="px-6 py-2">date processed</th>
-                  <th scope="col" class="px-6 py-2">out for delivery</th>
                   <th scope="col" class="px-6 py-2">date delivered</th>
                 </tr>
               </thead>
@@ -74,32 +84,54 @@
                   :key="item.id"
                   class="bg-gray-100/10 border-b border-gray-600/50"
                 >
-                  <td class="px-6 py-1 sticky left-0 top-0 bg-slate-50 z-10">{{ item.order_number }}</td>
+                  <td class="px-6 py-1 sticky left-0 top-0 bg-slate-50 z-10">
+                    {{ item.order_number }}
+                  </td>
                   <td class="px-6 py-1">{{ item.product_name }}</td>
                   <td class="px-6 py-1">
                     <p
                       @click="editStatus(item.order_detail_id)"
-                      class="shadow px-3 py-1 text-center rounded-full flex justify-center gap-1 cursor-pointer hover:bg-slate-200 transition"
+                      class="shadow px-3 py-1 text-center rounded-full flex justify-center gap-3 cursor-pointer hover:bg-slate-200 transition"
                       :class="{
                         'text-orange-500 bg-orange-300/10':
                           item.status === 'pending',
                         'text-gray-500 bg-yellow-300/10':
                           item.status === 'confirmed',
-                        'text-yellow-500 bg-yellow-300/10':
+                        'text-gray-700 bg-gray-200/10':
                           item.status === 'processing',
+                        'text-yellow-600 bg-yellow-200/10':
+                          item.status === 'ready_to_pickup',
                         'text-blue-500 bg-blue-300/10':
                           item.status === 'out_for_delivery',
-                        'text-green-500 bg-red-300/10':
+                        'text-green-500 bg-green-300/10':
                           item.status === 'delivered',
                         'text-red-500 bg-red-300/10':
                           item.status === 'cancelled',
+                        'text-purple-500 bg-purple-300/10':
+                          item.status === 'delayed',
+                        'text-pink-500 bg-pink-300/10':
+                          item.status === 'return_in_progress',
+                        'text-teal-500 bg-teal-300/10':
+                          item.status === 'return_completed',
+                        'text-red-600 bg-red-200/10':
+                          item.status === 'return_declined',
+                        'text-blue-400 bg-blue-200/10':
+                          item.status === 'return_requested',
+                        'text-blue-600 bg-blue-300/10':
+                          item.status === 'return_approved',
+                        'text-gray-500 bg-gray-300/10':
+                          item.status === 'closed',
                       }"
                     >
-                      {{ item.status }}
-                      <Icon
+                      <div>
+                        {{ item.status }}
+                      </div>
+                      <div>
+                        <Icon
                         icon="material-symbols:edit"
                         class="text-lg text-green-500"
                       />
+                      </div>
                     </p>
                   </td>
                   <td class="px-6 py-1">{{ item.quantity }}</td>
@@ -114,16 +146,7 @@
                     {{ item.date_purchased }}
                   </td>
                   <td class="px-6 py-1">
-                    {{ item.confirmed_date }}
-                  </td>
-                  <td class="px-6 py-1">
                     {{ item.estimated_delivery }}
-                  </td>
-                  <td class="px-6 py-1">
-                    {{ item.processing_date }}
-                  </td>
-                  <td class="px-6 py-1">
-                    {{ item.delivery_date }}
                   </td>
                   <td class="px-6 py-1">
                     {{ item.delivered_date }}
@@ -166,13 +189,12 @@
           Select order Status:
         </h1>
         <select v-model="selectValue" class="w-full p-2 rounded-md">
-          <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="processing">Processing</option>
-          <option value="cancelled">Cancelled</option>
+          <option v-for="option in options" :value="option.value">
+            {{ option.text }}
+          </option>
         </select>
       </div>
-      <div v-if="selectValue === 'pending' || selectValue === 'confirmed'">
+      <div v-if="selectValue === 'pending'">
         <h1 class="text-lg font-semibold text-blue-400 mt-4">
           Estimated Delivery Date:
         </h1>
@@ -215,7 +237,7 @@ export default {
   },
   setup() {
     const url = API_URL;
-    
+
     const refreshPage = () => {
       location.reload(true);
     };
@@ -274,11 +296,20 @@ export default {
         (order) => order.order_detail_id === orderId
       );
       if (orderToEdit) {
-        showStatusModal.value = true;
         editableOrderStatus.value = orderToEdit; // Direct assignment without spreading
         userOrderName.value = editableOrderStatus.value.username;
         selectValue.value = editableOrderStatus.value.status;
-        if (editableOrderStatus.value.status == "delivered" || editableOrderStatus.value.status == "out_for_delivery" || editableOrderStatus.value.status == "processing") {
+        updateOptions();
+        if (
+          editableOrderStatus.value.status == "pending" ||
+          editableOrderStatus.value.status == "confirmed" ||
+          editableOrderStatus.value.status == "processing" ||
+          editableOrderStatus.value.status == "return_requested" ||
+          editableOrderStatus.value.status == "return_in_progress"  ||
+          editableOrderStatus.value.status == "delivered" 
+        ) {
+          showStatusModal.value = true;
+        } else {
           showStatusModal.value = false;
         }
         console.log("info", editableOrderStatus.value);
@@ -332,6 +363,7 @@ export default {
     };
     // Now userLogin is directly accessible here  , and it's reactive
     onMounted(() => {
+      updateOptions();
       getUserFromLocalStorage();
       fetchOrders();
     });
@@ -356,7 +388,46 @@ export default {
       console.log(id);
     };
 
+    const options = ref([]);
+
+    const updateOptions = () => {
+      if (selectValue.value === "pending") {
+        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
+        options.value = [
+          { value: "pending", text: "Pending" },
+          { value: "confirmed", text: "Confirmed" },
+          { value: "cancelled", text: "Cancelled" },
+        ];
+      } else if (selectValue.value === "confirmed") {
+        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
+        options.value = [
+          { value: "confirmed", text: "Confirmed" },
+          { value: "processing", text: "Processing" },
+        ];
+      } else if (selectValue.value === "processing") {
+        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
+        options.value = [
+          { value: "processing", text: "Processing" },
+          { value: "ready_to_pickup", text: "Ready to Pickup" },
+        ];
+      } else if (selectValue.value === "delivered") {
+        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
+        options.value = [
+          { value: "delivered", text: "Delivered" },
+          { value: "closed", text: "Closed" },
+        ];
+      } else {
+        // Reset to all options otherwise
+        options.value = [
+          { value: "processing", text: "Processing" },
+          { value: "out_for_delivery", text: "Out for delivery" },
+          { value: "delivered", text: "Delivered" },
+        ];
+      }
+    }; 
+    
     return {
+      options,
       barangayname,
       orders,
       editData,
@@ -374,6 +445,7 @@ export default {
       userOrderName,
       editableOrderStatus,
       estimatedDelivery,
+      updateOptions,
     };
   },
 };
