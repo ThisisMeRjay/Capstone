@@ -3,9 +3,7 @@
 include('db.php');
 
 // Set headers for CORS
-header("Access-Control-Allow-Origin: http://localhost:5173"); // Update this to match your Vue.js development server URL
-header("Access-Control-Allow-Methods: GET");
-header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+include ('header.php');
 
 function fetchSearch()
 {

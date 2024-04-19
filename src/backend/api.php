@@ -3,9 +3,7 @@
 include('db.php');
 
 // Set headers for CORS
-header("Access-Control-Allow-Origin: http://localhost:5173"); // Update this to match your Vue.js development server URL
-header("Access-Control-Allow-Methods: OPTIONS, GET, POST, PUT, DELETE");
-header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+include ('header.php');
 
 
 
@@ -204,9 +202,8 @@ function CheckoutOrder()
 {
     global $conn;
     $data = json_decode(file_get_contents("php://input"), true);
-
     $stmt = $conn->prepare("INSERT INTO orders (user_id, total_price, item) VALUES (?, ?, ?)");
-    $stmt->bind_param("sis", $user_id, $total_price, $item);
+    $stmt->bind_param("sds", $user_id, $total_price, $item);
 
     // Set parameters and execute
     $user_id = $data['user_id'];
@@ -219,7 +216,7 @@ function CheckoutOrder()
     $payment = $data['payment_method'];
 
     $stmt = $conn->prepare("INSERT INTO order_details (order_number, order_id, product_id, quantity, total_price_products, payment_method) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("iiidds", $order_number, $order_id, $product_id, $quantity, $price, $payment);
+    $stmt->bind_param("iiiids", $order_number, $order_id, $product_id, $quantity, $price, $payment);
 
     foreach ($data['product_id'] as $key => $product_id) {
         $quantity = $data['quantity'][$key];

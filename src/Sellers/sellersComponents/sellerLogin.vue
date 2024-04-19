@@ -63,18 +63,21 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { API_URL } from "@/config";
 export default {
   setup() {
+    const url = API_URL;
+
     const loginEmail = ref("");
     const loginPassword = ref("");
     const router = useRouter();
     let name = ref("");
     const signIn = async () => {
       try {
-        const url =
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=login";
+        const urli =
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=login`;
         const res = await axios.post(
-          url,
+          urli,
           {
             email: loginEmail.value,
             password: loginPassword.value,

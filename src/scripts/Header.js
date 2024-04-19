@@ -33,6 +33,8 @@ export default {
     },
   },
   setup(props) {
+    const url = "192.168.1.19";
+
     const showCart = ref(false);
     const isSidebarOpen = ref(false);
     const cartItemsValue = ref([]);
@@ -75,7 +77,7 @@ export default {
     const cartItems = async () => {
       try {
         const res = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/api.php?action=fetchCartItems",
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=fetchCartItems`,
           {
             cart_id: userLogin.value.user_id,
           }
@@ -181,7 +183,7 @@ export default {
       // console.log(id);
       try {
         const res = await axios.delete(
-          `http://localhost/Ecommerce/vue-project/src/backend/api.php?action=deleteCartItem`,
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=deleteCartItem`,
           {
             data: { id },
             headers: {
@@ -359,7 +361,7 @@ export default {
       // API call
       try {
         const res = await axios.post(
-          `http://localhost/Ecommerce/vue-project/src/backend/api.php?action=CheckoutOrder`,
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=CheckoutOrder`,
           {
             user_id: userID,
             total_price: totalPrice,
@@ -390,7 +392,7 @@ export default {
     const getTrackingOrder = async () => {
       try {
         const res = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/api.php?action=getTrackOrder",
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=getTrackOrder`,
           {
             id: userLogin.value.user_id, // get the user id
           }
@@ -415,10 +417,11 @@ export default {
 
     const statusMapping = {
       pending: 1,
-      processing: 2,
-      out_for_delivery: 3,
-      delivered: 4,
-      cancelled: 5,
+      confirmed: 2,
+      processing: 3,
+      out_for_delivery: 4,
+      delivered: 5,
+      cancelled: 6,
     };
 
     const showOrderTracking = ref(false);
@@ -439,7 +442,7 @@ export default {
       // Adjust the URL to your comment submission endpoint and ensure the body contains all necessary data
       try {
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/api.php?action=submitReviews", // Update this URL to your actual comment submission endpoint
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=submitReviews`, // Update this URL to your actual comment submission endpoint
           {
             userId: userLogin.value.user_id,
             productId: items.product_id,
@@ -473,7 +476,7 @@ export default {
     const GetBarangays = async () => {
       try {
         const res = await axios.get(
-          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
         );
         barangay.value = res.data;
         selectedBarangay.value = userLogin.value.barangay_id;
@@ -511,7 +514,7 @@ export default {
       try {
         console.log("id", userLogin.value.user_id);
         const res = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getProfile",
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=getProfile`,
           {
             user_id: userLogin.value.user_id,
           }
@@ -528,7 +531,7 @@ export default {
     const saveProfile = async () => {
       try {
         const res = await axios.put(
-          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=SaveEditprofile",
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=SaveEditprofile`,
           {
             username: userLogin.value.username,
             contact_number: userLogin.value.contact_number,

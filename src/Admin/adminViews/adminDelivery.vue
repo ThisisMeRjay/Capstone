@@ -1,7 +1,7 @@
 <template>
   <div class="mx-4">
-    <div class="py-3 px-10 font-bold text-2xl text-slate-700">
-      <h1>Order</h1>
+    <div class="pb-3 px-2 font-bold text-2xl text-sky-900">
+      <h1>Delivery</h1>
     </div>
     <hr />
     <div class="flex mt-5 w-full">
@@ -32,28 +32,25 @@
               class="shadow border text-gray-900 outline-none text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-32 px-3 py-2.5"
             >
               <option value="">Default</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
               <option value="processing">Processing</option>
               <option value="out_for_delivery">Out for Delivery</option>
               <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
             </select>
           </form>
         </div>
 
-        <div class="my-5 w-full">
-          <div class="relative max-w-[1200px] max-h-[570px] overflow-x-auto shadow-md rounded-md">
+        <div class="my-5 w-full p-2 border border-slate-900/20 rounded-md">
+          <div class="relative max-w-[1200px] overflow-x-auto shadow-md rounded-md max-h-[500px]">
             <table
               class="min-w-full text-sm text-left rtl:text-right text-gray-900 rounded-md"
             >
               <thead
-                class="text-xs text-slate-800 bg-slate-100 uppercase rounded-md sticky top-0 z-40"
+                class="text-xs text-sky-100 uppercase bg-sky-900 rounded-md sticky top-0 z-40"
               >
                 <tr
                   class="text-center bg-gray-100/10 border-b border-gray-600/50"
                 >
-                  <th scope="col" class="px-6 py-2 sticky left-0 bg-gray-100">Order Number</th>
+                  <th scope="col" class="px-6 py-2 sticky left-0 bg-sky-900">Order Number</th>
                   <th scope="col" class="px-6 py-2">Product name</th>
                   <th scope="col" class="px-6 py-2">STATUS</th>
                   <th scope="col" class="px-6 py-2">QUANTITY</th>
@@ -165,11 +162,13 @@
         <h1 class="text-lg font-semibold text-blue-400">
           Select order Status:
         </h1>
-        <select v-model="selectValue" class="w-full p-2 rounded-md">
-          <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="processing">Processing</option>
-          <option value="cancelled">Cancelled</option>
+        <select
+          v-model="selectValue"
+          class="w-full p-2 rounded-md"
+        >
+          <option v-for="option in options" :value="option.value">
+            {{ option.text }}
+          </option>
         </select>
       </div>
       <div v-if="selectValue === 'pending' || selectValue === 'confirmed'">
@@ -215,7 +214,6 @@ export default {
   },
   setup() {
     const url = API_URL;
-    
     const refreshPage = () => {
       location.reload(true);
     };
@@ -224,7 +222,7 @@ export default {
 
     const orders = ref([]);
 
-    let selectValue = ref("");
+    const selectValue = ref("");
 
     let estimatedDelivery = ref("");
 
@@ -267,6 +265,30 @@ export default {
       }
     };
 
+    const options = ref([]);
+
+    const updateOptions = () => {
+      if (selectValue.value === "out_for_delivery") {
+        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
+        options.value = [
+          { value: "out_for_delivery", text: "Out for delivery" },
+          { value: "delivered", text: "Delivered" },
+        ];
+      } else if (selectValue.value === "delivered") {
+        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
+        options.value = [
+          { value: "delivered", text: "Delivered" },
+        ];
+      } else {
+        // Reset to all options otherwise
+        options.value = [
+          { value: "processing", text: "Processing" },
+          { value: "out_for_delivery", text: "Out for delivery" },
+          { value: "delivered", text: "Delivered" },
+        ];
+      }
+    };
+
     const barangayname = ref([]);
     const editStatus = async (orderId) => {
       orderIdToEdit.value = orderId;
@@ -278,7 +300,8 @@ export default {
         editableOrderStatus.value = orderToEdit; // Direct assignment without spreading
         userOrderName.value = editableOrderStatus.value.username;
         selectValue.value = editableOrderStatus.value.status;
-        if (editableOrderStatus.value.status == "delivered" || editableOrderStatus.value.status == "out_for_delivery" || editableOrderStatus.value.status == "processing") {
+        updateOptions();
+        if (editableOrderStatus.value.status == "delivered") {
           showStatusModal.value = false;
         }
         console.log("info", editableOrderStatus.value);
@@ -331,19 +354,12 @@ export default {
       refreshPage();
     };
     // Now userLogin is directly accessible here  , and it's reactive
-    onMounted(() => {
-      getUserFromLocalStorage();
-      fetchOrders();
-    });
 
     const fetchOrders = async () => {
       console.log("seller ", userLogin.value.store_id);
       try {
         const response = await axios.post(
-          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getOrders`,
-          {
-            store_id: userLogin.value.store_id,
-          }
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getOrdersAdmin`
         );
         orders.value = response.data;
         console.log("orders: ", orders.value);
@@ -356,6 +372,12 @@ export default {
       console.log(id);
     };
 
+    onMounted(() => {
+      updateOptions();
+      getUserFromLocalStorage();
+      fetchOrders();
+    });
+
     return {
       barangayname,
       orders,
@@ -366,6 +388,7 @@ export default {
       temp_orders,
       searchQuery,
       filterBySearch,
+      selectValue,
 
       editStatus,
       showStatusModal,
@@ -374,6 +397,8 @@ export default {
       userOrderName,
       editableOrderStatus,
       estimatedDelivery,
+      updateOptions,
+      options,
     };
   },
 };

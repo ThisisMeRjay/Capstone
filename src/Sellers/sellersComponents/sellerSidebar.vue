@@ -266,11 +266,14 @@ import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { API_URL } from "@/config";
 export default {
   components: {
     Icon,
   },
   setup() {
+    const url = API_URL;
+
     const router = useRouter();
     const logout = () => {
       if (confirm("Are you sure you want to logout?")) {
@@ -296,7 +299,7 @@ export default {
       try {
         console.log("id", userLogin.value.store_id);
         const res = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=getLogo",
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=getLogo`,
           {
             store_id: userLogin.value.store_id,
           }
@@ -347,7 +350,7 @@ export default {
     const saveProfile = async () => {
       try {
         const res = await axios.put(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=save",
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=save`,
           {
             store_id: userLogin.value.store_id,
             store_name: userLogin.value.store_name,

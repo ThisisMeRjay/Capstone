@@ -198,6 +198,7 @@ import { Icon } from "@iconify/vue";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { API_URL } from "@/config";
 export default {
   components: {
     Icon,
@@ -231,13 +232,15 @@ export default {
     },
   },
   setup(props, { emit }) {
+    const url = API_URL;
+
     const selectedBarangay = ref("");
     const barangay = ref([]);
 
     const GetBarangays = async () => {
       try {
         const res = await axios.get(
-          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
         );
         barangay.value = res.data;
         console.log("barangaysss: ", res.data);
@@ -258,10 +261,10 @@ export default {
 
     const signIn = async () => {
       try {
-        const url =
-          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=login";
+        const urli =
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=login`;
         const res = await axios.post(
-          url,
+          urli,
           {
             email: loginEmail.value,
             password: loginPassword.value,
@@ -293,10 +296,10 @@ export default {
     const signUp = async () => {
       try {
         console.log("barangay id: ", selectedBarangay.value);
-        const url =
-          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=register";
+        const urli =
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=register`;
         const res = await axios.post(
-          url,
+          urli,
           {
             name: registerName.value,
             email: registerEmail.value,

@@ -30,13 +30,12 @@ const router = createRouter({
       children: [
         {
           path: "",
-          redirect: { name: "admin_dashboard_customers" },
+          redirect: { name: "admin_dashboard_home" },
         },
         {
-          path: "",
-          name: "users",
-          component: () =>
-            import("../Admin/adminViews/adminManageCustomers.vue"),
+          path: "/admin_dashboard_home",
+          name: "admin_dashboard_home",
+          component: () => import("../Admin/adminViews/adminDashboardHome.vue"),
         },
         {
           path: "/users", // Example nested route
@@ -45,9 +44,7 @@ const router = createRouter({
           children: [
             {
               path: "",
-              name: "admin_dashboard_customers",
-              component: () =>
-                import("../Admin/adminViews/adminManageCustomers.vue"),
+              redirect: { name: "admin_dashboard_customers" },
             },
             {
               path: "/admin_dashboard_customers",
@@ -57,11 +54,16 @@ const router = createRouter({
             },
             {
               path: "/admin_dashboard_sellers",
-              name: "dashboard_sellers",
+              name: "admin_dashboard_sellers",
               component: () =>
                 import("../Admin/adminViews/adminManageSellers.vue"),
             },
           ],
+        },
+        {
+          path: "/admin_delivery",
+          name: "admin_delivery",
+          component: () => import("../Admin/adminViews/adminDelivery.vue"),
         },
       ],
     },

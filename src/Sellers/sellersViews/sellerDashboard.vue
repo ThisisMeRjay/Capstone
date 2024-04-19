@@ -6,7 +6,7 @@
     <div class="relative">
       <div
         @click="showSidebarMenu"
-        class="absolute left-3 top-3 bg-slate-500/10 p-2 rounded-full shadow"
+        class="absolute left-8 top-3 bg-slate-500/10 p-2 rounded-full shadow"
       >
         <Icon icon="oui:menu-left" class="text-lg" />
       </div>
@@ -22,7 +22,7 @@
         </div>
       </div>
     </div>
-    <div class="w-full">
+    <div class="w-full pl-5">
       <router-view> </router-view>
     </div>
   </div>

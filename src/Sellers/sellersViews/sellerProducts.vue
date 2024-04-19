@@ -66,6 +66,7 @@ import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller";
 import { Bar } from "vue-chartjs";
 import moment from "moment-timezone";
+import { API_URL } from "@/config";
 import {
   Chart as ChartJS,
   Title,
@@ -118,6 +119,8 @@ const chartOptions = ref({
   },
 });
 
+const url = API_URL;
+
 const totalSales = ref(0);
 const totalStocks = ref("");
 const startDate = ref("");
@@ -128,7 +131,7 @@ const isDefaultDateRange = ref(true);
 const fetchRealTimeMonthlySales = async () => {
   try {
     const response = await axios.post(
-      "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchRealTimeMonthlySales",
+      `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchRealTimeMonthlySales`,
       { store_id: userLogin.value.store_id }
     );
 
@@ -180,7 +183,7 @@ const fetchSalesData = async (start, end) => {
   console.log("end ", end);
   try {
     const response = await axios.post(
-      "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchSalesData",
+      `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchSalesData`,
       {
         start: start,
         end: end,
@@ -200,7 +203,7 @@ const fetchCurrentInventoryStatus = async () => {
   const today = new Date().toISOString().split("T")[0];
   try {
     const response = await axios.post(
-      "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchStocks",
+      `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchStocks`,
       {
         store_id: userLogin.value.store_id,
       }

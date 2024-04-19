@@ -3,9 +3,7 @@
 include ('../db.php');
 
 // Set headers for CORS
-header("Access-Control-Allow-Origin: http://localhost:5173"); // Update this to match your Vue.js development server URL
-header("Access-Control-Allow-Methods: OPTIONS, GET, POST, PUT, DELETE");
-header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+include ('../header.php');
 
 
 $res = ['error' => false];
@@ -50,11 +48,75 @@ switch ($action) {
     case 'getReviews':
         getReviews();
         break;
+    case 'barangay':
+        barangay();
+        break;
+    case 'getOrdersAdmin':
+        getOrdersAdmin();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function getOrdersAdmin()
+{
+    global $conn;
+
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    // Use prepared statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT 
+    od.*, 
+    o.*,
+    p.*,
+    u.*
+FROM 
+order_details AS od
+LEFT JOIN 
+orders AS o ON o.order_id = od.order_id
+LEFT JOIN
+    products AS p ON  p.product_id = od.product_id
+LEFT JOIN
+    users As u ON u.user_id = o.user_id
+WHERE 
+    od.status = 'processing' OR od.status = 'out_for_delivery' OR od.status = 'delivered'
+ORDER BY 
+    od.order_detail_id DESC");
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $stmt->close();
+
+    $res = [];
+    while ($row = $result->fetch_assoc()) {
+        $row['image'] = base64_encode($row['image']);
+        $res[] = $row;
+    }
+
+    echo json_encode($res);
+}
+
+function barangay()
+{
+    global $conn;
+    $data = json_decode(file_get_contents("php://input"), true);
+    $ID = $data['id'];
+
+    $stmt = $conn->prepare("SELECT * FROM barangay WHERE barangay_id = ?");
+    $stmt->bind_param("i", $ID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $brgy = []; // Initialize an array to hold the fetched reviews.
+    while ($row = $result->fetch_assoc()) {
+        $brgy[] = $row; // Add each review to the array.
+    }
+    $stmt->close();
+
+    echo json_encode($brgy);
 }
 
 function getReviews()
@@ -491,9 +553,13 @@ function EditStatus()
     $UpdateDate = $data['date'];
     var_dump($newStatus);
 
-    if ($newStatus == 'processing') {
-        $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ?, processing_date = ? WHERE order_detail_id = ?");
+    if ($newStatus == 'confirmed') {
+        $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ?, confirmed_date = ? WHERE order_detail_id = ?");
         $stmt->bind_param("sssi", $newStatus, $estdate, $UpdateDate, $id);
+        $stmt->execute();
+    } elseif ($newStatus == 'processing') {
+        $stmt = $conn->prepare("UPDATE order_details SET status = ?, processing_date = ? WHERE order_detail_id = ?");
+        $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
         $stmt->execute();
     } elseif ($newStatus == 'out_for_delivery') {
         $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivery_date = ? WHERE order_detail_id = ?");

@@ -314,13 +314,7 @@
               <div class="flex justify-between items-center">
                 <button
                   @click="
-                    fetchShippingFee(
-                      Height,
-                      Weight,
-                      Length,
-                      Width,
-                      shipping
-                    )
+                    fetchShippingFee(Height, Weight, Length, Width, shipping)
                   "
                   class="inline-flex items-center justify-center px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
@@ -391,12 +385,14 @@ import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller"; // Adjust the path as necessary
 import { getDistance } from "geolib";
-
+import { API_URL } from "@/config";
 export default {
   components: {
     Icon,
   },
   setup() {
+    const url = API_URL;
+
     const specifications = ref([{ Spec_key: "", Spec_value: "" }]);
 
     const addSpec = () => {
@@ -431,7 +427,7 @@ export default {
 
       try {
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=SaveProduct",
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=SaveProduct`,
           {
             selectedCategory: selectedCategory.value,
             image: image.value,
@@ -472,7 +468,7 @@ export default {
       }
       try {
         const response = await axios.post(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=AddCategory",
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=AddCategory`,
           {
             category_name: newCategory.value.category_name,
             category_description: newCategory.value.category_description,
@@ -495,7 +491,7 @@ export default {
     const getCategories = async () => {
       try {
         const response = await axios.get(
-          "http://localhost/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchcategories"
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchcategories`
         );
         categories.value = response.data;
         console.log("categories ", categories.value);
@@ -510,7 +506,7 @@ export default {
     const GetBarangays = async () => {
       try {
         const res = await axios.get(
-          "http://localhost/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy"
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
         );
         barangay.value = res.data;
         console.log("barangaysss: ", res.data);
