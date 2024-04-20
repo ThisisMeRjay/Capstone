@@ -33,6 +33,29 @@ const router = createRouter({
           redirect: { name: "admin_dashboard_home" },
         },
         {
+          path: "/manage_request",
+          name: "manage_request",
+          component: () => import("../Admin/adminViews/adminManageRequest.vue"),
+          children: [
+            {
+              path: "",
+              redirect: { name: "manage_request_seller" },
+            },
+            {
+              path: "/manage_request_rider",
+              name: "manage_request_rider",
+              component: () =>
+                import("../Admin/adminViews/riderRequest.vue"),
+            },
+            {
+              path: "/manage_request_seller",
+              name: "manage_request_seller",
+              component: () =>
+                import("../Admin/adminViews/sellerRequest.vue"),
+            },
+          ],
+        },
+        {
           path: "/admin_dashboard_home",
           name: "admin_dashboard_home",
           component: () => import("../Admin/adminViews/adminDashboardHome.vue"),

@@ -35,7 +35,7 @@
             <td class="px-6 py-4">{{ user.Zone }}</td>
             <td class="px-6 py-4">{{ user.House_no }}</td>
             <td class="px-6 py-4 flex justify-center">
-              <button @click="deleteCustomer(user.customer_id)">
+              <button @click="deleteCustomer(user.user_id)">
                 <Icon
                   icon="material-symbols-light:delete-sharp"
                   class="text-2xl text-red-500"
@@ -60,10 +60,46 @@ export default {
   setup() {
     const url = API_URL;
     const customer = ref([]);
-    const deleteCustomer = (customer_id) => {
-      console.log("delete customer: ", customer_id);
+    const deleteCustomer = async (ID) => {
+      console.log("Deleting customer: ", ID);
+
+      // Confirm before proceeding with the deletion
+      if (
+        window.confirm(
+          "Are you sure you want to delete this customer? This action cannot be undone."
+        )
+      ) {
+        try {
+          // Execute the DELETE request to the server
+          const response = await axios.post(
+            `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=DeleteCustomer`,
+            {
+              customer_id: ID,
+            }
+          );
+
+          console.log("Response received:", response.data);
+
+          // Check the success status from the response data
+          if (response.data && response.data.success) {
+            alert("Customer deleted successfully!");
+            window.location.reload(); // Reload the page to reflect changes
+          } else {
+            alert(
+              "Failed to delete customer: " +
+                (response.data.message || "Unknown error")
+            );
+          }
+        } catch (error) {
+          console.error("Failed to delete customer:", error);
+          alert("Error occurred: " + error.message);
+        }
+      } else {
+        // User cancelled the confirmation
+        console.log("Deletion cancelled by user.");
+      }
     };
-    4;
+
     const fetchCustomer = async () => {
       try {
         // Assuming `get` is a predefined function that handles the fetching logic

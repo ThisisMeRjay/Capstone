@@ -34,6 +34,21 @@
             User Management
           </div>
         </RouterLink>
+        <RouterLink to="/manage_request">
+          <div
+            class="w-full bg-gray-100 p-2 mt-3 rounded-xl"
+            :class="{
+              'text-sky-700':
+                $route.name === 'manage_request_seller' ||
+                $route.name === 'manage_request_rider',
+              'text-sky-900':
+                $route.name !== 'manage_request_seller' &&
+                $route.name !== 'manage_request_rider',
+            }"
+          >
+            Manage Request
+          </div>
+        </RouterLink>
         <RouterLink to="/admin_delivery">
           <div
             class="w-full bg-gray-100 p-2 mt-3 rounded-xl"
