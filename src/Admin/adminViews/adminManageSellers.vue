@@ -6,9 +6,10 @@
       >
         <thead class="text-xs text-sky-100 uppercase bg-sky-900 rounded-md">
           <tr>
-            <th scope="col" class="px-6 py-3">Sellers Name</th>
+            <th scope="col" class="px-6 py-3">Store Name</th>
             <th scope="col" class="px-6 py-3">Email</th>
-            <th scope="col" class="px-6 py-3">Category</th>
+            <th scope="col" class="px-6 py-3">Address</th>
+            <th scope="col" class="px-6 py-3">Contact number</th>
             <th scope="col" class="px-6 py-3">Delete</th>
           </tr>
         </thead>
@@ -22,12 +23,13 @@
               scope="row"
               class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
             >
-              {{ user.seller_name }}
+              {{ user.store_name }}
             </th>
-            <td class="px-6 py-4">{{ user.phone_number }}</td>
-            <td class="px-6 py-4">{{ user.category }}</td>
+            <td class="px-6 py-4">{{ user.store_email }}</td>
+            <td class="px-6 py-4">{{ user.store_address }}</td>
+            <td class="px-6 py-4">{{ user.store_contact_number }}</td>
             <td class="px-6 py-4 flex justify-center">
-              <button @click="deleteseller(user.seller_id)">
+              <button @click="deleteSeller(user.store_id)">
                 <Icon
                   icon="material-symbols-light:delete-sharp"
                   class="text-2xl text-red-500"
@@ -42,30 +44,37 @@
 </template>
 <script>
 import { Icon } from "@iconify/vue";
+import { onMounted, ref } from "vue";
+import { API_URL } from "@/config";
+import axios from "axios";
 export default {
   components: {
     Icon,
   },
   setup() {
-    const seller = [
-      {
-        seller_id: 1,
-        seller_name: "John Doe",
-        phone_number: "+380999999999",
-        category: "Laptop PC",
-      },
-      {
-        seller_id: 2,
-        seller_name: "John",
-        phone_number: "+380999999999",
-        category: "Shafol PC",
-      },
-    ];
-    const deleteseller = (seller_id) => {
-      console.log("delete seller: ", seller_id);
+    const url = API_URL;
+    const seller = ref([]);
+    const deleteSeller = (store_id) => {
+      console.log("delete store: ", store_id);
     };
+    4;
+    const fetchSeller = async () => {
+      try {
+        // Assuming `get` is a predefined function that handles the fetching logic
+        const response = await axios.get(
+          `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=getSeller`
+        );
+        console.log("Response received:", response.data);
+        seller.value = response.data; // Returning the response to handle it where this function is called
+      } catch (error) {
+        // Handle errors that occur during the `get` call
+        console.error("Failed to fetch customers:", error);
+        throw error; // Optional: re-throw the error if you want to handle it further up the call stack
+      }
+    };
+    onMounted(fetchSeller);
     return {
-      deleteseller,
+      deleteSeller,
       seller,
     };
   },

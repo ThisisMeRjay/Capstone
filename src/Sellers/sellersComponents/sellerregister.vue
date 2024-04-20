@@ -63,6 +63,22 @@
             class="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 outline-none focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6"
           />
         </div>
+        <div>
+        <label
+          for="name"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Address</label
+        >
+        <div class="mt-2">
+          <input
+            id="address"
+            v-model="registerAddress"
+            name="address"
+            type="text"
+            class="block w-full rounded-md px-2 border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 outline-none sm:text-sm sm:leading-6"
+          />
+        </div>
+      </div>
       </div>
       <div>
         <div class="flex items-center justify-between">
@@ -109,6 +125,7 @@ export default {
     const url = API_URL;
 
     const registerEmail = ref("");
+    const registerAddress = ref("");
     const registerName = ref("");
     const registerPassword = ref("");
     const contactNumber = ref("");
@@ -124,6 +141,7 @@ export default {
             name: registerName.value,
             email: registerEmail.value,
             password: registerPassword.value,
+            address: registerAddress.value,
             contact_number: contactNumber.value,
             role: role.value,
           },
@@ -144,8 +162,10 @@ export default {
       registerPassword.value = "";
       contactNumber.value = "";
       role.value = "";
+      registerAddress.value = "";
     };
     return {
+      registerAddress,
       registerName,
       registerEmail,
       registerPassword,

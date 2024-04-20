@@ -102,12 +102,13 @@ function register()
     $store_email = $data['email'];
     $store_password = $data['password'];
     $store_contact_number = $data['contact_number'];
+    $address = $data['address'];
     $store_role = $data['role'];
     $hashed_password = password_hash($store_password, PASSWORD_DEFAULT);
 
     // Prepare the statement for inserting store information
-    $stmt = $conn->prepare("INSERT INTO user_store (store_name, store_email, store_password, store_contact_number, store_role) VALUES (?, ?, ? , ?, ?)");
-    $stmt->bind_param("sssss", $store_name, $store_email, $hashed_password, $store_contact_number, $store_role);
+    $stmt = $conn->prepare("INSERT INTO user_store (store_name, store_email, store_password, store_address, store_contact_number, store_role) VALUES (?, ?, ?, ? , ?, ?)");
+    $stmt->bind_param("ssssss", $store_name, $store_email, $hashed_password, $address, $store_contact_number, $store_role);
 
     // Execute the query
     $stmt->execute();
@@ -118,7 +119,7 @@ function register()
         $store_id = $conn->insert_id;
 
         // Prepare the statement for inserting into store_log
-        $stmt = $conn->prepare("INSERT INTO store_log (store_id) VALUES (?)");
+        $stmt = $conn->prepare("INSERT INTO store_logo (store_id) VALUES (?)");
         $stmt->bind_param("i", $store_id);
 
         // Execute the query
@@ -130,7 +131,7 @@ function register()
             $res['message'] = 'Registered successfully.';
         } else {
             $res['success'] = false;
-            $res['message'] = 'Failed to add to store_log.';
+            $res['message'] = 'Failed to add to store_logo.';
         }
     } else {
         $res['success'] = false;
