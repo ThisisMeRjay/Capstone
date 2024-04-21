@@ -30,13 +30,13 @@
             <td class="px-6 py-4">{{ user.store_contact_number }}</td>
             <td class="px-6 py-4 flex justify-between gap-3 cursor-pointer">
               <button
-                class="bg-green-500 font-bold p-2 text-xs shadow rounded hover:bg-green-500/60"
+                class="bg-green-500 font-bold p-2 text-xs text-white shadow rounded hover:bg-green-500/60"
                 @click="approved(user.store_id)"
               >
                 Approve
               </button>
               <button
-                class="bg-red-500 font-bold p-2 text-xs shadow rounded hover:bg-red-500/60"
+                class="bg-red-500 font-bold p-2 text-xs text-white shadow rounded hover:bg-red-500/60"
                 @click="rejected(user.store_id)"
               >
                 Reject

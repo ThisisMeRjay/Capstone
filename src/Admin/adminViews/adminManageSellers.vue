@@ -54,10 +54,44 @@ export default {
   setup() {
     const url = API_URL;
     const seller = ref([]);
-    const deleteSeller = (store_id) => {
-      console.log("delete store: ", store_id);
+    const deleteSeller = async (ID) => {
+      console.log("delete store: ", ID);
+
+      if (
+        window.confirm(
+          "Are you sure you want to delete this customer? This action cannot be undone."
+        )
+      ) {
+        try {
+          // Execute the DELETE request to the server
+          const response = await axios.post(
+            `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=DeleteSeller`,
+            {
+              store_id: ID,
+            }
+          );
+
+          console.log("Response received:", response.data);
+
+          // Check the success status from the response data
+          if (response.data && response.data.success) {
+            alert("Customer deleted successfully!");
+            window.location.reload(); // Reload the page to reflect changes
+          } else {
+            alert(
+              "Failed to delete seller: " +
+                (response.data.message || "Unknown error")
+            );
+          }
+        } catch (error) {
+          console.error("Failed to delete customer:", error);
+          alert("Error occurred: " + error.message);
+        }
+      } else {
+        // User cancelled the confirmation
+        console.log("Deletion cancelled by user.");
+      }
     };
-    4;
     const fetchSeller = async () => {
       try {
         // Assuming `get` is a predefined function that handles the fetching logic

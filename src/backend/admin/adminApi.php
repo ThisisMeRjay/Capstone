@@ -24,11 +24,85 @@ switch ($action) {
     case 'DeleteCustomer':
         DeleteCustomer();
         break;
+    case 'DeleteSeller':
+        DeleteSeller();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function DeleteSeller()
+{
+    global $conn; // Access the global database connection
+
+    // Get the JSON input from the HTTP request body
+    $data = json_decode(file_get_contents("php://input"), true);
+    if (empty($data['store_id'])) {
+        // If no customer_id is provided, return an error message
+        $res = [
+            'success' => false,
+            'message' => 'Storer ID is required.'
+        ];
+        echo json_encode($res);
+        return;
+    }
+
+    // Extract the customer_id from the data array
+    $store_id = $data['store_id'];
+
+    // Start a transaction to ensure both operations are done together
+    $conn->begin_transaction();
+
+    try {
+        // Prepare the SQL query to delete the customer's cart entries first
+        $stmt = $conn->prepare("DELETE FROM store_logo WHERE store_id = ?");
+        if (!$stmt) {
+            throw new Exception('Failed to prepare the store_logo SQL statement: ' . $conn->error);
+        }
+
+        // Bind the customer_id to the prepared statement for cart deletion
+        $stmt->bind_param("i", $store_id);
+
+        // Execute the cart deletion statement
+        $stmt->execute();
+        $stmt->close(); // Close the cart deletion statement
+
+        // Prepare the SQL query to delete the customer from users table
+        $stmt = $conn->prepare("DELETE FROM user_store WHERE store_id = ?");
+        if (!$stmt) {
+            throw new Exception('Failed to prepare the SQL statement: ' . $conn->error);
+        }
+
+        // Bind the customer_id to the prepared statement
+        $stmt->bind_param("i", $store_id);
+
+        // Execute the statement to delete the user
+        if (!$stmt->execute() || $stmt->affected_rows == 0) {
+            throw new Exception('Deletion failed: No seller found with that ID or ' . $stmt->error);
+        }
+
+        $stmt->close(); // Close the users deletion statement
+
+        // Commit the transaction
+        $conn->commit();
+
+        $res = [
+            'success' => true,
+            'message' => 'Stolre/Seller and their logo entries successfully deleted.'
+        ];
+    } catch (Exception $e) {
+        // If an exception occurs, roll back the transaction
+        $conn->rollback();
+        $res = [
+            'success' => false,
+            'message' => $e->getMessage()
+        ];
+    }
+
+    echo json_encode($res);
 }
 
 function DeleteCustomer()
