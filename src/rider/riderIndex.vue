@@ -21,7 +21,7 @@
       ></div>
       <aside
         v-if="showBar"
-        class="bg-blue-100 fixed z-20 top-0 right-0 w-64 h-screen"
+        class="bg-blue-100 fixed z-20 top-0 right-0 w-72 h-screen"
       >
         <div class="flex justify-between items-center shadow p-2">
           <h1 class="font-semibold text-lg">Menu</h1>
