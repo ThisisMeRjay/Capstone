@@ -7,7 +7,7 @@ include ('../header.php');
 
 
 $res = ['error' => false];
-$action = isset ($_GET['action']) ? $_GET['action'] : '';
+$action = isset($_GET['action']) ? $_GET['action'] : '';
 switch ($action) {
     case 'getCustomers':
         getCustomers();
@@ -27,11 +27,88 @@ switch ($action) {
     case 'DeleteSeller':
         DeleteSeller();
         break;
+    case 'fetchCommission':
+        fetchCommission();
+        break;
+    case 'fetchRealTimeMonthlySales':
+        fetchRealTimeMonthlySales();
+        break;   
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function fetchRealTimeMonthlySales()
+{
+    global $conn;
+    header('Content-Type: application/json'); // Ensure JSON response
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    // var_dump($storeId); // Use for debugging only
+
+    $currentYear = date('Y');
+    $stmt = $conn->prepare("
+        SELECT MONTH(commission.created_at) AS saleMonth, 
+               SUM(commission.com_value) AS totalSales
+        FROM commission
+        WHERE YEAR(commission.created_at) = ?
+        GROUP BY MONTH(commission.created_at)
+        ORDER BY MONTH(commission.created_at)
+    ");
+
+    $stmt->bind_param("s", $currentYear);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $monthlySales = [];
+    while ($row = $result->fetch_assoc()) {
+        $monthlySales[] = $row;
+    }
+
+    echo json_encode($monthlySales);
+    $stmt->close();
+}
+
+function fetchCommission()
+{
+    global $conn;
+    $data = json_decode(file_get_contents("php://input"), true);
+    // Fetch the 'start', 'end', and 'store_id' from the query parameters
+    $startDate = $data['start'];
+    $endDate = $data['end'];
+
+    // Ensure the start and end dates include the entire day
+    $startDate .= " 00:00:00";
+    $endDate .= " 23:59:59";
+
+    // Update your query to include status check and use LEFT JOIN for products
+    $stmt = $conn->prepare("
+        SELECT SUM(commission.com_value) AS totalSales 
+        FROM commission 
+        WHERE commission.created_at BETWEEN ? AND ?
+    ");
+
+    // Bind the parameters to the query
+    $stmt->bind_param("ss", $startDate, $endDate);
+
+    // Execute the query
+    $stmt->execute();
+
+    // Get the result
+    $result = $stmt->get_result();
+
+    // Fetch the data
+    $value = $result->fetch_assoc();
+
+    // Assuming you want to return the sum as a part of a JSON response
+    echo json_encode([
+        'totalSales' => $value['totalSales'] ? $value['totalSales'] : 0
+    ]);
+
+    // Close the statement
+    $stmt->close();
 }
 
 function DeleteSeller()
@@ -176,7 +253,8 @@ function DeleteCustomer()
     echo json_encode($res); // Output the result as JSON
 }
 
-function UpdateStatus() {
+function UpdateStatus()
+{
     global $conn; // Access the global database connection
 
     // Get the JSON input from the HTTP request body

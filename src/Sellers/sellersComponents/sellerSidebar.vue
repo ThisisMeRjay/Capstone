@@ -288,10 +288,13 @@ export default {
       const userData = localStorage.getItem("seller");
       if (userData) {
         userLogin.value = JSON.parse(userData);
+      } else {
+        router.push("/seller_index");
       }
       console.log(userLogin.value);
       return null;
     };
+
     getUserFromLocalStorage();
 
     const logo = ref("");

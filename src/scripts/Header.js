@@ -63,6 +63,8 @@ export default {
 
         if (userData !== null) {
           userLogin.value = JSON.parse(userData);
+        } else {
+          router.push("/home");
         }
 
         console.log("user", userLogin.value);

@@ -127,6 +127,23 @@ const router = createRouter({
       ],
     },
     {
+      path: "/rider_index",
+      name: "rider_index",
+      component: () => import("../rider/riderIndex.vue"),
+      children: [
+        {
+          path: "",
+          redirect: { name: "rider_home" },
+        },
+        {
+          path: "/rider_home",
+          name: "rider_home",
+          component: () =>
+            import("../rider/views/riderHome.vue"),
+        },
+      ],
+    },
+    {
       path: "/seller_index",
       name: "seller_index",
       component: () => import("../Sellers/sellerIndex.vue"),
