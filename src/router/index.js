@@ -44,14 +44,12 @@ const router = createRouter({
             {
               path: "/manage_request_rider",
               name: "manage_request_rider",
-              component: () =>
-                import("../Admin/adminViews/riderRequest.vue"),
+              component: () => import("../Admin/adminViews/riderRequest.vue"),
             },
             {
               path: "/manage_request_seller",
               name: "manage_request_seller",
-              component: () =>
-                import("../Admin/adminViews/sellerRequest.vue"),
+              component: () => import("../Admin/adminViews/sellerRequest.vue"),
             },
           ],
         },
@@ -144,8 +142,28 @@ const router = createRouter({
         {
           path: "/rider_home",
           name: "rider_home",
-          component: () =>
-            import("../rider/views/riderHome.vue"),
+          component: () => import("../rider/views/riderHome.vue"),
+        },
+      ],
+    },
+    {
+      path: "/rider_start",
+      name: "rider_start",
+      component: () => import("../rider/riderStart.vue"),
+      children: [
+        {
+          path: "",
+          redirect: { name: "rider_login" },
+        },
+        {
+          path: "/rider_login",
+          name: "rider_login",
+          component: () => import("../rider/riderLogin.vue"),
+        },
+        {
+          path: "/rider_register",
+          name: "rider_register",
+          component: () => import("../rider/riderRegister.vue"),
         },
       ],
     },

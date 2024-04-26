@@ -64,7 +64,9 @@ function insertRider()
     $rider_id = $data['rider_id'];
     $orderID = $data['id'];
     $stmt = $conn->prepare("UPDATE order_details SET rider_id = ? WHERE order_detail_id =?");
-    $stmt->bind_param("i", $rider_id, $orderID);
+    $stmt->bind_param("ii", $rider_id, $orderID);
+    $stmt->execute();
+    $stmt->close();
 }
 
 function DeleteRider()
@@ -127,20 +129,29 @@ function DeleteRider()
     echo json_encode($res);
 }
 
-function fetchAllriders()
+function fetchAllRiders()
 {
     global $conn;
-    $stmt = $conn->prepare("SELECT *
-FROM rider
-WHERE rider.status = 'approved'
-");
+
+    // Prepare the SQL query to fetch rider information along with a count of their active orders
+    $stmt = $conn->prepare("
+        SELECT r.*, COUNT(od.rider_id) AS order_count
+        FROM rider AS r
+        LEFT JOIN order_details AS od ON r.rider_id = od.rider_id AND od.status NOT IN ('delivered', 'cancelled', 'closed')
+        WHERE r.status = 'approved'
+        GROUP BY r.rider_id
+    ");
+
     $stmt->execute();
     $result = $stmt->get_result();
-    $seller = [];
+    $riders = [];
+
+    // Fetch each row and add it to the array
     while ($row = $result->fetch_assoc()) {
-        $seller[] = $row;
+        $riders[] = $row;
     }
-    echo json_encode($seller);
+
+    echo json_encode($riders);
 }
 
 function UpdateStatusRider()

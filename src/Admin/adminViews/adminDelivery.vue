@@ -194,12 +194,46 @@
   </div>
   <div v-if="riderModal">
     <div
-      class="z-40 fixed top-0 left-0 h-full w-full flex justify-center items-center"
+      class="z-50 fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center"
     >
-      <div class="bg-blue-100 p-3 rounded-md shadow">
-        <div><h1 class="font-semibold text-base">Select Rider</h1></div>
-        <div class="flex">
-          <div class="flex gap-2 bg-blue-200 p-2 justify-start items-center rounded-md"><p>Rider 1</p> <span class="text-blue-500 bg-blue-50 p-2 rounded-full">3</span></div></div>
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+        <h1 class="font-semibold text-lg text-gray-800 mb-4">Select Rider</h1>
+        <div class="overflow-x-auto" v-if="Riders.length > 0">
+          <table class="w-full text-left rounded-lg overflow-hidden">
+            <thead class="bg-blue-500 text-white">
+              <tr>
+                <th class="px-4 py-2">Rider Name</th>
+                <th class="px-4 py-2">Contact number</th>
+                <th class="px-4 py-2">Load</th>
+                <th class="px-4 py-2">Action</th>
+              </tr>
+            </thead>
+            <tbody
+              class="bg-white divide-y divide-gray-300"
+              v-for="(rider, index) in Riders"
+              :key="index"
+            >
+              <tr class="hover:bg-gray-100">
+                <td class="px-4 py-2">{{ rider.rider_name }}</td>
+                <td class="px-4 py-2">{{ rider.rider_contact_number }}</td>
+                <td class="px-4 py-2">
+                  <span class="text-blue-500 bg-blue-50 p-2 rounded-full">{{
+                    rider.order_count
+                  }}</span>
+                </td>
+                <td class="px-4 py-2">
+                  <button
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded focus:outline-none focus:shadow-outline"
+                    @click="insertRider(rider.rider_id)"
+                  >
+                    Assign
+                  </button>
+                </td>
+              </tr>
+              <!-- Repeat <tr> for more riders as needed -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -344,37 +378,14 @@ export default {
         .format("YYYY-MM-DD HH:mm:ss");
       console.log("date:  ", DateToupdate);
 
-      // try {
-      //   const response = await axios.put(
-      //     `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
-      //     {
-      //       id: orderIdToEdit.value,
-      //       status: selectValue.value,
-      //       estimated_delivery: estimatedDelivery.value,
-      //       date: DateToupdate,
-      //     }
-      //   );
-      //   // Assuming you might want to do something with the response here
-      //   console.log(response.data);
-      // } catch (error) {
-      //   console.error("Error editing status:", error);
-      // }
-      showStatusModal.value = false;
-      if (selectValue.value === "reserved_for_rider") {
-        riderModal.value = true;
-        console.log("ID ", orderIdToEdit.value);
-      }
-    };
-
-    const RiderID = ref("");
-
-    const insertRider = async () => {
       try {
         const response = await axios.put(
-          `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=insertRider`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
           {
             id: orderIdToEdit.value,
-            rider_id: RiderID.value
+            status: selectValue.value,
+            estimated_delivery: estimatedDelivery.value,
+            date: DateToupdate,
           }
         );
         // Assuming you might want to do something with the response here
@@ -382,6 +393,46 @@ export default {
       } catch (error) {
         console.error("Error editing status:", error);
       }
+      showStatusModal.value = false;
+      if (selectValue.value === "reserved_for_rider") {
+        riderModal.value = true;
+        console.log("ID ", orderIdToEdit.value);
+      }
+    };
+
+    const insertRider = async (ID) => {
+      // Show confirmation dialog
+      const confirmAction = confirm(
+        "Are you sure you want to assign this rider to the order?"
+      );
+
+      if (confirmAction) {
+        // User clicked OK
+        console.log("rider ID: ", ID);
+        console.log("order ID: ", orderIdToEdit.value);
+
+        try {
+          const response = await axios.put(
+            `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=insertRider`,
+            {
+              id: orderIdToEdit.value,
+              rider_id: ID,
+            }
+          );
+          // Assuming you might want to do something with the response here
+          console.log(response.data);
+
+          // Optionally alert the user that the operation was successful
+          alert("Rider has been successfully assigned!");
+        } catch (error) {
+          console.error("Error editing status:", error);
+          alert("Failed to assign the rider."); // Notify user about the error
+        }
+      } else {
+        // User clicked Cancel
+        console.log("Operation canceled by the user.");
+      }
+      refreshPage();
     };
 
     // Now userLogin is directly accessible here  , and it's reactive
@@ -402,7 +453,7 @@ export default {
     const editData = (id) => {
       console.log(id);
     };
-    
+
     onMounted(() => {
       updateOptions();
       getUserFromLocalStorage();
@@ -411,7 +462,7 @@ export default {
     });
 
     return {
-      RiderID,
+      insertRider,
       riderModal,
       Riders,
       barangayname,
