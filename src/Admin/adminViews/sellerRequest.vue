@@ -63,7 +63,6 @@ export default {
     const deleteSeller = (store_id) => {
       console.log("delete store: ", store_id);
     };
-    4;
     const fetchSeller = async () => {
       try {
         // Assuming `get` is a predefined function that handles the fetching logic

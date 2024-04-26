@@ -85,7 +85,7 @@ export default {
     );
 
     const options = {
-      keys: ["product_name", "product_description"],
+      keys: ["product_name"],
       threshold: 0.2,
     };
 

@@ -81,6 +81,12 @@ const router = createRouter({
               component: () =>
                 import("../Admin/adminViews/adminManageSellers.vue"),
             },
+            {
+              path: "/admin_dashboard_riders",
+              name: "admin_dashboard_riders",
+              component: () =>
+                import("../Admin/adminViews/adminManageRiders.vue"),
+            },
           ],
         },
         {

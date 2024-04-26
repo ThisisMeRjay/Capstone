@@ -416,13 +416,6 @@ export default {
           { value: "delivered", text: "Delivered" },
           { value: "closed", text: "Closed" },
         ];
-      } else {
-        // Reset to all options otherwise
-        options.value = [
-          { value: "processing", text: "Processing" },
-          { value: "out_for_delivery", text: "Out for delivery" },
-          { value: "delivered", text: "Delivered" },
-        ];
       }
     }; 
     

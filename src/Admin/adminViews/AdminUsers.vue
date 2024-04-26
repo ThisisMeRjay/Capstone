@@ -24,6 +24,16 @@
       >
         Sellers
       </RouterLink>
+      <RouterLink
+        to="/admin_dashboard_riders"
+        :class="{
+          'bg-sky-800/20 text-sky-800': $route.name === 'admin_dashboard_riders',
+          'text-sky-800 bg-slate-300/10': $route.name !== 'admin_dashboard_riders',
+          'px-3 py-2 font-semibold shadow rounded-md': true,
+        }"
+      >
+        Riders
+      </RouterLink>
     </div>
     <div>
       <!--  -->

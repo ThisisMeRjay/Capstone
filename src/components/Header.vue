@@ -86,13 +86,13 @@
                     </div>
                   </div>
                   <div>
-                    <div v-if="items.status === 6" class="my-4">
+                    <div v-if="items.status === 8" class="my-4">
                       <span
                         class="text-red-500 text-sm bg-red-400/10 p-2 rounded"
                         >Order Cancelled.</span
                       >
                     </div>
-                    <div v-if="items.status !== 6">
+                    <div v-if="items.status !== 8">
                       <div
                         class="mb-5 flex justify-between items-center bg-blue-300/20 rounded-md p-1"
                       >
@@ -167,7 +167,7 @@
                           <span
                             class="flex text-xs items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200"
                           >
-                            <div v-if="items.status >= 4">
+                            <div v-if="items.status >= 6">
                               <Icon
                                 icon="lets-icons:check-fill"
                                 class="text-lg text-blue-600"
@@ -177,7 +177,7 @@
                           </span>
                         </li>
                         <li class="flex items-center text-xs">
-                          <div v-if="items.status >= 5">
+                          <div v-if="items.status >= 7">
                             <Icon
                               icon="lets-icons:check-fill"
                               class="text-lg text-blue-600"
@@ -227,7 +227,7 @@
                           </p>
                         </div>
                         <div
-                          v-if="items.status >= 4"
+                          v-if="items.status >= 6"
                           class="bg-blue-500/10 rounded-md p-1 my-1"
                         >
                           <p class="text-xs font-light">
@@ -239,7 +239,7 @@
                           </p>
                         </div>
                         <div
-                          v-if="items.status >= 5"
+                          v-if="items.status >= 7"
                           class="bg-blue-500/10 rounded-md p-1 my-1"
                         >
                           <p class="text-xs font-light">
@@ -261,7 +261,7 @@
                       </div>
                       <!-- ratings and comment here -->
                       <div
-                        v-if="items.status === 5 && items.comment === null"
+                        v-if="items.status === 7 && items.comment === null"
                         class="rating-and-comment"
                       >
                         <div class="ratings flex justify-center">

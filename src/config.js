@@ -1,2 +1,2 @@
 // config.js
-export const API_URL = 'http://192.168.254.121';
+export const API_URL = 'http://192.168.68.209';

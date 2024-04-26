@@ -75,17 +75,17 @@ function getOrdersAdmin()
     u.*,
     us.store_name
 FROM 
-order_details AS od
+    order_details AS od
 LEFT JOIN 
-orders AS o ON o.order_id = od.order_id
+    orders AS o ON o.order_id = od.order_id
 LEFT JOIN
-    products AS p ON  p.product_id = od.product_id
+    products AS p ON p.product_id = od.product_id
 LEFT JOIN
-    user_store AS us ON  p.store_id = us.store_id
+    user_store AS us ON p.store_id = us.store_id
 LEFT JOIN
-    users As u ON u.user_id = o.user_id
+    users AS u ON u.user_id = o.user_id
 WHERE 
-    od.status = 'processing' OR od.status = 'out_for_delivery' OR od.status = 'delivered'
+    od.status NOT IN ('pending', 'confirmed', 'processing', 'cancelled')
 ORDER BY 
     od.order_detail_id DESC");
     $stmt->execute();

@@ -40,7 +40,9 @@
         </div>
 
         <div class="my-5 w-full p-2 border border-slate-900/20 rounded-md">
-          <div class="relative max-w-[1200px] overflow-x-auto shadow-md rounded-md max-h-[500px]">
+          <div
+            class="relative max-w-[1200px] overflow-x-auto shadow-md rounded-md max-h-[500px]"
+          >
             <table
               class="min-w-full text-sm text-left rtl:text-right text-gray-900 rounded-md"
             >
@@ -50,17 +52,17 @@
                 <tr
                   class="text-center bg-gray-100/10 border-b border-gray-600/50"
                 >
-                  <th scope="col" class="px-6 py-2 sticky left-0 bg-sky-900">Order Number</th>
+                  <th scope="col" class="px-6 py-2 sticky left-0 bg-sky-900">
+                    Order Number
+                  </th>
                   <th scope="col" class="px-6 py-2">Product name</th>
+                  <th scope="col" class="px-6 py-2">store name</th>
                   <th scope="col" class="px-6 py-2">STATUS</th>
                   <th scope="col" class="px-6 py-2">QUANTITY</th>
                   <th scope="col" class="px-6 py-2">CUSTOMER NAME</th>
                   <th scope="col" class="px-6 py-2">PRICE</th>
                   <th scope="col" class="px-6 py-2">PAYMENT METHOD</th>
-                  <th scope="col" class="px-6 py-2">ORDER DATE</th>
-                  <th scope="col" class="px-6 py-2">date confirmed</th>
                   <th scope="col" class="px-6 py-2">ESTIMATED DELIVERY</th>
-                  <th scope="col" class="px-6 py-2">date processed</th>
                   <th scope="col" class="px-6 py-2">out for delivery</th>
                   <th scope="col" class="px-6 py-2">date delivered</th>
                 </tr>
@@ -71,8 +73,11 @@
                   :key="item.id"
                   class="bg-gray-100/10 border-b border-gray-600/50"
                 >
-                  <td class="px-6 py-1 sticky left-0 top-0 bg-slate-50 z-10">{{ item.order_number }}</td>
+                  <td class="px-6 py-1 sticky left-0 top-0 bg-slate-50 z-10">
+                    {{ item.order_number }}
+                  </td>
                   <td class="px-6 py-1">{{ item.product_name }}</td>
+                  <td class="px-6 py-1">{{ item.store_name }}</td>
                   <td class="px-6 py-1">
                     <p
                       @click="editStatus(item.order_detail_id)"
@@ -108,16 +113,7 @@
                     </p>
                   </td>
                   <td class="px-6 py-1">
-                    {{ item.date_purchased }}
-                  </td>
-                  <td class="px-6 py-1">
-                    {{ item.confirmed_date }}
-                  </td>
-                  <td class="px-6 py-1">
                     {{ item.estimated_delivery }}
-                  </td>
-                  <td class="px-6 py-1">
-                    {{ item.processing_date }}
                   </td>
                   <td class="px-6 py-1">
                     {{ item.delivery_date }}
@@ -136,7 +132,7 @@
   <!-- edit status modal -->
   <div
     v-if="showStatusModal"
-    class="z-50 fixed top-0 left-0 h-full w-full flex justify-center items-center"
+    class="z-40 fixed top-0 left-0 h-full w-full flex justify-center items-center"
   >
     <form
       @submit.prevent="handleEditStatusOrder"
@@ -162,10 +158,7 @@
         <h1 class="text-lg font-semibold text-blue-400">
           Select order Status:
         </h1>
-        <select
-          v-model="selectValue"
-          class="w-full p-2 rounded-md"
-        >
+        <select v-model="selectValue" class="w-full p-2 rounded-md">
           <option v-for="option in options" :value="option.value">
             {{ option.text }}
           </option>
@@ -198,6 +191,17 @@
         </button>
       </div>
     </form>
+  </div>
+  <div v-if="riderModal">
+    <div
+      class="z-40 fixed top-0 left-0 h-full w-full flex justify-center items-center"
+    >
+      <div class="bg-blue-100 p-3 rounded-md shadow">
+        <div><h1 class="font-semibold text-base">Select Rider</h1></div>
+        <div class="flex">
+          <div class="flex gap-2 bg-blue-200 p-2 justify-start items-center rounded-md"><p>Rider 1</p> <span class="text-blue-500 bg-blue-50 p-2 rounded-full">3</span></div></div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -238,6 +242,23 @@ export default {
 
     const searchQuery = ref("");
 
+    const Riders = ref([]);
+
+    const riderModal = ref(false);
+
+    const fetchRiders = async () => {
+      try {
+        const response = await axios.get(
+          `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=fetchAllriders`
+        );
+        // Assuming you might want to do something with the response here
+        Riders.value = response.data;
+        console.log("riders", response.data);
+      } catch (error) {
+        console.error("Error getting riders:", error);
+      }
+    };
+
     const filterBySearch = () => {
       if (!searchQuery.value) {
         fetchOrders(); // Fetch all orders if no status is selected or reset to default
@@ -268,23 +289,11 @@ export default {
     const options = ref([]);
 
     const updateOptions = () => {
-      if (selectValue.value === "out_for_delivery") {
+      if (selectValue.value === "ready_to_pickup") {
         // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
         options.value = [
-          { value: "out_for_delivery", text: "Out for delivery" },
-          { value: "delivered", text: "Delivered" },
-        ];
-      } else if (selectValue.value === "delivered") {
-        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
-        options.value = [
-          { value: "delivered", text: "Delivered" },
-        ];
-      } else {
-        // Reset to all options otherwise
-        options.value = [
-          { value: "processing", text: "Processing" },
-          { value: "out_for_delivery", text: "Out for delivery" },
-          { value: "delivered", text: "Delivered" },
+          { value: "ready_to_pickup", text: "Ready to Pickup" },
+          { value: "reserved_for_rider", text: "Reserved for Rider" },
         ];
       }
     };
@@ -296,13 +305,12 @@ export default {
         (order) => order.order_detail_id === orderId
       );
       if (orderToEdit) {
-        showStatusModal.value = true;
         editableOrderStatus.value = orderToEdit; // Direct assignment without spreading
         userOrderName.value = editableOrderStatus.value.username;
         selectValue.value = editableOrderStatus.value.status;
         updateOptions();
-        if (editableOrderStatus.value.status == "delivered") {
-          showStatusModal.value = false;
+        if (editableOrderStatus.value.status == "ready_to_pickup") {
+          showStatusModal.value = true;
         }
         console.log("info", editableOrderStatus.value);
         try {
@@ -336,14 +344,37 @@ export default {
         .format("YYYY-MM-DD HH:mm:ss");
       console.log("date:  ", DateToupdate);
 
+      // try {
+      //   const response = await axios.put(
+      //     `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
+      //     {
+      //       id: orderIdToEdit.value,
+      //       status: selectValue.value,
+      //       estimated_delivery: estimatedDelivery.value,
+      //       date: DateToupdate,
+      //     }
+      //   );
+      //   // Assuming you might want to do something with the response here
+      //   console.log(response.data);
+      // } catch (error) {
+      //   console.error("Error editing status:", error);
+      // }
+      showStatusModal.value = false;
+      if (selectValue.value === "reserved_for_rider") {
+        riderModal.value = true;
+        console.log("ID ", orderIdToEdit.value);
+      }
+    };
+
+    const RiderID = ref("");
+
+    const insertRider = async () => {
       try {
         const response = await axios.put(
-          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
+          `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=insertRider`,
           {
             id: orderIdToEdit.value,
-            status: selectValue.value,
-            estimated_delivery: estimatedDelivery.value,
-            date: DateToupdate,
+            rider_id: RiderID.value
           }
         );
         // Assuming you might want to do something with the response here
@@ -351,8 +382,8 @@ export default {
       } catch (error) {
         console.error("Error editing status:", error);
       }
-      refreshPage();
     };
+
     // Now userLogin is directly accessible here  , and it's reactive
 
     const fetchOrders = async () => {
@@ -371,14 +402,18 @@ export default {
     const editData = (id) => {
       console.log(id);
     };
-
+    
     onMounted(() => {
       updateOptions();
       getUserFromLocalStorage();
       fetchOrders();
+      fetchRiders();
     });
 
     return {
+      RiderID,
+      riderModal,
+      Riders,
       barangayname,
       orders,
       editData,
