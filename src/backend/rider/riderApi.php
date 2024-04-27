@@ -41,12 +41,14 @@ function getDetails()
                 od.*,
                 o.*,
                 u.*,
+                us.*,
                 p.*,
-                b.name
+                b.name,
             FROM order_details as od
             LEFT JOIN orders as o ON od.order_id = o.order_id
             LEFT JOIN users as u ON u.user_id = o.user_id
             LEFT JOIN products as p ON p.product_id = od.product_id
+            LEFT JOIN user_store as us ON us.store_id = p.store_id
             LEFT JOIN barangay as b ON b.barangay_id = u.barangay_id
             WHERE od.status = 'reserved_for_rider' AND od.rider_id = ? AND od.order_detail_id = ?;";
 

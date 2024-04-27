@@ -7,6 +7,8 @@
           class="text-xs text-sky-100 uppercase bg-gradient-to-r from-blue-500 from-10% via-violet-500 via-30% to-orange-500 to-90% sm:rounded-md"
         >
           <tr>
+            <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">Store name</th>
+            <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">Order number</th>
             <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">Customer name</th>
             <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">Contact no.</th>
             <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">status</th>
@@ -14,20 +16,28 @@
           </tr>
         </thead>
         <tbody v-for="(order, index) in orders" :key="index">
-          <tr class="bg-gray-200 border-b border-gray-700">
+          <tr class="bg-gray-200 border-b border-gray-700 text-xs">
+            <td class="px-2 py-2 sm:px-6 sm:py-4">{{ order.store_name }}</td>
+            <td class="px-2 py-2 sm:px-6 sm:py-4">{{ order.order_number }}</td>
             <td class="px-2 py-2 sm:px-6 sm:py-4">{{ order.username }}</td>
             <td class="px-2 py-2 sm:px-6 sm:py-4">
               {{ order.contact_number }}
             </td>
             <td class="px-2 py-2 sm:px-6 sm:py-4">
-              <p class="bg-orange-300 p-1 rounded-full px-2">
-                {{ order.status }}
-              </p>
+              <div class="bg-orange-300 p-1 rounded-full px-2 flex gap-2 items-center hover:bg-slate-400" @click="updateStatus(order.order_detail_id)">
+                <div>{{ order.status }}</div>
+                <div>
+                  <Icon
+                    icon="material-symbols:edit"
+                    class="text-xs text-green-500"
+                  />
+                </div>
+              </div>
             </td>
-            <td class="px-2 py-2 sm:px-6 sm:py-4 flex justify-center">
+            <td class="px-2 py-2 sm:px-6 sm:py-4">
               <button
                 @click="getDetails(order.order_detail_id)"
-                class="bg-blue-500 p-3 rounded hover:bg-blue-600"
+                class="bg-blue-500 p-1 items-center flex rounded hover:bg-blue-600"
               >
                 Details
               </button>
@@ -47,8 +57,10 @@
         <ul class="space-y-2" v-for="(detail, index) in details" :key="index">
           <li><strong>Customer name:</strong> {{ detail.username }}</li>
           <li><strong>Contact no:</strong> {{ detail.contact_number }}</li>
-          <li><strong>Address:</strong> {{ detail.address }}, {{ detail.Zone }}, {{ detail.name }}</li>
-          <li><strong>Product:</strong> {{ detail.product_name }}</li>
+          <li>
+            <strong>Address:</strong> {{ detail.address }}, {{ detail.Zone }},
+            {{ detail.name }}
+          </li>
           <li><strong>Quantity:</strong> {{ detail.quantity }}</li>
           <li><strong>Price:</strong> {{ detail.total_price_products }}</li>
         </ul>
@@ -71,7 +83,11 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { API_URL } from "@/config";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Rider";
+import { Icon } from "@iconify/vue";
 export default {
+  components: {
+    Icon,
+  },
   setup() {
     const showModal = ref(false);
     const url = API_URL;
@@ -118,7 +134,26 @@ export default {
       } catch {}
     };
 
+    const updateStatus = async (ID) => {
+      showModal.value = true;
+      console.log("rider ID: ", ID);
+      try {
+        const urli = `${url}/Ecommerce/vue-project/src/backend/rider/riderApi.php?action=getDetails`;
+        const res = await axios.post(
+          urli,
+          {
+            id: userLogin.value.rider_id,
+            detail_id: ID,
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        console.log(res.data);
+        details.value = res.data;
+      } catch {}
+    };
+
     return {
+      updateStatus,
       getDetails,
       details,
       showModal,
