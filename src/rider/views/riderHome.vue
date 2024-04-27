@@ -15,14 +15,18 @@
         </thead>
         <tbody v-for="(order, index) in orders" :key="index">
           <tr class="bg-gray-200 border-b border-gray-700">
-            <td class="px-2 py-2 sm:px-6 sm:py-4">{{order.username}}</td>
-            <td class="px-2 py-2 sm:px-6 sm:py-4">{{order.contact_number}}</td>
+            <td class="px-2 py-2 sm:px-6 sm:py-4">{{ order.username }}</td>
             <td class="px-2 py-2 sm:px-6 sm:py-4">
-              <p class="bg-orange-300 p-1 rounded-full px-2">{{order.status}}</p>
+              {{ order.contact_number }}
+            </td>
+            <td class="px-2 py-2 sm:px-6 sm:py-4">
+              <p class="bg-orange-300 p-1 rounded-full px-2">
+                {{ order.status }}
+              </p>
             </td>
             <td class="px-2 py-2 sm:px-6 sm:py-4 flex justify-center">
               <button
-                @click="showModal = true"
+                @click="getDetails(order.order_detail_id)"
                 class="bg-blue-500 p-3 rounded hover:bg-blue-600"
               >
                 Details
@@ -40,19 +44,16 @@
     >
       <div class="bg-white rounded-lg p-5 shadow-lg w-full max-w-md">
         <h2 class="text-xl font-bold mb-4">Order Details</h2>
-        <ul class="space-y-2">
-          <li><strong>Product:</strong> iPhone 12</li>
-          <li><strong>Quantity:</strong> 2</li>
-          <li><strong>Price:</strong> $999 each</li>
-          <li><strong>Total:</strong> $1998</li>
+        <ul class="space-y-2" v-for="(detail, index) in details" :key="index">
+          <li><strong>Customer name:</strong> {{ detail.username }}</li>
+          <li><strong>Contact no:</strong> {{ detail.contact_number }}</li>
+          <li><strong>Address:</strong> {{ detail.address }}, {{ detail.Zone }}, {{ detail.name }}</li>
+          <li><strong>Product:</strong> {{ detail.product_name }}</li>
+          <li><strong>Quantity:</strong> {{ detail.quantity }}</li>
+          <li><strong>Price:</strong> {{ detail.total_price_products }}</li>
         </ul>
         <div class="mt-4 flex justify-between">
-          <button
-            @click="showModal = false"
-            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          >
-            Accept
-          </button>
+          <div></div>
           <button
             @click="showModal = false"
             class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
@@ -72,6 +73,7 @@ import { API_URL } from "@/config";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Rider";
 export default {
   setup() {
+    const showModal = ref(false);
     const url = API_URL;
 
     onMounted(() => {
@@ -82,7 +84,6 @@ export default {
     const orders = ref([]);
 
     const getOrders = async () => {
-      console.log("rider ID: ", userLogin.value.rider_id);
       try {
         const urli = `${url}/Ecommerce/vue-project/src/backend/rider/riderApi.php?action=getOrders`;
         const res = await axios.post(
@@ -97,8 +98,30 @@ export default {
       } catch {}
     };
 
+    const details = ref([]);
+
+    const getDetails = async (ID) => {
+      showModal.value = true;
+      console.log("rider ID: ", ID);
+      try {
+        const urli = `${url}/Ecommerce/vue-project/src/backend/rider/riderApi.php?action=getDetails`;
+        const res = await axios.post(
+          urli,
+          {
+            id: userLogin.value.rider_id,
+            detail_id: ID,
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        console.log(res.data);
+        details.value = res.data;
+      } catch {}
+    };
+
     return {
-      showModal: false,
+      getDetails,
+      details,
+      showModal,
       getOrders,
       orders,
     };
