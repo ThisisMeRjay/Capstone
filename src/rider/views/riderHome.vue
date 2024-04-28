@@ -137,19 +137,19 @@ export default {
     const updateStatus = async (ID) => {
       showModal.value = true;
       console.log("rider ID: ", ID);
-      try {
-        const urli = `${url}/Ecommerce/vue-project/src/backend/rider/riderApi.php?action=getDetails`;
-        const res = await axios.post(
-          urli,
-          {
-            id: userLogin.value.rider_id,
-            detail_id: ID,
-          },
-          { headers: { "Content-Type": "application/json" } }
-        );
-        console.log(res.data);
-        details.value = res.data;
-      } catch {}
+      // try {
+      //   const urli = `${url}/Ecommerce/vue-project/src/backend/rider/riderApi.php?action=getDetails`;
+      //   const res = await axios.post(
+      //     urli,
+      //     {
+      //       id: userLogin.value.rider_id,
+      //       detail_id: ID,
+      //     },
+      //     { headers: { "Content-Type": "application/json" } }
+      //   );
+      //   console.log(res.data);
+      //   details.value = res.data;
+      // } catch {}
     };
 
     return {

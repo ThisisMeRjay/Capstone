@@ -43,7 +43,7 @@ function getDetails()
                 u.*,
                 us.*,
                 p.*,
-                b.name,
+                b.name
             FROM order_details as od
             LEFT JOIN orders as o ON od.order_id = o.order_id
             LEFT JOIN users as u ON u.user_id = o.user_id
@@ -86,10 +86,13 @@ function getOrders() // Pass $conn as an argument rather than using global
     // Prepare the SQL query
     $sql = "SELECT 
                 od.*,
-                u.*
+                u.*,
+                us.*
             FROM order_details as od
             LEFT JOIN orders as o ON od.order_id = o.order_id
             LEFT JOIN users as u ON u.user_id = o.user_id
+            LEFT JOIN products as p ON p.product_id = od.product_id
+            LEFT JOIN user_store as us ON us.store_id = p.store_id
             WHERE od.status = 'reserved_for_rider' AND od.rider_id = ?";
 
     if ($stmt = $conn->prepare($sql)) {
