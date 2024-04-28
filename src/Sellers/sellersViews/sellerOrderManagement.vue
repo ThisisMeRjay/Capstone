@@ -36,6 +36,7 @@
               <option value="confirmed">Confirmed</option>
               <option value="processing">Processing</option>
               <option value="ready_to_pickup">Ready to Pick Up</option>
+              <option value="ready_to_pickup">Reserved for Rider</option>
               <option value="pick_up">Pick Up</option>
               <option value="out_for_delivery">Out for Delivery</option>
               <option value="delivered">Delivered</option>
@@ -193,16 +194,6 @@
             {{ option.text }}
           </option>
         </select>
-      </div>
-      <div v-if="selectValue === 'pending'">
-        <h1 class="text-lg font-semibold text-blue-400 mt-4">
-          Estimated Delivery Date:
-        </h1>
-        <input
-          type="date"
-          v-model="estimatedDelivery"
-          class="w-full p-2 rounded-md border-gray-300 shadow-sm"
-        />
       </div>
       <!-- Add more inputs as needed here -->
       <div class="flex justify-evenly my-5 gap-5 items-center">

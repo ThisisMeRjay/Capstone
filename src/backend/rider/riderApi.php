@@ -15,11 +15,54 @@ switch ($action) {
     case 'getDetails':
         getDetails();
         break;
+    case 'getOrdersHistory':
+        getOrdersHistory();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function getOrdersHistory()
+{
+    global $conn;
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    // Check for the presence of 'id' in the input data
+    if (!isset($data['id'])) {
+        echo json_encode(['error' => 'Missing rider ID']);
+        return;
+    }
+
+    $rider_id = $data['id'];
+
+    // Prepare the SQL query
+    $sql = "SELECT 
+                od.*,
+                u.*,
+                us.store_name
+            FROM order_details as od
+            LEFT JOIN orders as o ON od.order_id = o.order_id
+            LEFT JOIN users as u ON u.user_id = o.user_id
+            LEFT JOIN products as p ON p.product_id = od.product_id
+            LEFT JOIN user_store as us ON us.store_id = p.store_id
+            WHERE (od.status = 'delivered' OR od.status = 'closed' OR od.status = 'return_completed') AND od.rider_id = ?";
+
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("i", $rider_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $orders = [];
+        while ($row = $result->fetch_assoc()) {
+            $orders[] = $row;
+        }
+        echo json_encode($orders);
+        $stmt->close();
+    } else {
+        echo json_encode(['error' => 'Failed to prepare the SQL statement']);
+    }
 }
 
 function getDetails()
@@ -38,19 +81,18 @@ function getDetails()
 
     // Prepare the SQL query
     $sql = "SELECT 
-                od.*,
-                o.*,
-                u.*,
-                us.*,
-                p.*,
-                b.name
-            FROM order_details as od
-            LEFT JOIN orders as o ON od.order_id = o.order_id
-            LEFT JOIN users as u ON u.user_id = o.user_id
-            LEFT JOIN products as p ON p.product_id = od.product_id
-            LEFT JOIN user_store as us ON us.store_id = p.store_id
-            LEFT JOIN barangay as b ON b.barangay_id = u.barangay_id
-            WHERE od.status = 'reserved_for_rider' AND od.rider_id = ? AND od.order_detail_id = ?;";
+            od.*,
+            o.*,
+            u.*,
+            p.*,
+            b.name
+        FROM order_details as od
+        LEFT JOIN orders as o ON od.order_id = o.order_id
+        LEFT JOIN users as u ON u.user_id = o.user_id
+        LEFT JOIN products as p ON p.product_id = od.product_id
+        LEFT JOIN barangay as b ON b.barangay_id = u.barangay_id
+        WHERE od.rider_id = ?
+        AND od.order_detail_id = ?;";
 
     // Prepare the statement
 
@@ -87,13 +129,13 @@ function getOrders() // Pass $conn as an argument rather than using global
     $sql = "SELECT 
                 od.*,
                 u.*,
-                us.*
+                us.store_name
             FROM order_details as od
             LEFT JOIN orders as o ON od.order_id = o.order_id
             LEFT JOIN users as u ON u.user_id = o.user_id
             LEFT JOIN products as p ON p.product_id = od.product_id
             LEFT JOIN user_store as us ON us.store_id = p.store_id
-            WHERE od.status = 'reserved_for_rider' AND od.rider_id = ?";
+            WHERE od.status NOT IN ('pending', 'confirmed', 'processing', 'return_declined', 'return_requested', 'return_approved', 'ready_to_pickup', 'delivered', 'closed') AND od.rider_id = ?";
 
     if ($stmt = $conn->prepare($sql)) {
         $stmt->bind_param("i", $rider_id);

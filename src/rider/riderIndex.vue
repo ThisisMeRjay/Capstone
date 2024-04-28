@@ -40,18 +40,11 @@
               <h1 class="" @click="showBar = false">home</h1>
             </div>
           </RouterLink>
-          <RouterLink to="/menu2">
+          <RouterLink to="/rider_history">
             <div
               class="w-full hover:bg-gray-700/10 transition hover:shadow hover:text-blue-500 hover:font-medium p-2"
             >
-              <h1 class="" @click="showBar = false">delivery</h1>
-            </div>
-          </RouterLink>
-          <RouterLink to="/menu3">
-            <div
-              class="w-full hover:bg-gray-700/10 transition hover:shadow hover:text-blue-500 hover:font-medium p-2"
-            >
-              <h1 class="" @click="showBar = false">return</h1>
+              <h1 class="" @click="showBar = false">history</h1>
             </div>
           </RouterLink>
             <div

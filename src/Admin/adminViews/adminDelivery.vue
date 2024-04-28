@@ -32,9 +32,18 @@
               class="shadow border text-gray-900 outline-none text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-32 px-3 py-2.5"
             >
               <option value="">Default</option>
-              <option value="processing">Processing</option>
+              <option value="ready_to_pickup">Ready to Pick Up</option>
+              <option value="ready_to_pickup">Reserved for Rider</option>
               <option value="out_for_delivery">Out for Delivery</option>
               <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="delayed">Delayed</option>
+              <option value="return_in_progress">Return in Progress</option>
+              <option value="return_completed">Return Completed</option>
+              <option value="return_requested">Return Requested</option>
+              <option value="return_declined">Return Declined</option>
+              <option value="return_approved">Return Approved</option>
+              <option value="closed">Closed</option>
             </select>
           </form>
         </div>
@@ -65,6 +74,7 @@
                   <th scope="col" class="px-6 py-2">ESTIMATED DELIVERY</th>
                   <th scope="col" class="px-6 py-2">out for delivery</th>
                   <th scope="col" class="px-6 py-2">date delivered</th>
+                  <th scope="col" class="px-6 py-2">rider ID</th>
                 </tr>
               </thead>
               <tbody class="text-center">
@@ -121,6 +131,9 @@
                   <td class="px-6 py-1">
                     {{ item.delivered_date }}
                   </td>
+                  <td class="px-6 py-1">
+                    {{ item.rider_id }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -164,7 +177,12 @@
           </option>
         </select>
       </div>
-      <div v-if="selectValue === 'pending' || selectValue === 'confirmed'">
+      <div
+        v-if="
+          selectValue === 'ready_to_pickup' ||
+          selectValue === 'reserved_for_rider'
+        "
+      >
         <h1 class="text-lg font-semibold text-blue-400 mt-4">
           Estimated Delivery Date:
         </h1>

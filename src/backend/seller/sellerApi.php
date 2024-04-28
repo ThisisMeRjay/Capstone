@@ -551,7 +551,7 @@ function EditStatus() {
     $data = json_decode(file_get_contents("php://input"), true);
     $id = $data['id'];
     $newStatus = $data['status'];
-    $estdate = $data['estimated_delivery'] ?? null; // Using null coalescing for optional parameters
+    $estdate = $data['estimated_delivery']; // Using null coalescing for optional parameters
     $UpdateDate = $data['date'];
     var_dump($newStatus);
 
@@ -561,8 +561,8 @@ function EditStatus() {
             $stmt->bind_param("si", $newStatus, $id);
             break;
         case 'confirmed':
-            $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ?, confirmed_date = ? WHERE order_detail_id = ?");
-            $stmt->bind_param("sssi", $newStatus, $estdate, $UpdateDate, $id);
+            $stmt = $conn->prepare("UPDATE order_details SET status = ?, confirmed_date = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
             break;
         case 'processing':
             $stmt = $conn->prepare("UPDATE order_details SET status = ?, processing_date = ? WHERE order_detail_id = ?");
@@ -571,6 +571,10 @@ function EditStatus() {
         case 'ready_to_pickup':
             $stmt = $conn->prepare("UPDATE order_details SET status = ? WHERE order_detail_id = ?");
             $stmt->bind_param("si", $newStatus, $id);
+            break;
+        case 'reserved_for_rider':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("ssi", $newStatus, $estdate, $id);
             break;
         case 'out_for_delivery':
             $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivery_date = ? WHERE order_detail_id = ?");
@@ -606,7 +610,6 @@ function EditStatus() {
         case 'return_declined':
         case 'return_requested':
         case 'return_approved':
-        case 'reserved_for_rider':
         case 'closed':
             $stmt = $conn->prepare("UPDATE order_details SET status = ? WHERE order_detail_id = ?");
             $stmt->bind_param("si", $newStatus, $id);

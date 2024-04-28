@@ -144,6 +144,11 @@ const router = createRouter({
           name: "rider_home",
           component: () => import("../rider/views/riderHome.vue"),
         },
+        {
+          path: "/rider_history",
+          name: "rider_history",
+          component: () => import("../rider/views/riderHistory.vue"),
+        },
       ],
     },
     {
