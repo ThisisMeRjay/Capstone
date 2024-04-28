@@ -247,24 +247,32 @@ export default {
           width: parseFloat(item.width),
           height: parseFloat(item.height),
         }; // Assuming dimensions are in centimeters
+        const quantity = parseInt(item.quantity); // Parse quantity of the item
 
         // Constants for calculation
-        const weightFactor = 1; // Cost per kilogram
-        const volumeFactor = 0.005; // Cost per cubic centimeter (for more granularity)
-        const distanceFactor = 0.001; // Cost per meter
+        const weightFactor = 5; // Cost per kilogram
+        const volumeFactor = 0.001; // Cost per cubic centimeter (for more granularity)
+        const distanceFactor = 0.006; // Cost per meter
 
         // Calculate volume in cubic centimeters (for more granularity)
         const volumeCm3 =
           dimensionsCm.length * dimensionsCm.width * dimensionsCm.height;
 
-        // Compute the shipping fee
+        // Compute the shipping fee, adjust weight and volume based on quantity
         const shippingFee =
           baseShippingFee +
           distanceMeters * distanceFactor +
-          weightKg * weightFactor +
-          volumeCm3 * volumeFactor;
+          weightKg * quantity * weightFactor +
+          volumeCm3 * quantity * volumeFactor;
 
+        const dis = baseShippingFee +
+          distanceMeters * distanceFactor;
+        const vol = volumeCm3 * quantity * volumeFactor;
+        const wei = weightKg * quantity * weightFactor;
         console.log("Shipping Fee:", shippingFee.toFixed(2));
+        console.log("Shipping Fee + distance:", dis.toFixed(2));
+        console.log("volumeCm3:", vol.toFixed(2));
+        console.log("wieght:", wei.toFixed(2));
         return shippingFee.toFixed(2); // Return the shipping fee formatted as a string with two decimal places
       } catch (error) {
         console.error("Error calculating shipping fee:", error);
@@ -354,20 +362,19 @@ export default {
       console.log("product IDs", ids);
       let quantities = checkoutItems.value.map((item) => item.quantity);
       console.log("Quantities", quantities);
-      let productsTotalIncludingShipping = checkoutItems.value.map((item) =>
+      let eachshipping = itemsToCheckout.value.map((item) => item.shippingFee);
+      let eachproduct = itemsToCheckout.value.map((item) =>
         parseFloat(
           (
-            parseFloat(item.price) * item.quantity +
-            parseFloat(computedshippingFee.value)
+            parseFloat(item.price) * item.quantity
           ).toFixed(2)
         )
       );
-      console.log(
-        "Total Prices including shipping",
-        productsTotalIncludingShipping
-      );
+      console.log("each product", eachproduct);
+      console.log("each shipping", eachshipping);
+      console.log("price to all", priceTotalAll.value);
 
-      // API call
+      //API call
       try {
         const res = await axios.post(
           `${url}/Ecommerce/vue-project/src/backend/api.php?action=CheckoutOrder`,
@@ -378,7 +385,8 @@ export default {
             item: numofItems,
             product_id: ids,
             quantity: quantities,
-            price: productsTotalIncludingShipping,
+            price: eachproduct,
+            revenue: eachshipping,
             payment_method: payment,
           },
           {

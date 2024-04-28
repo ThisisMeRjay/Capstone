@@ -188,7 +188,7 @@
                 />
               </div>
             </div>
-            <div>
+            <!-- <div>
               <h1 class="text-sm font-medium">Base Shipping fee:</h1>
               <div
                 class="flex justify-start items-center bg-slate-50 border rounded-md"
@@ -200,17 +200,17 @@
                   v-model="shipping"
                 />
               </div>
-            </div>
+            </div> -->
           </div>
           <!-- test button -->
-          <button
+          <!-- <button
             @click="triggertesting"
             class="text-sm p-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md"
           >
             Test Shipping fee first?
-          </button>
+          </button> -->
           <!-- Base Shipping Fee Modal -->
-          <div
+          <!-- <div
             v-if="showBaseShippingModal"
             class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center"
             @click="showBaseShippingModal = false"
@@ -329,7 +329,7 @@
                 </span>
               </div>
             </div>
-          </div>
+          </div> -->
           <div class="my-4">
             <h1 class="text-sm font-medium">Stocks/Quantity:</h1>
             <input
@@ -434,7 +434,7 @@ export default {
             productName: productName.value,
             productDescription: productDescription.value,
             price: price.value,
-            shipping: shipping.value,
+            // shipping: shipping.value,
             quantity: quantity.value,
             specifications: specifications.value,
             store_id: userLogin.value.store_id,

@@ -286,7 +286,7 @@ function SaveProduct()
     $productName = $data['productName'];
     $productDescription = $data['productDescription'];
     $price = $data['price'];
-    $shipping = $data['shipping'];
+    // $shipping = $data['shipping'];
     $specifications = $data['specifications'];
     $quantity = $data['quantity'];
     $storeID = $data['store_id'];
@@ -296,8 +296,8 @@ function SaveProduct()
     $width = $data['width'];
     $brgyID = $data['barangay_id'];
 
-    $stmt = $conn->prepare("INSERT INTO products (category_id, product_name, product_description, price, shipping_fee, image, store_id, weight, height, length, width) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issddsidddd", $selectedCategory, $productName, $productDescription, $price, $shipping, $imageData, $storeID, $weight, $height, $length, $width);
+    $stmt = $conn->prepare("INSERT INTO products (category_id, product_name, product_description, price, image, store_id, weight, height, length, width) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issdsidddd", $selectedCategory, $productName, $productDescription, $price, $imageData, $storeID, $weight, $height, $length, $width);
     if ($stmt->execute()) {
         $product_id = $conn->insert_id;
         // Insert specifications as before...
@@ -451,7 +451,7 @@ function editProductsInfo()
     $product_name = $data['product_name'];
     $product_price = $data['product_price'];
     $product_description = $data['product_description'];
-    $shipping_fee = $data['shipping_fee'];
+    // $shipping_fee = $data['shipping_fee'];
     $quantity = $data['quantity'];
     $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data['image']));
     $specifications = $data['specifications'];
@@ -482,8 +482,8 @@ function editProductsInfo()
 
 
         // Update product information in the products table
-        $stmt = $conn->prepare("UPDATE products SET category_id = ?, product_name = ?, price = ?, product_description = ?, shipping_fee = ?, image = ?, weight = ?, height = ?, length = ?, width = ? WHERE product_id = ?");
-        $stmt->bind_param("isdsdsidddd", $catID, $product_name, $product_price, $product_description, $shipping_fee, $image, $weight, $height, $length, $width, $product_id);
+        $stmt = $conn->prepare("UPDATE products SET category_id = ?, product_name = ?, price = ?, product_description = ?, image = ?, weight = ?, height = ?, length = ?, width = ? WHERE product_id = ?");
+        $stmt->bind_param("isdssidddd", $catID, $product_name, $product_price, $product_description, $image, $weight, $height, $length, $width, $product_id);
         $stmt->execute();
         $stmt->close();
 

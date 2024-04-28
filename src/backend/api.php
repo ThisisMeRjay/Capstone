@@ -221,10 +221,19 @@ function CheckoutOrder()
     foreach ($data['product_id'] as $key => $product_id) {
         $quantity = $data['quantity'][$key];
         $price = $data['price'][$key];
+        $revenueAmount = $data['revenue'][$key];
         $order_number = generateUniqueOrderNumber($conn);
     
         $stmt->bind_param("iiidds", $order_number, $order_id, $product_id, $quantity, $price, $payment);
         $stmt->execute();
+
+        $order_detail_id = $conn->insert_id;
+
+        // Add the revenue to the revenue table
+        $updateRevenueStmt = $conn->prepare("INSERT INTO revenue (revenue_amount, order_detail_id) VALUE (?, ?)");
+        $updateRevenueStmt->bind_param("di", $revenueAmount, $order_detail_id);
+        $updateRevenueStmt->execute();
+        $updateRevenueStmt->close();
 
         // Deduct the ordered quantity from the inventory
         $updateInventoryStmt = $conn->prepare("UPDATE inventory SET quantity = quantity - ? WHERE product_id = ?");

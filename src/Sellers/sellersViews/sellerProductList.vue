@@ -203,7 +203,7 @@
             </div>
           </div>
 
-          <div class="py-2">
+          <!-- <div class="py-2">
             <p for="" class="text-sm">Base Shipping Fee:</p>
             <div class="flex gap-2 justify-between">
               <input
@@ -211,7 +211,6 @@
                 v-model="shipping_fee"
                 class="p-2 rounded-md"
               />
-              <!-- test button -->
               <button
                 @click="triggertesting"
                 class="text-sm p-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md"
@@ -219,10 +218,10 @@
                 Test Shipping fee first?
               </button>
             </div>
-          </div>
+          </div> -->
 
           <!-- Base Shipping Fee Modal -->
-          <div
+          <!-- <div
             v-if="showBaseShippingModal"
             class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center"
             @click="showBaseShippingModal = false"
@@ -347,7 +346,7 @@
                 </span>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <div class="py-2">
             <p for="" class="text-sm">Stocks:</p>
@@ -612,7 +611,7 @@ export default {
             product_name: product_name.value,
             product_price: product_price.value,
             product_description: product_description.value,
-            shipping_fee: shipping_fee.value,
+            // shipping_fee: shipping_fee.value,
             quantity: quantity.value,
             image: image.value,
             specifications: specifications.value,
