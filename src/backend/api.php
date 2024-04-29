@@ -162,7 +162,10 @@ LEFT JOIN
 LEFT JOIN
     reviews AS r ON r.product_id = od.product_id AND r.user_id = o.user_id AND  r.order_number = od.order_number
 WHERE 
-    o.user_id = ?");
+    o.user_id = ?
+ORDER BY
+    od.order_detail_id DESC
+    ");
     $stmt->bind_param("i", $id);
     $stmt->execute();
 

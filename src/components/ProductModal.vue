@@ -5,47 +5,46 @@
     class="fixed inset-0 flex items-center justify-center bg-gray-500 border-2 border-zinc-300 bg-opacity-75 z-20"
   >
     <div
-      class="bg-white rounded-lg shadow-xl max-w-lg overflow-auto p-6 relative"
-      style="max-height: 90vh"
+      class="bg-white rounded-lg shadow-xl h-80 sm:h-auto w-3/4 sm:max-w-lg overflow-auto p-2 sm:p-6 relative"
       @click.stop
     >
       <button
         @click="closeModal()"
         class="bg-slate-700/20 absolute right-3 top-3 p-2 rounded-full"
       >
-        <Icon icon="gravity-ui:xmark" class="text-lg hover:text-red-500" />
+        <Icon icon="gravity-ui:xmark" class="text-xs sm:text-lg hover:text-red-500" />
       </button>
       <div
         class="w-full flex gap-2 capitalize justify-start items-center font-medium text-black-700"
       >
         <span
-          class="px-4 py-1 bg-blue-500/10 text-base shadow text-blue-500 font-semibold rounded-md"
+          class="px-4 py-1 bg-blue-500/10 text-sm sm:text-base shadow text-blue-500 font-semibold rounded-md"
           >{{ product.store_name }}</span
         >
       </div>
 
       <div class="flex">
-        <div class="flex-none w-48 relative">
+        <div class="flex-none w-32 sm:w-48 relative h-40">
           <img
             :src="'data:image/png;base64,' + product.image"
             :alt="product.name"
-            class="absolute inset-0 w-full h-auto object-cover"
+            class="absolute inset-0 w-32 sm:w-full h-auto object-cover"
             loading="lazy"
           />
         </div>
-        <form class="flex-auto p-6">
+        <form class="flex-auto p-1 sm:p-6">
           <div class="flex flex-wrap">
             <div>
-              <h1 class="flex-auto text-xl font-semibold text-gray-900">
+              <h1 class="flex-auto text-sm sm:text-xl font-semibold text-gray-900">
                 {{ product.product_name }}
               </h1>
               <div>
-                <span class="text-base font-medium">{{
+                <span class="felx text-xs sm:text-base font-medium">{{
                   product.product_description
                 }}</span>
               </div>
             </div>
-            <div class="text-lg font-semibold text-black-500">
+            <div class="text-md sm:text-lg font-semibold text-black-500">
               ₱{{ finalQuantity }}
             </div>
             <div
@@ -58,8 +57,8 @@
 
           <div>
             <div>
-              <form class="max-w-xs mx-auto my-2">
-                <div class="relative flex items-center max-w-[8rem]">
+              <form class="max-w-xs mx-auto mb-0 sm:my-2">
+                <div class="relative flex items-center max-w-[8rem] sm:pl-8">
                   <button
                     type="button"
                     @click="decrement"
@@ -89,10 +88,10 @@
                 </div>
               </form>
             </div>
-            <div class="sm:flex text-sm justify-start items-center font-medium">
-              <div class="flex-auto my-1 mx-2 flex space-x-4">
+            <div class="flex text-sm justify-start items-center font-medium">
+              <div class="flex-auto my-1 mx-1 sm:mx-2 flex space-x-4">
                 <button
-                  class="h-10 sm:w-40 px-6 hover:bg-slate-500/10 font-semibold rounded-md border-2 text-gray-900"
+                  class="h-10 sm:w-40 px-1 sm:px-6 hover:bg-slate-500/10 font-semibold rounded-md border-2 text-gray-900 text-xs"
                   type="button"
                   @click="addToCart(product.product_name, product.product_id)"
                 >
@@ -118,7 +117,7 @@
       </div>
       <div class="">
         <div>
-          <h1 class="p-2 bg-slate-800/10 text-blue-500 rounded-md">
+          <h1 class="p-2 bg-slate-800/10 text-blue-500 rounded-md text-sm sm:text-base">
             Specifications :
           </h1>
         </div>
@@ -128,20 +127,20 @@
             :key="index"
             class="flex gap-2 justify-start items-center"
           >
-            <span class="font-medium text-base">{{ spec.spec_key }}</span
-            >: <span class="text-sm">{{ spec.spec_value }}</span>
+            <span class="font-medium text-xs sm:text-base">{{ spec.spec_key }}</span
+            >: <span class="text-xs sm:text-sm">{{ spec.spec_value }}</span>
           </li>
         </ul>
       </div>
       <!-- Reviews Section -->
       <div class="py-4">
         <div class="flex justify-between">
-          <p class="text-md font-medium text-blue-500">
+          <p class="text-xs sm:text-md font-medium text-blue-500">
             Customer reviews
           </p>
           <p
           @click="getReviews(product.product_id)"
-          class="text-md font-medium text-blue-800 hover:text-blue-600 cursor-pointer"
+          class="text-xs sm:text-md font-medium text-blue-800 hover:text-blue-600 cursor-pointer"
         >
           view
         </p>
