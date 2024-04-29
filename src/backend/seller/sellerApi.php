@@ -250,7 +250,7 @@ function fetchSalesData()
         ON products.product_id = order_details.product_id 
         WHERE order_details.delivered_date BETWEEN ? AND ? 
         AND products.store_id = ? 
-        AND order_details.status = 'delivered'
+        AND order_details.status = 'delivered' OR order_details.status = 'closed'
     ");
 
     // Bind the parameters to the query

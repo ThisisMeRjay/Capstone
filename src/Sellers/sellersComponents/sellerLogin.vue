@@ -74,8 +74,7 @@ export default {
     let name = ref("");
     const signIn = async () => {
       try {
-        const urli =
-          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=login`;
+        const urli = `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=login`;
         const res = await axios.post(
           urli,
           {
@@ -86,13 +85,12 @@ export default {
         );
         console.log("res data: ", res.data.store);
         name.value = res.data.store;
-        localStorage.setItem("seller", JSON.stringify(name.value));
-
         const role = res.data.store_role;
-        // console.log(res.data);
         if (role === "seller") {
+          localStorage.setItem("seller", JSON.stringify(name.value));
           router.push("/seller_dashboard");
         } else if (role === "admin") {
+          localStorage.setItem("admin", JSON.stringify(name.value));
           router.push("/admin_dashboard");
         }
       } catch {}

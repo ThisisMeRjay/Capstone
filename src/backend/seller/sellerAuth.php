@@ -161,7 +161,7 @@ function login()
     $stmt->execute();
     $result = $stmt->get_result();
     $store = $result->fetch_array();
-    if ($store) {
+    if ($store['status'] == 'approved') {
         if (password_verify($store_password, $store['store_password'])) {
             $_SESSION['store'] = $store;
             $globalUser = $store;

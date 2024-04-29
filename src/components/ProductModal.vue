@@ -179,6 +179,11 @@ export default {
   setup(props, { emit }) {
     const url = API_URL;
 
+    const refreshPage = () => {
+      location.reload(true);
+    };
+
+
     const quantity = ref(1);
     const finalQuantity = ref("");
     const isHeartRed = reactive([]);
@@ -243,6 +248,7 @@ export default {
 
         // console.log(response.data);
         emit("update:isVisible", false);
+        refreshPage();
       } catch (error) {
         console.error("Error adding to cart:", error);
       }

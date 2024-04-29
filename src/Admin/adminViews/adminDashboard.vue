@@ -62,6 +62,15 @@
           </div>
         </RouterLink>
       </div>
+      <div class="">
+        <button
+          @click="logout"
+          class="flex justify-start items-center font-semibold hover:bg-slate-400/20 rounded-md text-slate-700 w-full py-2"
+        >
+          <Icon icon="solar:logout-line-duotone" class="text-2xl" />
+          Logout
+        </button>
+      </div>
     </div>
 
     <div class="bg-white cursor-pointer">
@@ -87,16 +96,17 @@ export default {
   setup() {
     const router = useRouter();
     const logout = () => {
-      localStorage.removeItem("seller");
+      localStorage.removeItem("admin");
       router.push("/seller_index");
     };
     var userLogin = ref([]);
     const getUserFromLocalStorage = () => {
-      const userData = localStorage.getItem("seller");
+      const userData = localStorage.getItem("admin");
       if (userData) {
         userLogin.value = JSON.parse(userData);
+      } else {
+        router.push("/seller_index");
       }
-      return null;
     };
     getUserFromLocalStorage();
     return {

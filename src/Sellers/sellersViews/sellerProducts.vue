@@ -33,7 +33,7 @@
       <!-- Total Sales & Cost Block -->
       <div class="bg-slate-400/10 rounded-md h-32 w-full text-slate-700 shadow">
         <div class="p-2">
-          <h1 class="text-base font-semibold">Total Sales & Cost</h1>
+          <h1 class="text-base font-semibold">Total Sales</h1>
           <p class="text-xs" v-if="isDefaultDateRange">Last 7 Days</p>
           <p class="text-xs" v-else>From {{ startDate }} to {{ endDate }}</p>
         </div>

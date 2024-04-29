@@ -49,7 +49,7 @@
                   type="submit"
                   class="bg-sky-900 w-full font-semibold text-lg text-white px-5 py-2 rounded-md"
                 >
-                  Sign In
+                  Login
                 </button>
                 <div class="flex justify-center gap-2 py-2">
                   <p>Don't have account?</p>
@@ -73,12 +73,12 @@
           class="bg-slate-300 relative top-20 mx-auto border border-slate-900/20 shadow-lg px-3 py-2 w-96 rounded-lg"
         >
           <div class="flex justify-end">
-            <div
+            <button
               class="bg-slate-600/20 rounded-full text-red-500 shadow p-2"
               @click="close"
             >
               <Icon icon="iconamoon:close-bold" />
-            </div>
+            </button>
           </div>
           <div class="text-white px-3 py-2 rounded-md mt-3">
             <h1 class="font-bold text-sky-900 text-2xl text-center">
@@ -94,62 +94,62 @@
           <form @submit.prevent="signUp">
             <div class="p-2 rounded-md shadow-sm mb-2">
               <div class="gap-2 mt-2">
-                <p class="font-semibold">
-                  Name <span class="text-red-500">*</span>
-                </p>
+                <label for="name" class="font-semibold"
+                  >Name <span class="text-red-500">*</span></label
+                >
                 <input
-                  type="name"
+                  type="text"
                   id="name"
                   v-model="registerName"
-                  placeholder="full name"
+                  placeholder="Full Name"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
               </div>
               <div class="gap-2 mt-2">
-                <p class="font-semibold">
-                  Email <span class="text-red-500">*</span>
-                </p>
+                <label for="email" class="font-semibold"
+                  >Email <span class="text-red-500">*</span></label
+                >
                 <input
                   type="email"
                   id="email"
                   v-model="registerEmail"
-                  placeholder="email"
+                  placeholder="Email"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
               </div>
-              <div class="gap-2">
-                <p class="font-semibold">
-                  Password <span class="text-red-500">*</span>
-                </p>
+              <div class="gap-2 mt-2">
+                <label for="password" class="font-semibold"
+                  >Password <span class="text-red-500">*</span></label
+                >
                 <input
                   type="password"
-                  v-model="registerPassword"
                   id="password"
-                  placeholder="password"
+                  v-model="registerPassword"
+                  placeholder="Password"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
               </div>
-              <div class="gap-2">
-                <p class="font-semibold">
-                  Contact Number <span class="text-red-500">*</span>
-                </p>
+              <div class="gap-2 mt-2">
+                <label for="number" class="font-semibold"
+                  >Contact Number <span class="text-red-500">*</span></label
+                >
                 <input
                   type="tel"
                   id="number"
                   v-model="contactNumber"
                   pattern="[0-9]{11}"
-                  placeholder="123-456-765-89"
+                  placeholder="09123456789"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
               </div>
-              <div class="gap-2">
-                <p class="font-semibold">
-                  Address <span class="text-red-500">*</span>
-                </p>
+              <div class="gap-2 mt-2">
+                <label for="address" class="font-semibold"
+                  >Address <span class="text-red-500">*</span></label
+                >
                 <input
                   type="text"
                   id="address"
@@ -159,6 +159,7 @@
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
                 <select
+                  id="barangay"
                   class="w-full p-2 rounded-md my-1 border outline-none"
                   v-model="selectedBarangay"
                   required
@@ -174,24 +175,24 @@
                 </select>
               </div>
               <div class="gap-2 mt-2">
-                <p class="font-semibold">
-                  Zone <span class="text-red-500">*</span>
-                </p>
+                <label for="zone" class="font-semibold"
+                  >Zone <span class="text-red-500">*</span></label
+                >
                 <input
-                  type="zone"
+                  type="text"
                   id="zone"
                   v-model="registerZone"
-                  placeholder="Zone 7"
+                  placeholder="ex. Zone 7"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
               </div>
               <div class="gap-2 mt-2">
-                <p class="font-semibold">
-                  House no. <span class="text-red-500">*</span>
-                </p>
+                <label for="houseno" class="font-semibold"
+                  >House no. <span class="text-red-500">*</span></label
+                >
                 <input
-                  type="houseno"
+                  type="text"
                   id="houseno"
                   v-model="registerHouseno"
                   placeholder="House no."
@@ -208,11 +209,12 @@
                 </button>
                 <div class="flex justify-center gap-2 py-2">
                   <p>Already have account?</p>
-                  <span
+                  <button
                     class="text-blue-500 hover:text-blue-700"
                     @click="showLoginModal"
-                    >Sign In
-                  </span>
+                  >
+                    Sign In
+                  </button>
                 </div>
               </div>
             </div>
@@ -290,8 +292,7 @@ export default {
 
     const signIn = async () => {
       try {
-        const urli =
-          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=login`;
+        const urli = `${url}/Ecommerce/vue-project/src/backend/auth.php?action=login`;
         const res = await axios.post(
           urli,
           {
@@ -312,7 +313,9 @@ export default {
           emit("update:isVisible", false);
           emit("login-completed", name.value);
         }
-      } catch {}
+      } catch {
+        
+      }
     };
     const registerZone = ref("");
     const registerHouseno = ref("");
@@ -320,15 +323,14 @@ export default {
     const registerName = ref("");
     const registerPassword = ref("");
     const contactNumber = ref("");
-    const customerRole = 'customer';
+    const customerRole = "customer";
     const address = ref("");
     const registerResponseMessage = ref("");
 
     const signUp = async () => {
       try {
         console.log("barangay id: ", selectedBarangay.value);
-        const urli =
-          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=register`;
+        const urli = `${url}/Ecommerce/vue-project/src/backend/auth.php?action=register`;
         const res = await axios.post(
           urli,
           {
