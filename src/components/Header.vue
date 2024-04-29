@@ -31,9 +31,11 @@
     <div
       class="fixed z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 justify-center items-center flex"
     >
-      <div class="overflow-scroll bg-slate-100 h-[500px] rounded-md">
+      <div
+        class="overflow-scroll bg-slate-100 h-[400px] sm:h-[500px] rounded-md"
+      >
         <div
-          class="p-5 bg-slate-100 rounded-md h-full w-[600px] text-slate-800"
+          class="p-5 bg-slate-100 rounded-md h-full w-[330px] sm:w-[600px] text-slate-800 text-xs"
         >
           <div class="h-full">
             <h1 class="font-semibold text-lg">Order Tracking</h1>
@@ -114,18 +116,18 @@
                         </div>
                       </div>
                       <ol
-                        class="flex items-center w-full text-sm font-medium text-center text-gray-500 sm:text-base"
+                        class="flex flex-col sm:flex-row gap-1 sm:items-center w-full font-medium text-center text-gray-500"
                       >
                         <li
                           class="flex md:w-full items-center sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-2 xl:after:mx-2 dark:after:border-gray-600"
                         >
                           <span
-                            class="flex text-xs items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200"
+                            class="flex items-center text-custom-size after:content-['/'] sm:after:hidden after:mx-1 after:text-gray-200"
                           >
                             <div v-if="items.status >= 1">
                               <Icon
                                 icon="lets-icons:check-fill"
-                                class="text-lg text-blue-600"
+                                class="sm:text-lg text-blue-600 text-xs"
                               />
                             </div>
                             Pending
@@ -135,12 +137,12 @@
                           class="flex md:w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-2 xl:after:mx-2 dark:after:border-gray-600"
                         >
                           <span
-                            class="flex text-xs items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200"
+                            class="flex text-xs items-center text-custom-size after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200"
                           >
                             <div v-if="items.status >= 2">
                               <Icon
                                 icon="lets-icons:check-fill"
-                                class="text-lg text-blue-600"
+                                class="sm:text-lg text-blue-600 text-xs"
                               />
                             </div>
                             Confirmed
@@ -150,12 +152,12 @@
                           class="flex md:w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-2 xl:after:mx-2 dark:after:border-gray-600"
                         >
                           <span
-                            class="flex text-xs items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200"
+                            class="flex text-xs items-center text-custom-size after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200"
                           >
                             <div v-if="items.status >= 3">
                               <Icon
                                 icon="lets-icons:check-fill"
-                                class="text-lg text-blue-600"
+                                class="sm:text-lg text-blue-600 text-xs"
                               />
                             </div>
                             Processing
@@ -165,22 +167,22 @@
                           class="flex md:w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-2 xl:after:mx-2 dark:after:border-gray-600"
                         >
                           <span
-                            class="flex text-xs items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200"
+                            class="flex text-xs items-center text-custom-size after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200"
                           >
                             <div v-if="items.status >= 6">
                               <Icon
                                 icon="lets-icons:check-fill"
-                                class="text-lg text-blue-600"
+                                class="sm:text-lg text-blue-600 text-xs"
                               />
                             </div>
                             Out for delivery
                           </span>
                         </li>
-                        <li class="flex items-center text-xs">
+                        <li class="flex items-center text-custom-size text-xs">
                           <div v-if="items.status >= 7">
                             <Icon
                               icon="lets-icons:check-fill"
-                              class="text-lg text-blue-600"
+                              class="sm:text-lg text-blue-600 text-xs"
                             />
                           </div>
                           Delivered
@@ -618,9 +620,9 @@
     </div>
     <!-- cart modal -->
     <div v-if="showCart" class="flex justify-center items-center">
-      <div class="absolute top-32 right-3 z-30">
+      <div class="cart-modal z-30">
         <div
-          class="bg-slate-300 border border-slate-900/20 shadow-lg px-3 py-2 w-96 rounded-lg"
+          class="bg-slate-300 border border-slate-900/20 shadow-lg px-3 py-2 rounded-lg"
         >
           <div class="flex justify-end">
             <div
@@ -723,6 +725,7 @@
         </div>
       </div>
     </div>
+
     <!-- payment popup -->
     <div
       v-if="showPayment"
@@ -907,6 +910,7 @@
         <div class="flex flex-col items-start">
           <!-- track your order -->
           <div
+            @click="orderTracking"
             class="flex items-center gap-2 p-2 rounded-md hover:bg-slate-800/50 w-full text-white hover:font-bold"
           >
             <Icon icon="fluent:vehicle-bus-24-regular" class="text-xl" />
@@ -970,5 +974,35 @@ textarea {
   display: block;
   margin-top: 20px;
   width: 100%;
+}
+.text-custom-size {
+  font-size: 0.7rem; /* default size */
+}
+
+@media (min-width: 640px) {
+  /* Tailwind's 'sm' breakpoint */
+  .text-custom-size {
+    font-size: 0.75rem; /* smaller size for 'sm' screens and up */
+  }
+}
+@media (min-width: 768px) {
+  .cart-modal {
+    position: absolute;
+    top: 8rem; /* equivalent to tailwind top-32 */
+    right: 0.75rem; /* equivalent to tailwind right-3 */
+    width: 24rem; /* equivalent to tailwind w-96 */
+  }
+}
+
+/* Mobile and small devices (below 768px width) */
+@media (max-width: 767px) {
+  .cart-modal {
+    position: fixed; /* Fixed to make sure it stays in view on scroll */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%; /* Responsive width */
+    z-index: 30; /* High z-index to keep it above other content */
+  }
 }
 </style>

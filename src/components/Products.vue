@@ -16,12 +16,13 @@
       <button
         @click="fetchProducts"
         class="bg-blue-500 py-2 text-slate-100 px-4 rounded-full font-semibold shadow"
-        >Home</button
       >
+        Home
+      </button>
     </div>
   </div>
 
-  <div :class="showCategory ? 'flex relative' : ''">
+  <div :class="showCategory ? 'flex' : ''">
     <div
       v-if="showCategory"
       class="text-base h-full w-72 shadow absolute z-10 sm:relative font-medium bg-gray-50 border border-r-slate-700/10"
@@ -121,7 +122,7 @@
           <h2
             class="md:text-2xl text-lg font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r drop-shadow-lg from-blue-600 from-10% to-violet-500"
           >
-            {{ selectedCategoryName || "Popular Products" }}
+           {{ selectedCategoryName || 'Products' }} 
           </h2>
         </div>
 
@@ -397,6 +398,8 @@ export default {
       // Assuming product.value was a typo and it should be products.value
       const filtered = products.value.filter((product) => {
         // Debugging: Check if IDs match
+        selectedCategoryName.value = name;
+        console.log("cat", selectedCategoryName.value);
         const isMatch = product.category_id === id;
         //  console.log("Is Match:", isMatch);
 
@@ -405,16 +408,34 @@ export default {
 
       //   console.log("Filtered products:", filtered);
       products.value = filtered;
+      handleResize();
     };
 
-    onMounted(fetchProducts(), getCategories(), GetStorename());
+    onMounted(() => {
+      handleResize();
+      GetStorename();
+      getCategories();
+      fetchProducts();
+      handleResize(); // Call the handler right away to set the initial state
+      window.addEventListener('resize', handleResize); // Add event listener on mount
+    });
 
     const onHeartClick = (product) => {
       // Handle the heart icon click event
       console.log("Heart clicked for product:", product.id);
+    }; // Create a reactive reference
+
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        // Define your breakpoint for 'small screens'
+        showCategory.value = false;
+      } else {
+        showCategory.value = true;
+      }
     };
 
     return {
+      handleResize,
       products,
       getStars,
       onHeartClick,

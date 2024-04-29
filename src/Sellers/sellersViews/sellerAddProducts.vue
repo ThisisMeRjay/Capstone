@@ -3,16 +3,7 @@
     <div class="py-3 px-10 font-bold text-2xl text-slate-700">
       <h1>Add Products</h1>
     </div>
-    <div>
-      <div class="flex justify-end">
-        <button
-          @click="saveProduct"
-          class="bg-blue-400/20 text-blue-600 px-3 font-medium text-sm py-2 rounded-full mb-2 shadow"
-        >
-          Save Product
-        </button>
-      </div>
-    </div>
+    
     <div class="gap-5">
       <!-- Add Category Section -->
       <div class="my-4">
@@ -48,7 +39,8 @@
           {{ message.content }}
         </p>
       </div>
-      <hr class="border-t-2 border-black" />
+      <hr class="border-t-2 border-black mt-20 mb-2" />
+      <h1>Add new product:</h1>
       <div
         class="bg-slate-400/10 rounded-md h-full w-1/2 text-slate-700 shadow my-5 p-4"
       >
@@ -374,6 +366,16 @@
             </button>
           </div>
         </div>
+        <div>
+      <div class="flex justify-center">
+        <button
+          @click="saveProduct"
+          class="bg-blue-800/20 text-blue-900 px-3 font-medium text-sm py-2 rounded-full mb-2 shadow"
+        >
+          Save Product
+        </button>
+      </div>
+    </div>
       </div>
     </div>
   </div>

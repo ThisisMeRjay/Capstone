@@ -33,7 +33,7 @@
       <!-- Total Sales & Cost Block -->
       <div class="bg-slate-400/10 rounded-md h-32 w-full text-slate-700 shadow">
         <div class="p-2">
-          <h1 class="text-base font-semibold">Total Commission</h1>
+          <h1 class="text-base font-semibold">Revenue</h1>
           <p class="text-xs" v-if="isDefaultDateRange">Last 7 Days</p>
           <p class="text-xs" v-else>From {{ startDate }} to {{ endDate }}</p>
         </div>
@@ -45,7 +45,7 @@
       <!-- Inventory Status Block -->
       <div class="bg-slate-400/10 rounded-md h-32 w-full text-slate-700 shadow">
         <div class="p-2">
-          <h1 class="text-base font-semibold">Inventory Status</h1>
+          <h1 class="text-base font-semibold">Total</h1>
           <p class="text-xs">As of {{ currentDate }}</p>
         </div>
         <div class="p-2">
@@ -90,7 +90,7 @@ const chartData = ref({
   labels: [], // Initially empty, will be filled with month names
   datasets: [
     {
-      label: "Real-Time Sales",
+      label: "Real-Time Revenue",
       data: [], // Initially empty, will be filled with real-time sales data
       backgroundColor: "rgba(54, 162, 235, 0.2)",
       borderColor: "rgba(54, 162, 235, 1)",
@@ -106,7 +106,7 @@ const chartOptions = ref({
   plugins: {
     title: {
       display: true,
-      text: "MONTHLY SALES",
+      text: "MONTHLY REVENUE",
       font: {
         size: 20,
       },
@@ -183,7 +183,7 @@ const fetchSalesData = async (start, end) => {
   console.log("end ", end);
   try {
     const response = await axios.post(
-      `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=fetchCommission`,
+      `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=fetchRevenue`,
       {
         start: start,
         end: end
@@ -202,12 +202,8 @@ const fetchCurrentInventoryStatus = async () => {
   const today = new Date().toISOString().split("T")[0];
   try {
     const response = await axios.post(
-      `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchStocks`,
-      {
-        store_id: userLogin.value.store_id,
-      }
-    );
-    totalStocks.value = "In Stock: " + response.data.totalQuantity;
+      `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=totalRevenue`);
+    totalStocks.value = "Revenue: " + response.data.totalQuantity;
     currentDate.value = today; // Update the reference date for inventory status display
     console.log("Stocks:", totalStocks.value);
   } catch (error) {

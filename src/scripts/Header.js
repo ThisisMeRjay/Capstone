@@ -450,10 +450,13 @@ export default {
     };
 
     const showOrderTracking = ref(false);
-    const orderTracking = (e) => {
+    const orderTracking = () => {
+      toggleSidebar();
       showOrderTracking.value = !showOrderTracking.value;
+      
+
     };
-    const closeOrderTracking = (e) => {
+    const closeOrderTracking = () => {
       showOrderTracking.value = false;
     };
 

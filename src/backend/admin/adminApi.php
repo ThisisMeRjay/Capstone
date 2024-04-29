@@ -27,8 +27,8 @@ switch ($action) {
     case 'DeleteSeller':
         DeleteSeller();
         break;
-    case 'fetchCommission':
-        fetchCommission();
+    case 'fetchRevenue':
+        fetchRevenue();
         break;
     case 'fetchRealTimeMonthlySales':
         fetchRealTimeMonthlySales();
@@ -47,12 +47,38 @@ switch ($action) {
         break;
     case 'insertRider':
         insertRider();
-        break;  
+        break;
+    case 'totalRevenue':
+        totalRevenue();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function totalRevenue()
+{
+    global $conn;
+    header('Content-Type: application/json');
+
+    // Adjusted query with LEFT JOIN to include products table
+    $stmt = $conn->prepare("
+        SELECT SUM(revenue.revenue_amount) AS totalQuantity
+        FROM revenue
+    ");
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($row = $result->fetch_assoc()) {
+        echo json_encode(['totalQuantity' => $row['totalQuantity']]);
+    } else {
+        echo json_encode(['error' => true, 'message' => 'Failed to fetch inventory status.']);
+    }
+
+    $stmt->close();
 }
 
 function insertRider()
@@ -220,12 +246,12 @@ function fetchRealTimeMonthlySales()
 
     $currentYear = date('Y');
     $stmt = $conn->prepare("
-        SELECT MONTH(commission.created_at) AS saleMonth, 
-               SUM(commission.com_value) AS totalSales
-        FROM commission
-        WHERE YEAR(commission.created_at) = ?
-        GROUP BY MONTH(commission.created_at)
-        ORDER BY MONTH(commission.created_at)
+        SELECT MONTH(revenue.created_at) AS saleMonth, 
+               SUM(revenue.revenue_amount) AS totalSales
+        FROM revenue
+        WHERE YEAR(revenue.created_at) = ?
+        GROUP BY MONTH(revenue.created_at)
+        ORDER BY MONTH(revenue.created_at)
     ");
 
     $stmt->bind_param("s", $currentYear);
@@ -241,7 +267,7 @@ function fetchRealTimeMonthlySales()
     $stmt->close();
 }
 
-function fetchCommission()
+function fetchRevenue()
 {
     global $conn;
     $data = json_decode(file_get_contents("php://input"), true);
@@ -255,9 +281,9 @@ function fetchCommission()
 
     // Update your query to include status check and use LEFT JOIN for products
     $stmt = $conn->prepare("
-        SELECT SUM(commission.com_value) AS totalSales 
-        FROM commission 
-        WHERE commission.created_at BETWEEN ? AND ?
+        SELECT SUM(revenue.revenue_amount) AS totalSales 
+        FROM revenue 
+        WHERE revenue.created_at BETWEEN ? AND ?
     ");
 
     // Bind the parameters to the query
