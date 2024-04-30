@@ -23,6 +23,10 @@ export default {
     };
   },
   methods: {
+    HamburgerSignin() {
+      this.isSidebarOpen = !this.isSidebarOpen;
+      this.showLogin = !this.showLogin;
+    },
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;
     },

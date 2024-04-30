@@ -1,7 +1,7 @@
 <template>
   <div class="p-2 border border-slate-900/20 rounded-md">
     <div class="relative overflow-x-auto">
-      <h1 class="pb-3 sticky left-0">Ready for Pickup</h1>
+      <h1 class="pb-3 sticky left-0">Delivery</h1>
       <table class="min-w-full text-sm text-left text-gray-900 sm:rounded-md">
         <thead
           class="text-xs text-sky-100 uppercase bg-gradient-to-r from-blue-500 from-10% via-violet-500 via-30% to-orange-500 to-90% sm:rounded-md"

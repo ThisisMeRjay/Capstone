@@ -358,12 +358,6 @@
         </div>
       </div>
       <!-- login modal -->
-      <LoginModal
-        :is-visible="showLogin"
-        @update:isVisible="showLogin = $event"
-        @login-completed="HandleSignIn"
-      ></LoginModal>
-      <!-- login modal -->
 
       <!-- Cart -->
       <div
@@ -430,6 +424,12 @@
         </div>
       </div>
     </div>
+    <!-- login modal -->
+    <LoginModal
+      :is-visible="showLogin"
+      @update:isVisible="showLogin = $event"
+      @login-completed="HandleSignIn"
+    ></LoginModal>
     <!-- Profile Modal -->
     <div
       v-if="ShowProfileModal"
@@ -911,6 +911,9 @@
           <!-- track your order -->
           <div
             @click="orderTracking"
+            :class="
+              userLogin.length === 0 ? 'text-blue-500 pointer-events-none' : ''
+            "
             class="flex items-center gap-2 p-2 rounded-md hover:bg-slate-800/50 w-full text-white hover:font-bold"
           >
             <Icon icon="fluent:vehicle-bus-24-regular" class="text-xl" />
@@ -920,6 +923,9 @@
           <!-- Cart -->
           <div
             @click="showCartFunction"
+            :class="
+              userLogin.length === 0 ? 'text-blue-500 pointer-events-none' : ''
+            "
             class="flex items-center gap-2 p-2 rounded-md hover:bg-slate-800/50 w-full text-white hover:font-bold"
           >
             <Icon icon="ion:cart-outline" class="text-xl" />
@@ -939,7 +945,7 @@
             <!-- Sign In -->
             <div
               class="flex items-center gap-2 p-2 rounded-md hover:bg-slate-800/50 w-full text-white hover:font-bold"
-              @click="Handlesignin"
+              @click="HamburgerSignin"
               v-else
             >
               <Icon icon="bi:person" class="text-xl" />

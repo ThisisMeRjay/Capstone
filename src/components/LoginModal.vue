@@ -5,7 +5,7 @@
         class="fixed inset-0 bg-gray-600 bg-opacity-50 backdrop-blur overflow-y-auto h-full w-full z-50"
       >
         <div
-          class="bg-slate-300 relative top-20 mx-auto border border-slate-900/20 shadow-lg px-3 py-2 w-96 rounded-lg"
+          class="bg-slate-300 relative top-20 mx-auto border border-slate-900/20 shadow-lg px-3 py-2 w-72 sm:w-96 rounded-lg"
         >
           <div class="flex justify-end">
             <div
@@ -70,7 +70,7 @@
         class="fixed inset-0 bg-gray-600 bg-opacity-50 backdrop-blur overflow-y-auto h-full w-full z-50"
       >
         <div
-          class="bg-slate-300 relative top-20 mx-auto border border-slate-900/20 shadow-lg px-3 py-2 w-96 rounded-lg"
+          class="bg-slate-300 relative top-20 mx-auto border border-slate-900/20 shadow-lg px-3 py-2 w-72 sm:w-96 rounded-lg"
         >
           <div class="flex justify-end">
             <button
@@ -103,8 +103,26 @@
                   v-model="registerName"
                   placeholder="Full Name"
                   required
-                  class="w-full p-2 rounded-md my-1 bg-gray-100"
+                  :class="[
+                    'border',
+                    'w-full',
+                    'p-2',
+                    'rounded-md',
+                    'my-1',
+                    'bg-gray-100',
+                    errorMessage.nameErr
+                      ? 'border-red-500'
+                      : registerName.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
                 />
+                <p
+                  class="px-3 py-1 rounded-md text-red-500"
+                  v-if="errorMessage.nameErr && registerName.length > 0"
+                >
+                  {{ errorMessage.nameErr }}
+                </p>
               </div>
               <div class="gap-2 mt-2">
                 <label for="email" class="font-semibold"
@@ -116,22 +134,72 @@
                   v-model="registerEmail"
                   placeholder="Email"
                   required
-                  class="w-full p-2 rounded-md my-1 bg-gray-100"
+                  :class="[
+                    'border',
+                    'w-full',
+                    'p-2',
+                    'rounded-md',
+                    'my-1',
+                    'bg-gray-100',
+                    errorMessage.emailErr
+                      ? 'border-red-500'
+                      : registerEmail.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
                 />
-              </div>
-              <div class="gap-2 mt-2">
-                <label for="password" class="font-semibold"
-                  >Password <span class="text-red-500">*</span></label
+                <p
+                  class="px-3 py-1 rounded-md text-red-500"
+                  v-if="errorMessage.emailErr && registerEmail.length > 0"
                 >
-                <input
-                  type="password"
-                  id="password"
-                  v-model="registerPassword"
-                  placeholder="Password"
-                  required
-                  class="w-full p-2 rounded-md my-1 bg-gray-100"
-                />
+                  {{ errorMessage.emailErr }}
+                </p>
               </div>
+              <div class="relative mt-2 gap-2" style="position: relative">
+                <label for="password" class="font-semibold">
+                  Password <span class="text-red-500">*</span>
+                </label>
+                <div style="position: relative">
+                  <input
+                    :type="showPassword ? 'text' : 'password'"
+                    id="password"
+                    v-model="registerPassword"
+                    placeholder="Password"
+                    required
+                    class="border w-full p-2 rounded-md my-1 bg-gray-100 pr-10"
+                    :class="{
+                      'border-red-500': errorMessage.passwordErr,
+                      'border-green-500': registerPassword.length > 0,
+                      'border-gray-300':
+                        !errorMessage.passwordErr &&
+                        registerPassword.length === 0,
+                    }"
+                    style="padding-right: 2.5rem"
+                  />
+                  <button
+                    type="button"
+                    class="absolute inset-y-0 right-0 flex items-center password-toggle-button"
+                    style="
+                      top: 50%;
+                      transform: translateY(-50%);
+                      right: 0.75rem;
+                    "
+                  >
+                    <icon
+                      :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'"
+                      class="text-lg cursor-pointer"
+                      @click.stop="toggleShowPassword"
+                    />
+                  </button>
+                </div>
+                <p
+                  class="px-3 py-1 rounded-md text-red-500"
+                  v-if="errorMessage.passwordErr && registerPassword.length > 0"
+                >
+                  {{ errorMessage.passwordErr }}
+                </p>
+              </div>
+
               <div class="gap-2 mt-2">
                 <label for="number" class="font-semibold"
                   >Contact Number <span class="text-red-500">*</span></label
@@ -140,12 +208,32 @@
                   type="tel"
                   id="number"
                   v-model="contactNumber"
-                  pattern="[0-9]{11}"
                   placeholder="09123456789"
                   required
-                  class="w-full p-2 rounded-md my-1 bg-gray-100"
+                  :class="[
+                    'border',
+                    'w-full',
+                    'p-2',
+                    'rounded-md',
+                    'my-1',
+                    'bg-gray-100',
+                    errorMessage.contactNumberErr && contactNumber.length > 0
+                      ? 'border-red-500'
+                      : contactNumber.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
                 />
+                <p
+                  v-if="
+                    errorMessage.contactNumberErr && contactNumber.length > 0
+                  "
+                  class="text-red-500"
+                >
+                  {{ errorMessage.contactNumberErr }}
+                </p>
               </div>
+
               <div class="gap-2 mt-2">
                 <label for="address" class="font-semibold"
                   >Address <span class="text-red-500">*</span></label
@@ -154,7 +242,7 @@
                   type="text"
                   id="address"
                   v-model="address"
-                  placeholder="Municipality"
+                  placeholder="Legazpi City"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
@@ -174,32 +262,58 @@
                   </option>
                 </select>
               </div>
+              <
               <div class="gap-2 mt-2">
-                <label for="zone" class="font-semibold"
-                  >Zone <span class="text-red-500">*</span></label
-                >
-                <input
-                  type="text"
+                <label for="zone" class="font-semibold">
+                  Zone <span class="text-red-500">*</span>
+                </label>
+                <select
                   id="zone"
                   v-model="registerZone"
-                  placeholder="ex. Zone 7"
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
-                />
-              </div>
-              <div class="gap-2 mt-2">
-                <label for="houseno" class="font-semibold"
-                  >House no. <span class="text-red-500">*</span></label
                 >
+                  <option value="" disabled selected>Select your zone</option>
+                  <option v-for="zone in 7" :key="zone" :value="'Zone ' + zone">
+                    Zone {{ zone }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="gap-2 mt-2">
+                <label for="houseno" class="font-semibold">
+                  House no. <span class="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   id="houseno"
                   v-model="registerHouseno"
                   placeholder="House no."
                   required
-                  class="w-full p-2 rounded-md my-1 bg-gray-100"
+                  :class="[
+                    'border',
+                    'w-full',
+                    'p-2',
+                    'rounded-md',
+                    'my-1',
+                    'bg-gray-100',
+                    errorMessage.houseNumberErr && registerHouseno.length > 0
+                      ? 'border-red-500'
+                      : contactNumber.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
                 />
+                <p
+                  v-if="
+                    errorMessage.houseNumberErr && registerHouseno.length > 0
+                  "
+                  class="text-red-500"
+                >
+                  {{ errorMessage.houseNumberErr }}
+                </p>
               </div>
+
               <div class="my-5">
                 <button
                   type="submit"
@@ -226,10 +340,11 @@
 </template>
 <script>
 import { Icon } from "@iconify/vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, reactive, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { API_URL } from "@/config";
+import { debounce } from "lodash";
 export default {
   components: {
     Icon,
@@ -246,9 +361,13 @@ export default {
     return {
       showRegister: false,
       showLogin: true,
+      showPassword: false,
     };
   },
   methods: {
+    toggleShowPassword() {
+      this.showPassword = !this.showPassword;
+    },
     showRegisterModal() {
       this.showRegister = true;
       this.showLogin = false;
@@ -313,9 +432,7 @@ export default {
           emit("update:isVisible", false);
           emit("login-completed", name.value);
         }
-      } catch {
-        
-      }
+      } catch {}
     };
     const registerZone = ref("");
     const registerHouseno = ref("");
@@ -324,10 +441,151 @@ export default {
     const registerPassword = ref("");
     const contactNumber = ref("");
     const customerRole = "customer";
-    const address = ref("");
+    const address = ref("Legazpi City");
     const registerResponseMessage = ref("");
+    const errorMessage = reactive({
+      nameErr: null,
+      emailErr: null,
+      passwordErr: null,
+      contactNumberErr: null,
+      houseNumberErr: null, // New error field for house number validation
+    });
+
+    const nameValidation = computed(() => {
+      const pattern = /^[\p{L}'\- \p{M}]*$/u;
+      if (!pattern.test(registerName.value.trim())) {
+        return "Please enter a valid name.";
+      }
+      return null;
+    });
+
+    const checkEmailExists = debounce(async (email) => {
+      try {
+        const response = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=checkEmail`,
+          {
+            email: email,
+          }
+        );
+        if (response.data.exists) {
+          errorMessage.emailErr = "This email is already registered.";
+        } else {
+          errorMessage.emailErr = emailValidation.value; // continue with other validations
+        }
+      } catch (error) {
+        console.error("Error checking email:", error);
+      }
+    }, 500); // 500ms debounce delay
+
+    const emailValidation = computed(() => {
+      if (!registerEmail.value.endsWith("@gmail.com")) {
+        return "Email must be a Gmail address (@gmail.com).";
+      }
+      return null;
+    });
+
+    const passwordValidation = computed(() => {
+      if (registerPassword.value.length < 8) {
+        return "Password must be at least 8 characters long.";
+      }
+      if (!/[A-Z]/.test(registerPassword.value)) {
+        return "Password must include at least one uppercase letter.";
+      }
+      if (!/[a-z]/.test(registerPassword.value)) {
+        return "Password must include at least one lowercase letter.";
+      }
+      if (!/[0-9]/.test(registerPassword.value)) {
+        return "Password must include at least one number.";
+      }
+      if (!/[\!\@\#\$\%\^\&\*\(\)\_\+\.\,\;\:]/.test(registerPassword.value)) {
+        return "Password must include at least one special character (e.g., !@#$%^&*).";
+      }
+      return null;
+    });
+
+    const contactNumberValidation = computed(() => {
+      const pattern = /^\d{11}$/; // Ensures exactly 11 digits
+      if (!pattern.test(contactNumber.value)) {
+        return "Contact number must start with '09' and be exactly 11 digits.";
+      }
+      return null;
+    });
+
+    const houseNumberValidation = computed(() => {
+      const pattern = /^\d+$/; // Ensures only digits are entered
+      if (!pattern.test(registerHouseno.value)) {
+        return "House number must be numeric.";
+      }
+      return null;
+    });
+
+    // Watch for changes in the name and email fields to validate them
+    watch(
+      registerName,
+      () => {
+        errorMessage.nameErr = nameValidation.value;
+      },
+      { immediate: false }
+    );
+
+    watch(
+      registerEmail,
+      () => {
+        if (registerEmail.value.includes("@gmail.com")) {
+          checkEmailExists(registerEmail.value); // Trigger the debounced email existence check
+        } else {
+          errorMessage.emailErr = emailValidation.value;
+        }
+      },
+      { immediate: false }
+    );
+
+    watch(
+      registerPassword,
+      () => {
+        errorMessage.passwordErr = passwordValidation.value;
+      },
+      { immediate: false }
+    );
+
+    watch(
+      contactNumber,
+      () => {
+        errorMessage.contactNumberErr = contactNumberValidation.value;
+      },
+      { immediate: true }
+    );
+
+    watch(
+      registerHouseno,
+      () => {
+        errorMessage.houseNumberErr = houseNumberValidation.value;
+      },
+      { immediate: true }
+    );
 
     const signUp = async () => {
+      // Perform a final validation check on form submission
+      errorMessage.nameErr = nameValidation.value;
+      errorMessage.emailErr = emailValidation.value;
+      errorMessage.passwordErr = passwordValidation.value;
+      errorMessage.contactNumberErr = contactNumberValidation.value;
+      if (
+        errorMessage.nameErr ||
+        errorMessage.emailErr ||
+        errorMessage.passwordErr ||
+        errorMessage.contactNumberErr ||
+        errorMessage.houseNumberErr // Include this check
+      ) {
+        console.log(
+          errorMessage.nameErr,
+          errorMessage.emailErr,
+          errorMessage.passwordErr,
+          errorMessage.contactNumberErr,
+          errorMessage.houseNumberErr
+        );
+        return;
+      }
       try {
         console.log("barangay id: ", selectedBarangay.value);
         const urli = `${url}/Ecommerce/vue-project/src/backend/auth.php?action=register`;
@@ -378,7 +636,18 @@ export default {
       registerResponseMessage,
       name,
       address,
+      errorMessage,
     };
   },
 };
 </script>
+<style>
+@media (max-width: 640px) {
+  .password-toggle-button {
+    padding-right: 0px; /* Slightly less padding on small screens */
+  }
+  #password {
+    font-size: 12px; /* Smaller font size for inputs on small screens */
+  }
+}
+</style>
