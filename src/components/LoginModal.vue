@@ -29,6 +29,7 @@
                   type="email"
                   id="email"
                   v-model="loginEmail"
+                  placeholder="email"
                   required
                   :class="[
                     'border',
@@ -66,7 +67,7 @@
                     class="border w-full p-2 rounded-md my-1 bg-gray-100 pr-10"
                     :class="{
                       'border-red-500': errorMessage.passwordErr,
-                      'border-green-500': registerPassword.length > 0,
+                      'border-green-500': loginPassword.length > 0,
                     }"
                     style="padding-right: 2.5rem"
                   />
@@ -151,7 +152,7 @@
                   type="text"
                   id="name"
                   v-model="registerName"
-                  placeholder="Full Name"
+                  placeholder="Name"
                   required
                   :class="[
                     'border',
@@ -312,7 +313,6 @@
                   </option>
                 </select>
               </div>
-              <
               <div class="gap-2 mt-2">
                 <label for="zone" class="font-semibold">
                   Zone <span class="text-red-500">*</span>
@@ -488,6 +488,7 @@ export default {
         }
       } catch {}
     };
+
     const registerZone = ref("");
     const registerHouseno = ref("");
     const registerEmail = ref("");
@@ -647,6 +648,7 @@ export default {
       errorMessage.emailErr = emailValidation.value;
       errorMessage.passwordErr = passwordValidation.value;
       errorMessage.contactNumberErr = contactNumberValidation.value;
+      errorMessage.houseNumberErr = houseNumberValidation.value;
       if (
         errorMessage.nameErr ||
         errorMessage.emailErr ||

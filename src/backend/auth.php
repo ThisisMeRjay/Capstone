@@ -45,7 +45,7 @@ function checkName()
     $name = $data['name']; // Ensure the key matches what is sent from the client
 
     // Prepare the SQL statement to check for the email
-    $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM user_store WHERE store_name = ?");
+    $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM users WHERE username = ?");
     if (!$stmt) {
         echo json_encode(['error' => "Error preparing statement: " . $conn->error]);
         return;

@@ -21,11 +21,89 @@ switch ($action) {
     case 'save':
         save();
         break;
+    case 'checkEmail':
+        checkEmail();
+        break;
+    case 'checkName':
+        checkName();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function checkName()
+{
+    global $conn;
+
+    // Read JSON data from the POST input
+    $data = json_decode(file_get_contents("php://input"), true);
+    $name = $data['name']; // Ensure the key matches what is sent from the client
+
+    // Prepare the SQL statement to check for the email
+    $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM rider WHERE rider_name = ?");
+    if (!$stmt) {
+        echo json_encode(['error' => "Error preparing statement: " . $conn->error]);
+        return;
+    }
+
+    // Bind the email parameter and execute the query
+    $stmt->bind_param("s", $name);
+    if (!$stmt->execute()) {
+        echo json_encode(['error' => "Error executing query: " . $stmt->error]);
+        $stmt->close();
+        return;
+    }
+
+    // Get the result and determine if email exists
+    $result = $stmt->get_result();
+    if ($result) {
+        $data = $result->fetch_assoc();
+        $stmt->close();
+        // Return JSON indicating whether the email exists
+        echo json_encode(['exists' => $data['count'] > 0]);
+    } else {
+        echo json_encode(['error' => "Error fetching results: " . $stmt->error]);
+        $stmt->close();
+    }
+}
+
+function checkEmail()
+{
+    global $conn;
+
+    // Read JSON data from the POST input
+    $data = json_decode(file_get_contents("php://input"), true);
+    $email = $data['email']; // Ensure the key matches what is sent from the client
+
+    // Prepare the SQL statement to check for the email
+    $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM rider WHERE rider_email = ?");
+    if (!$stmt) {
+        echo json_encode(['error' => "Error preparing statement: " . $conn->error]);
+        return;
+    }
+
+    // Bind the email parameter and execute the query
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        echo json_encode(['error' => "Error executing query: " . $stmt->error]);
+        $stmt->close();
+        return;
+    }
+
+    // Get the result and determine if email exists
+    $result = $stmt->get_result();
+    if ($result) {
+        $data = $result->fetch_assoc();
+        $stmt->close();
+        // Return JSON indicating whether the email exists
+        echo json_encode(['exists' => $data['count'] > 0]);
+    } else {
+        echo json_encode(['error' => "Error fetching results: " . $stmt->error]);
+        $stmt->close();
+    }
 }
 
 function save()
@@ -129,9 +207,26 @@ function login()
     // Use json_decode with true to get an associative array
     $post_data = json_decode(file_get_contents("php://input"), true);
 
+    // Basic input validation
+    if (empty($post_data['email']) || empty($post_data['password'])) {
+        $res['error'] = true;
+        $res['message'] = 'Email and password are required';
+        echo json_encode($res);
+        return;
+    }
+
     // Extract data from the array
     $store_email = $post_data['email'];
     $store_password = $post_data['password'];
+
+    // Validate email format and check if it ends with @gmail.com
+    if (!filter_var($store_email, FILTER_VALIDATE_EMAIL) || substr($store_email, -10) !== '@gmail.com') {
+        $res['error'] = true;
+        $res['messageEmail'] = 'Email must be a valid Gmail address (@gmail.com)';
+        echo json_encode($res);
+        return;
+    }
+
 
     // Use prepared statements to prevent SQL injection
     $stmt = $conn->prepare("SELECT * FROM rider WHERE rider_email=?");
@@ -139,22 +234,26 @@ function login()
     $stmt->execute();
     $result = $stmt->get_result();
     $store = $result->fetch_array();
-    if ($store['status'] == 'approved') {
-        if (password_verify($store_password, $store['rider_password'])) {
-            $_SESSION['rider'] = $store;
-            $globalUser = $store;
-            $res['success'] = true;
-            $res['message'] = 'Login Success!';
-            $res['rider_role'] = $store['rider_role'];
-            $res['store'] = $store;
-        } else {
-            $res['error'] = true;
-            $res['message'] = 'logging in';
+    if ($store) {
+        if ($store['status'] == 'approved') {
+            if (password_verify($store_password, $store['rider_password'])) {
+                session_regenerate_id();
+                $_SESSION['rider'] = $store;
+                $globalUser = $store;
+                $res['success'] = true;
+                $res['message'] = 'Login Success!';
+                $res['rider_role'] = $store['rider_role'];
+                $res['store'] = $store;
+            } else {
+                $res['error'] = true;
+                $res['message'] = 'Incorrect password';
+            }
         }
     } else {
         $res['error'] = true;
-        $res['message'] = 'Invalid password';
+        $res['messageEmail'] = 'Email not found';
     }
+
     // Encode the final response array and send as HTTP response
     echo json_encode($res);
 

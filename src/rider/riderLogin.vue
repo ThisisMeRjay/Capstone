@@ -3,43 +3,74 @@
     <div>
       <h1 class="text-center font-bold text-2xl text-sky-500">Login</h1>
     </div>
-    <form class="space-y-6" @submit.prevent="signIn">
-      <div>
-        <label
-          for="email"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Email address</label
+    <form class="space-y-6 text-sm" @submit.prevent="signIn">
+      <div class="gap-2 mt-2">
+        <p class="font-semibold">Email <span class="text-red-500">*</span></p>
+
+        <input
+          type="email"
+          id="email"
+          v-model="loginEmail"
+          placeholder="email"
+          required
+          :class="[
+            'border',
+            'w-full',
+            'p-2',
+            'rounded-md',
+            'my-1',
+            'bg-gray-100',
+            errorMessage.emailErr && loginEmail.length > 0
+              ? 'border-red-500'
+              : loginEmail.length > 0
+              ? 'border-green-500'
+              : 'border-gray-300',
+          ]"
+        />
+        <p
+          v-if="errorMessage.emailErr && loginEmail.length > 0"
+          class="text-red-500 pl-3 pb-2"
         >
-        <div class="mt-2">
-          <input
-            id="email"
-            name="email"
-            v-model="loginEmail"
-            type="email"
-            autocomplete="email"
-            class="block w-full rounded-md bg-slate-400/20 border border-blue-500/25 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 outline-none sm:text-sm sm:leading-6"
-          />
-        </div>
+          {{ errorMessage.emailErr }}
+        </p>
       </div>
 
-      <div>
-        <div class="flex items-center justify-between">
-          <label
-            for="password"
-            class="block text-sm font-medium leading-6 text-gray-900"
-            >Password</label
-          >
-        </div>
-        <div class="mt-2">
+      <div class="relative mt-2 gap-2" style="position: relative">
+        <label for="password" class="font-semibold">
+          Password <span class="text-red-500">*</span>
+        </label>
+        <div style="position: relative">
           <input
+            :type="showPassword ? 'text' : 'password'"
             id="password"
-            name="password"
             v-model="loginPassword"
-            type="password"
-            autocomplete="current-password"
-            class="block w-full px-2 rounded-md py-1.5 text-gray-900 bg-slate-400/20 border border-blue-500/25 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 outline-none focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6"
+            placeholder="Password"
+            required
+            class="border w-full p-2 rounded-md my-1 bg-gray-100 pr-10"
+            :class="{
+              'border-red-500': errorMessage.passwordErr,
+              'border-green-500': loginPassword.length > 0,
+            }"
+            style="padding-right: 2.5rem"
           />
+          <button
+            type="button"
+            class="absolute inset-y-0 right-0 flex items-center password-toggle-button"
+            style="top: 50%; transform: translateY(-50%); right: 0.75rem"
+          >
+            <icon
+              :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'"
+              class="text-lg cursor-pointer"
+              @click.stop="toggleShowPassword"
+            />
+          </button>
         </div>
+        <p
+          class="px-3 py-1 rounded-md text-red-500"
+          v-if="errorMessage.passwordErr && loginPassword.length > 0"
+        >
+          {{ errorMessage.passwordErr }}
+        </p>
       </div>
 
       <div>
@@ -60,22 +91,43 @@
   </div>
 </template>
 <script>
-import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { ref, watch, reactive, computed } from "vue";
 import { API_URL } from "@/config";
+import { Icon } from "@iconify/vue";
 export default {
+  components: {
+    Icon,
+  },
+  data() {
+    return {
+      showPassword: false,
+    };
+  },
+  methods: {
+    toggleShowPassword() {
+      this.showPassword = !this.showPassword;
+    },
+  },
   setup() {
+    const refreshPage = () => {
+      location.reload(true);
+    };
     const url = API_URL;
 
     const loginEmail = ref("");
     const loginPassword = ref("");
     const router = useRouter();
+
+    const errorMessage = reactive({
+      passwordErr: null,
+      emailErr: null,
+    });
     let name = ref("");
     const signIn = async () => {
       try {
-        const urli =
-          `${url}/Ecommerce/vue-project/src/backend/rider/riderAuth.php?action=login`;
+        const urli = `${url}/Ecommerce/vue-project/src/backend/rider/riderAuth.php?action=login`;
         const res = await axios.post(
           urli,
           {
@@ -84,14 +136,21 @@ export default {
           },
           { headers: { "Content-Type": "application/json" } }
         );
+        errorMessage.emailErr = res.data.messageEmail;
+        errorMessage.passwordErr = res.data.message;
+
         console.log("res data: ", res.data.store);
         name.value = res.data.store;
         localStorage.setItem("rider", JSON.stringify(name.value));
-
-        const role = res.data.rider_role;
-        // console.log(res.data);
-        if (role === "rider") {
-          router.push("/rider_index");
+        
+        if (res.data.success) {
+          
+          const role = res.data.rider_role;
+          if (role === "rider") {
+            router.push("/rider_index");
+          } else {
+            router.push("/rider_start");
+          }
         }
       } catch {}
     };
@@ -99,6 +158,7 @@ export default {
       loginEmail,
       loginPassword,
       signIn,
+      errorMessage,
     };
   },
 };
