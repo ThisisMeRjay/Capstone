@@ -9,94 +9,155 @@
     >
       {{ registerResponseMessage }}
     </p>
-    <form class="space-y-6" @submit.prevent="signUp">
-      <div>
-        <label
-          for="name"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Store Name</label
+    <form class="space-y-6 text-sm" @submit.prevent="signUp">
+      <div class="gap-2 mt-2">
+        <label for="name" class="font-semibold"
+          >Name <span class="text-red-500">*</span></label
         >
-        <div class="mt-2">
-          <input
-            id="name"
-            v-model="registerName"
-            name="name"
-            type="text"
-            class="block w-full rounded-md px-2 border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 outline-none sm:text-sm sm:leading-6"
-          />
-        </div>
+        <input
+          type="text"
+          id="name"
+          v-model="registerName"
+          placeholder="Name"
+          required
+          :class="[
+            'border',
+            'w-full',
+            'p-2',
+            'rounded-md',
+            'my-1',
+            'bg-gray-100',
+            errorMessage.nameErr
+              ? 'border-red-500'
+              : registerName.length > 0
+              ? 'border-green-500'
+              : 'border-gray-300',
+          ]"
+        />
+        <p
+          class="px-3 py-1 rounded-md text-red-500"
+          v-if="errorMessage.nameErr && registerName.length > 0"
+        >
+          {{ errorMessage.nameErr }}
+        </p>
       </div>
 
-      <div>
-        <label
-          for="email"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Email address</label
+      <div class="gap-2 mt-2">
+        <label for="email" class="font-semibold"
+          >Email <span class="text-red-500">*</span></label
         >
-        <div class="mt-2">
-          <input
-            id="email"
-            name="email"
-            v-model="registerEmail"
-            type="email"
-            autocomplete="email"
-            class="block w-full rounded-md px-2 border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 outline-none sm:text-sm sm:leading-6"
-          />
-        </div>
+        <input
+          type="email"
+          id="email"
+          v-model="registerEmail"
+          placeholder="Email"
+          required
+          :class="[
+            'border',
+            'w-full',
+            'p-2',
+            'rounded-md',
+            'my-1',
+            'bg-gray-100',
+            errorMessage.emailErr
+              ? 'border-red-500'
+              : registerEmail.length > 0
+              ? 'border-green-500'
+              : 'border-gray-300',
+          ]"
+        />
+        <p
+          class="px-3 py-1 rounded-md text-red-500"
+          v-if="errorMessage.emailErr && registerEmail.length > 0"
+        >
+          {{ errorMessage.emailErr }}
+        </p>
       </div>
 
-      <div>
-        <div class="flex items-center justify-between">
-          <label
-            for="password"
-            class="block text-sm font-medium leading-6 text-gray-900"
-            >Password</label
-          >
-        </div>
-        <div class="mt-2">
+      <div class="relative mt-2 gap-2" style="position: relative">
+        <label for="password" class="font-semibold">
+          Password <span class="text-red-500">*</span>
+        </label>
+        <div style="position: relative">
           <input
+            :type="showPassword ? 'text' : 'password'"
             id="password"
             v-model="registerPassword"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            class="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 outline-none focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6"
+            placeholder="Password"
+            required
+            class="border w-full p-2 rounded-md my-1 bg-gray-100 pr-10"
+            :class="{
+              'border-red-500': errorMessage.passwordErr,
+              'border-green-500': registerPassword.length > 0,
+              'border-gray-300':
+                !errorMessage.passwordErr && registerPassword.length === 0,
+            }"
+            style="padding-right: 2.5rem"
           />
-        </div>
-        <div>
-        <label
-          for="name"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Address</label
-        >
-        <div class="mt-2">
-          <input
-            id="address"
-            v-model="registerAddress"
-            name="address"
-            type="text"
-            class="block w-full rounded-md px-2 border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 outline-none sm:text-sm sm:leading-6"
-          />
-        </div>
-      </div>
-      </div>
-      <div>
-        <div class="flex items-center justify-between">
-          <label
-            for="password"
-            class="block text-sm font-medium leading-6 text-gray-900"
-            >Contact Number</label
+          <button
+            type="button"
+            class="absolute inset-y-0 right-0 flex items-center password-toggle-button"
+            style="top: 50%; transform: translateY(-50%); right: 0.75rem"
           >
+            <icon
+              :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'"
+              class="text-lg cursor-pointer"
+              @click.stop="toggleShowPassword"
+            />
+          </button>
         </div>
-        <div class="mt-2">
-          <input
-            id="number"
-            v-model="contactNumber"
-            pattern="[0-9]{11}"
-            placeholder="123-456-765-89"
-            class="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 outline-none focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6"
-          />
-        </div>
+        <p
+          class="px-3 py-1 rounded-md text-red-500"
+          v-if="errorMessage.passwordErr && registerPassword.length > 0"
+        >
+          {{ errorMessage.passwordErr }}
+        </p>
+      </div>
+
+      <div class="gap-2 mt-2">
+        <label for="address" class="font-semibold"
+          >Address <span class="text-red-500">*</span></label
+        >
+        <input
+          type="text"
+          id="address"
+          v-model="registerAddress"
+          placeholder="Legazpi City"
+          required
+          class="w-full p-2 rounded-md my-1 bg-gray-100"
+        />
+      </div>
+
+      <div class="gap-2 mt-2">
+        <label for="number" class="font-semibold"
+          >Contact Number <span class="text-red-500">*</span></label
+        >
+        <input
+          type="tel"
+          id="number"
+          v-model="contactNumber"
+          placeholder="09123456789"
+          required
+          :class="[
+            'border',
+            'w-full',
+            'p-2',
+            'rounded-md',
+            'my-1',
+            'bg-gray-100',
+            errorMessage.contactNumberErr && contactNumber.length > 0
+              ? 'border-red-500'
+              : contactNumber.length > 0
+              ? 'border-green-500'
+              : 'border-gray-300',
+          ]"
+        />
+        <p
+          v-if="errorMessage.contactNumberErr && contactNumber.length > 0"
+          class="text-red-500"
+        >
+          {{ errorMessage.contactNumberErr }}
+        </p>
       </div>
 
       <div>
@@ -118,23 +179,181 @@
 </template>
 <script>
 import axios from "axios";
-import { ref } from "vue";
+import { ref, watch, reactive, computed } from "vue";
 import { API_URL } from "@/config";
+import { debounce } from "lodash";
+import { Icon } from "@iconify/vue";
 export default {
+  components: {
+    Icon,
+  },
+  data() {
+    return {
+      showPassword: false,
+    };
+  },
+  methods: {
+    toggleShowPassword() {
+      this.showPassword = !this.showPassword;
+    },
+  },
   setup() {
     const url = API_URL;
 
     const registerEmail = ref("");
-    const registerAddress = ref("");
+    const registerAddress = ref("Legazpi City");
     const registerName = ref("");
     const registerPassword = ref("");
     const contactNumber = ref("");
     const role = ref(1);
     const registerResponseMessage = ref("");
-    const signUp = async () => {
+    const errorMessage = reactive({
+      nameErr: null,
+      emailErr: null,
+      passwordErr: null,
+      contactNumberErr: null,
+    });
+
+    const checkNameExists = debounce(async (name) => {
       try {
-        const urli =
-          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=register`;
+        const response = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=checkName`,
+          {
+            name: name,
+          }
+        );
+        if (response.data.exists) {
+          errorMessage.nameErr = "This name is already exists.";
+        } else {
+          errorMessage.nameErr = nameValidation.value; // continue with other validations
+        }
+      } catch (error) {
+        console.error("Error checking name:", error);
+      }
+    }, 500); // 500ms debounce delay
+
+    const nameValidation = computed(() => {
+      const pattern = /^[\p{L}'\- \p{M}]*$/u;
+      if (!pattern.test(registerName.value.trim())) {
+        return "Please enter a valid name.";
+      }
+      return null;
+    });
+
+    const checkEmailExists = debounce(async (email) => {
+      try {
+        const response = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=checkEmail`,
+          {
+            email: email,
+          }
+        );
+        if (response.data.exists) {
+          errorMessage.emailErr = "This email is already registered.";
+        } else {
+          errorMessage.emailErr = emailValidation.value; // continue with other validations
+        }
+      } catch (error) {
+        console.error("Error checking email:", error);
+      }
+    }, 500); // 500ms debounce delay
+
+    const emailValidation = computed(() => {
+      if (!registerEmail.value.endsWith("@gmail.com")) {
+        return "Email must be a Gmail address (@gmail.com).";
+      }
+      return null;
+    });
+
+    const passwordValidation = computed(() => {
+      if (registerPassword.value.length < 8) {
+        return "Password must be at least 8 characters long.";
+      }
+      if (!/[A-Z]/.test(registerPassword.value)) {
+        return "Password must include at least one uppercase letter.";
+      }
+      if (!/[a-z]/.test(registerPassword.value)) {
+        return "Password must include at least one lowercase letter.";
+      }
+      if (!/[0-9]/.test(registerPassword.value)) {
+        return "Password must include at least one number.";
+      }
+      if (!/[\!\@\#\$\%\^\&\*\(\)\_\+\.\,\;\:]/.test(registerPassword.value)) {
+        return "Password must include at least one special character (e.g., !@#$%^&*).";
+      }
+      return null;
+    });
+
+    const contactNumberValidation = computed(() => {
+      const pattern = /^\d{11}$/; // Ensures exactly 11 digits
+      if (!pattern.test(contactNumber.value)) {
+        return "Contact number must start with '09' and be exactly 11 digits.";
+      }
+      return null;
+    });
+
+    watch(
+      registerName,
+      () => {
+        if (registerName.value) {
+          checkNameExists(registerName.value); // Trigger the debounced email existence check
+        } else {
+          errorMessage.nameErr = nameValidation.value;
+        }
+      },
+      { immediate: false }
+    );
+
+    watch(
+      registerEmail,
+      () => {
+        if (registerEmail.value.includes("@gmail.com")) {
+          checkEmailExists(registerEmail.value); // Trigger the debounced email existence check
+        } else {
+          errorMessage.emailErr = emailValidation.value;
+        }
+      },
+      { immediate: false }
+    );
+
+    watch(
+      registerPassword,
+      () => {
+        errorMessage.passwordErr = passwordValidation.value;
+      },
+      { immediate: false }
+    );
+
+    watch(
+      contactNumber,
+      () => {
+        errorMessage.contactNumberErr = contactNumberValidation.value;
+      },
+      { immediate: true }
+    );
+
+    const signUp = async () => {
+      // Perform a final validation check on form submission
+      errorMessage.nameErr = nameValidation.value;
+      errorMessage.emailErr = emailValidation.value;
+      errorMessage.passwordErr = passwordValidation.value;
+      errorMessage.contactNumberErr = contactNumberValidation.value;
+      if (
+        errorMessage.nameErr ||
+        errorMessage.emailErr ||
+        errorMessage.passwordErr ||
+        errorMessage.contactNumberErr
+      ) {
+        console.log(
+          errorMessage.nameErr,
+          errorMessage.emailErr,
+          errorMessage.passwordErr,
+          errorMessage.contactNumberErr
+        );
+        return;
+      }
+      try {
+        const urli = `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=register`;
         const res = await axios.post(
           urli,
           {
@@ -172,6 +391,7 @@ export default {
       contactNumber,
       signUp,
       registerResponseMessage,
+      errorMessage,
     };
   },
 };

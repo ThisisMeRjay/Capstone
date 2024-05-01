@@ -194,7 +194,6 @@ export default {
       emailErr: null,
       passwordErr: null,
       contactNumberErr: null,
-      houseNumberErr: null, // New error field for house number validation
     });
 
     const checkNameExists = debounce(async (name) => {
