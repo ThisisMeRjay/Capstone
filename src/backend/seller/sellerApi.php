@@ -7,7 +7,7 @@ include ('../header.php');
 
 
 $res = ['error' => false];
-$action = isset ($_GET['action']) ? $_GET['action'] : '';
+$action = isset($_GET['action']) ? $_GET['action'] : '';
 switch ($action) {
     case 'getOrders':
         getOrders();
@@ -73,9 +73,13 @@ function getOrdersAdmin()
     o.*,
     p.*,
     u.*,
-    us.store_name
+    us.store_name,
+    r.rider_name,
+    pr.*
 FROM 
     order_details AS od
+LEFT JOIN
+    proof AS pr ON pr.proof_id = od.proof_id
 LEFT JOIN 
     orders AS o ON o.order_id = od.order_id
 LEFT JOIN
@@ -84,6 +88,8 @@ LEFT JOIN
     user_store AS us ON p.store_id = us.store_id
 LEFT JOIN
     users AS u ON u.user_id = o.user_id
+LEFT JOIN
+    rider AS r ON r.rider_id = od.rider_id
 WHERE 
     od.status NOT IN ('pending', 'confirmed', 'processing', 'cancelled')
 ORDER BY 
@@ -96,6 +102,7 @@ ORDER BY
     $res = [];
     while ($row = $result->fetch_assoc()) {
         $row['image'] = base64_encode($row['image']);
+        $row['proof_image'] = base64_encode($row['proof_image']);
         $res[] = $row;
     }
 
@@ -159,7 +166,7 @@ function fetchStocks()
 
     $data = json_decode(file_get_contents("php://input"), true);
 
-    if (!isset ($data['store_id'])) {
+    if (!isset($data['store_id'])) {
         echo json_encode(['error' => true, 'message' => 'store_id is missing']);
         exit;
     }
@@ -195,7 +202,7 @@ function fetchRealTimeMonthlySales()
 
     $data = json_decode(file_get_contents("php://input"), true);
 
-    if (!isset ($data['store_id'])) {
+    if (!isset($data['store_id'])) {
         echo json_encode(['error' => true, 'message' => 'store_id is missing']);
         exit;
     }
@@ -331,7 +338,7 @@ function AddCategory()
     $data = json_decode(file_get_contents("php://input"), true);
 
     // Check if the necessary data is available
-    if (isset ($data['category_name']) && isset ($data['category_description'])) {
+    if (isset($data['category_name']) && isset($data['category_description'])) {
         $catname = $conn->real_escape_string($data['category_name']);
         $catdesc = $conn->real_escape_string($data['category_description']);
 
@@ -545,7 +552,8 @@ function getSpecs()
     echo json_encode($res);
 }
 
-function EditStatus() {
+function EditStatus()
+{
     global $conn;
 
     $data = json_decode(file_get_contents("php://input"), true);
@@ -553,7 +561,9 @@ function EditStatus() {
     $newStatus = $data['status'];
     $estdate = $data['estimated_delivery']; // Using null coalescing for optional parameters
     $UpdateDate = $data['date'];
-    var_dump($newStatus);
+    $proof = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data['proof']));
+
+    var_dump($proof);
 
     switch ($newStatus) {
         case 'pending':
@@ -581,9 +591,20 @@ function EditStatus() {
             $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
             break;
         case 'delivered':
-            $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivered_date = ? WHERE order_detail_id = ?");
-            $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
+            $insertStmt = $conn->prepare("INSERT INTO proof (proof_image) VALUES (?)");
+            $insertStmt->bind_param("s", $proof); // Correcting the bind_param to match the number of columns in INSERT
+            $insertStmt->execute();
+
+            $lastInsertID = $conn->insert_id;
+
+            // Update the `order_details` table with the new status, delivered date, and proof_id
+            $stmt = $conn->prepare("UPDATE order_details SET status = ?, delivered_date = ?, proof_id = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("ssii", $newStatus, $UpdateDate, $lastInsertID, $id); // Make sure the types and variables are correct; 'ii' are integers, 'ss' are strings
+
+            // Execute the update statement
+            $stmt->execute();
             break;
+
         case 'cancelled':
             $stmt = $conn->prepare("UPDATE order_details SET status = ?, cancelled_date = ? WHERE order_detail_id = ?");
             $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
@@ -620,9 +641,10 @@ function EditStatus() {
     }
 
     if ($stmt->execute()) {
-        echo "Order status updated successfully.";
+
+        echo json_encode(['success' => true, 'message' => 'image successfully']);
     } else {
-        echo "No order was updated. Please check your input.";
+        echo json_encode(['success' => false, 'message' => 'image not successfully']);
     }
 
     $stmt->close();

@@ -74,7 +74,8 @@
                   <th scope="col" class="px-6 py-2">ESTIMATED DELIVERY</th>
                   <th scope="col" class="px-6 py-2">out for delivery</th>
                   <th scope="col" class="px-6 py-2">date delivered</th>
-                  <th scope="col" class="px-6 py-2">rider ID</th>
+                  <th scope="col" class="px-6 py-2">rider assigned</th>
+                  <th scope="col" class="px-6 py-2">Delivery proof</th>
                 </tr>
               </thead>
               <tbody class="text-center">
@@ -132,7 +133,15 @@
                     {{ item.delivered_date }}
                   </td>
                   <td class="px-6 py-1">
-                    {{ item.rider_id }}
+                    {{ item.rider_name }}
+                  </td>
+                  <td class="px-6 py-1">
+                    <button
+                      class="bg-gray-300 p-1 rounded hover:bg-slate-500 cursor-pointer"
+                      @click="viewImage(item)"
+                    >
+                      view
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -142,6 +151,24 @@
       </div>
     </div>
   </div>
+  <!-- Image overlay -->
+  <div
+    v-if="showImage"
+    class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+  >
+    <img
+      :src="'data:image/png;base64,' + displayImage.proof_image"
+      class="w-auto max-w-3xl max-h-full p-4 object-contain bg-white rounded-lg shadow-lg"
+      alt="Proof Image"
+    />
+    <button
+      class="absolute top-3 right-3 text-white text-xl p-2 bg-red-600 rounded-full hover:bg-red-700 focus:outline-none"
+      @click="showImage = false"
+    >
+      &times;
+    </button>
+  </div>
+
   <!-- edit status modal -->
   <div
     v-if="showStatusModal"
@@ -272,6 +299,16 @@ export default {
     const url = API_URL;
     const refreshPage = () => {
       location.reload(true);
+    };
+
+    const showImage = ref(false);
+
+    const displayImage = ref(null);
+
+    const viewImage = (image) => {
+      displayImage.value = image;
+      console.log("jasoif", displayImage.value);
+      showImage.value = !showImage.value;
     };
 
     const selectedStatus = ref("");
@@ -503,6 +540,9 @@ export default {
       estimatedDelivery,
       updateOptions,
       options,
+      showImage,
+      viewImage,
+      displayImage,
     };
   },
 };

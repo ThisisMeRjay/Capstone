@@ -11,7 +11,9 @@
             <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">Order number</th>
             <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">Customer name</th>
             <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">Contact no.</th>
-            <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">Estimated delivery</th>
+            <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">
+              Estimated delivery
+            </th>
             <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">status</th>
             <th scope="col" class="px-2 py-2 sm:px-6 sm:py-3">order details</th>
           </tr>
@@ -28,52 +30,49 @@
               {{ order.estimated_delivery }}
             </td>
             <td class="px-2 py-2 sm:px-6 sm:py-4">
-                <p
+              <div
                 @click="updateStatus(order.order_detail_id)"
-                      class="shadow px-3 py-1 text-center rounded-full flex justify-center gap-3 cursor-pointer hover:bg-slate-200 transition"
-                      :class="{
-                        'text-orange-500 bg-orange-300/10':
-                        order.status === 'pending',
-                        'text-gray-500 bg-yellow-300/10':
-                        order.status === 'confirmed',
-                        'text-gray-700 bg-gray-200/10':
-                        order.status === 'processing',
-                        'text-yellow-600 bg-yellow-200/10':
-                        order.status === 'ready_to_pickup',
-                        'text-pink-400 bg-blue-300/10':
-                        order.status === 'reserved_for_rider',
-                        'text-blue-500 bg-blue-300/10':
-                        order.status === 'out_for_delivery',
-                        'text-green-500 bg-green-300/10':
-                        order.status === 'delivered',
-                        'text-red-500 bg-red-300/10':
-                        order.status === 'cancelled',
-                        'text-purple-500 bg-purple-300/10':
-                        order.status === 'delayed',
-                        'text-pink-500 bg-pink-300/10':
-                        order.status === 'return_in_progress',
-                        'text-teal-500 bg-teal-300/10':
-                        order.status === 'return_completed',
-                        'text-red-600 bg-red-200/10':
-                        order.status === 'return_declined',
-                        'text-blue-400 bg-blue-200/10':
-                        order.status === 'return_requested',
-                        'text-blue-600 bg-blue-300/10':
-                        order.status === 'return_approved',
-                        'text-gray-500 bg-gray-300/10':
-                        order.status === 'closed',
-                      }"
-                    >
-                      <div>
-                        {{ order.status }}
-                      </div>
-                      <div>
-                        <Icon
-                        icon="material-symbols:edit"
-                        class="text-lg text-green-500"
-                      />
-                      </div>
-                    </p>
+                class="shadow px-3 py-1 text-center rounded-full flex justify-center gap-3 cursor-pointer hover:bg-slate-200 transition"
+                :class="{
+                  'text-orange-500 bg-orange-300/10':
+                    order.status === 'pending',
+                  'text-gray-500 bg-yellow-300/10':
+                    order.status === 'confirmed',
+                  'text-gray-700 bg-gray-200/10': order.status === 'processing',
+                  'text-yellow-600 bg-yellow-200/10':
+                    order.status === 'ready_to_pickup',
+                  'text-pink-400 bg-blue-300/10':
+                    order.status === 'reserved_for_rider',
+                  'text-blue-500 bg-blue-300/10':
+                    order.status === 'out_for_delivery',
+                  'text-green-500 bg-green-300/10':
+                    order.status === 'delivered',
+                  'text-red-500 bg-red-300/10': order.status === 'cancelled',
+                  'text-purple-500 bg-purple-300/10':
+                    order.status === 'delayed',
+                  'text-pink-500 bg-pink-300/10':
+                    order.status === 'return_in_progress',
+                  'text-teal-500 bg-teal-300/10':
+                    order.status === 'return_completed',
+                  'text-red-600 bg-red-200/10':
+                    order.status === 'return_declined',
+                  'text-blue-400 bg-blue-200/10':
+                    order.status === 'return_requested',
+                  'text-blue-600 bg-blue-300/10':
+                    order.status === 'return_approved',
+                  'text-gray-500 bg-gray-300/10': order.status === 'closed',
+                }"
+              >
+                <div>
+                  {{ order.status }}
+                </div>
+                <div>
+                  <Icon
+                    icon="material-symbols:edit"
+                    class="text-lg text-green-500"
+                  />
+                </div>
+              </div>
             </td>
             <td class="px-2 py-2 sm:px-6 sm:py-4">
               <button
@@ -88,42 +87,58 @@
       </table>
     </div>
     <!-- edit status modal -->
-  <div
-    v-if="showStatusModal"
-    class="z-50 fixed top-0 left-0 h-full w-full flex justify-center items-center"
-  >
-    <form
-      @submit.prevent="handleEditStatusOrder"
-      class="w-72 bg-gray-200 p-5 rounded-md shadow text-xs"
+    <div
+      v-if="showStatusModal"
+      class="z-50 fixed top-0 left-0 h-full w-full flex justify-center items-center"
     >
-      <div>
-        <h1 class="text-lg font-semibold text-blue-400">
-          Select order Status:
-        </h1>
-        <select v-model="selectValue" class="w-full p-2 rounded-md">
-          <option v-for="option in options" :value="option.value">
-            {{ option.text }}
-          </option>
-        </select>
-      </div>
-      <!-- Add more inputs as needed here -->
-      <div class="flex justify-evenly my-5 gap-5 items-center">
-        <button
-          type="button"
-          @click="closeEditStatusModal()"
-          class="px-4 py-2 bg-gray-400/20 text-slate-700 w-full rounded-md shadow"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          class="px-4 py-2 bg-green-400/20 text-green-700 hover:bg-green-500/25 w-full rounded-md shadow"
-        >
-          Update
-        </button>
-      </div>
-    </form>
-  </div>
+      <form
+        @submit.prevent="handleEditStatusOrder"
+        class="w-72 bg-gray-200 p-5 rounded-md shadow text-xs"
+      >
+        <div>
+          <h1 class="text-lg font-semibold text-blue-400">
+            Select Order Status:
+          </h1>
+          <select v-model="selectValue" class="w-full p-2 rounded-md">
+            <option v-for="option in options" :value="option.value">
+              {{ option.text }}
+            </option>
+          </select>
+        </div>
+        <div v-if="selectValue === 'delivered'" class="my-4">
+          <label
+            for="cameraInput"
+            class="block text-sm font-medium text-gray-700"
+            >Take a Photo:</label
+          >
+          <input
+            type="file"
+            id="cameraInput"
+            capture="user"
+            accept="image/*"
+            @change="handleCameraInput"
+          />
+        </div>
+        <!-- <div v-if="proof">
+          <p>{{ proof }}</p>
+        </div> -->
+        <div class="flex justify-evenly my-5 gap-5 items-center">
+          <button
+            type="button"
+            @click="closeEditStatusModal()"
+            class="px-4 py-2 bg-gray-400/20 text-slate-700 w-full rounded-md shadow"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 bg-blue-400/20 text-blue-700 hover:bg-green-500/25 w-full rounded-md shadow"
+          >
+            Update
+          </button>
+        </div>
+      </form>
+    </div>
 
     <!-- Modal for order details -->
     <div
@@ -139,7 +154,9 @@
             <strong>Address:</strong> {{ detail.address }}, {{ detail.Zone }},
             {{ detail.name }}
           </li>
-          <li><strong>Estimated Delivery:</strong> {{ detail.estimated_delivery }}</li>
+          <li>
+            <strong>Estimated Delivery:</strong> {{ detail.estimated_delivery }}
+          </li>
           <li><strong>Quantity:</strong> {{ detail.quantity }}</li>
           <li><strong>Price:</strong> {{ detail.total_price_products }}</li>
         </ul>
@@ -232,7 +249,7 @@ export default {
       } catch {}
     };
 
-      const updateStatus = async (orderId) => {
+    const updateStatus = async (orderId) => {
       orderIdToEdit.value = orderId;
       const orderToEdit = orders.value.find(
         (order) => order.order_detail_id === orderId
@@ -279,13 +296,45 @@ export default {
           { value: "delayed", text: "Delayed" },
           { value: "return_in_progress", text: "Return in Progress" },
         ];
-      } 
-    }; 
+      }
+    };
+
+    const proof = ref("");
+
+    const handleCameraInput = (event) => {
+      const file = event.target.files[0];
+      if (!file) {
+        return;
+      }
+
+      const img = new Image();
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      img.onload = () => {
+        let scale = Math.min(
+          1,
+          canvas.width / img.width,
+          canvas.height / img.height
+        );
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        proof.value = canvas.toDataURL("image/png");
+      };
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result; // Load image source from reader
+      };
+      reader.readAsDataURL(file);
+    };
 
     const handleEditStatusOrder = async () => {
       console.log("Status: ", selectValue.value);
       console.log("orderId:  ", orderIdToEdit.value);
       console.log("estimated date:  ", estimatedDelivery.value);
+      console.log("image:  ", proof.value);
 
       // Generate current date and time in Philippine time zone and format it
       const DateToupdate = moment()
@@ -301,10 +350,12 @@ export default {
             status: selectValue.value,
             estimated_delivery: estimatedDelivery.value,
             date: DateToupdate,
+            proof: proof.value,
           }
         );
         // Assuming you might want to do something with the response here
-        console.log(response.data);
+        // Messageimage.value = response.data.message;
+        console.log(response.data.message);
       } catch (error) {
         console.error("Error editing status:", error);
       }
@@ -329,6 +380,8 @@ export default {
       temp_orders,
       options,
       updateOptions,
+      proof,
+      handleCameraInput,
     };
   },
 };
