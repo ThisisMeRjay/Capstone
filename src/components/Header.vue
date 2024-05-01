@@ -891,8 +891,15 @@
             class="flex gap-2 justify-start mx-5 items-center"
           >
             <img
+              v-if="profile"
               :src="'data:image/png;base64,' + profile"
               class="w-12 h-12 rounded-full mr-2"
+              :alt="userLogin.username"
+            />
+            <img
+              v-else
+              src="../assets/profile.jpg"
+              class="w-12 h-12 rounded-full mr-4"
               :alt="userLogin.username"
             />
           </button>

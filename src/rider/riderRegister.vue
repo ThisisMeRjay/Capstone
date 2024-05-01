@@ -23,6 +23,20 @@
             name="name"
             type="text"
             class="block w-full rounded-md px-2 border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 outline-none sm:text-sm sm:leading-6"
+            :class="[
+              errorMessage.nameErr
+                ? 'border-red-500'
+                : registerName.length > 0
+                ? 'border-green-500'
+                : 'border-gray-300',
+            ]"
+          />
+          <p
+            class="px-3 py-1 rounded-md text-red-500"
+            v-if="errorMessage.nameErr && registerName.length > 0"
+          >
+            {{ errorMessage.nameErr }}
+          </p>
           />
         </div>
       </div>
@@ -110,8 +124,54 @@ export default {
     const registerName = ref("");
     const registerPassword = ref("");
     const contactNumber = ref("");
-    const role = ref('rider');
+    const role = ref("rider");
     const registerResponseMessage = ref("");
+    const errorMessage = reactive({
+      nameErr: null,
+      emailErr: null,
+      passwordErr: null,
+      contactNumberErr: null,
+      houseNumberErr: null, // New error field for house number validation
+    });
+
+    const checkNameExists = debounce(async (name) => {
+      try {
+        const response = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=checkName`,
+          {
+            name: name,
+          }
+        );
+        if (response.data.exists) {
+          errorMessage.nameErr = "This name is already exists.";
+        } else {
+          errorMessage.nameErr = nameValidation.value; // continue with other validations
+        }
+      } catch (error) {
+        console.error("Error checking name:", error);
+      }
+    }, 500); // 500ms debounce delay
+
+    const nameValidation = computed(() => {
+      const pattern = /^[\p{L}'\- \p{M}]*$/u;
+      if (!pattern.test(registerName.value.trim())) {
+        return "Please enter a valid name.";
+      }
+      return null;
+    });
+
+    watch(
+      registerName,
+      () => {
+        if (registerName.value) {
+          checkNameExists(registerName.value); // Trigger the debounced email existence check
+        } else {
+          errorMessage.nameErr = nameValidation.value;
+        }
+      },
+      { immediate: false }
+    );
+
     const signUp = async () => {
       try {
         const urli = `${url}/Ecommerce/vue-project/src/backend/rider/riderAuth.php?action=register`;
@@ -148,6 +208,7 @@ export default {
       contactNumber,
       signUp,
       registerResponseMessage,
+      errorMessage,
     };
   },
 };

@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-slate-300">
     <header
-      class="py-5 absolute z-10 w-full top-0 bg-gradient-to-r from-blue-500/75 from-30% via-violet-500/50 shadow-md shadow-blue-400/25 via-60% to-orange-500/25 to-90% font-semibold text-white text-xl px-10"
+      class="py-5 absolute w-full top-0 bg-gradient-to-r z-0 from-blue-500/75 from-30% via-violet-500/50 shadow-md shadow-blue-400/25 via-60% to-orange-500/25 to-90% font-semibold text-white text-xl px-10"
     >
       <img src="../assets/logo.jpg" alt="" class="w-12 h-12 rounded-full mr-2"/>
     </header>
@@ -16,7 +16,7 @@
             </h1>
             <img src="../assets/login.svg" alt="" class="sm:w-full sm:h-full" />
           </div>
-          <div class="flex justify-center items-center">
+          <div class="flex justify-center items-center z-10">
             <div
               class="p-[1px] shadow-xl shadow-blue-500/25 rounded-xl bg-gradient-to-tr from-blue-500 via-violet-500 to-orange-500"
             >

@@ -24,26 +24,76 @@
                 <p class="font-semibold">
                   Email <span class="text-red-500">*</span>
                 </p>
+
                 <input
                   type="email"
                   id="email"
                   v-model="loginEmail"
                   required
-                  class="w-full p-2 rounded-md my-1 bg-gray-100"
+                  :class="[
+                    'border',
+                    'w-full',
+                    'p-2',
+                    'rounded-md',
+                    'my-1',
+                    'bg-gray-100',
+                    errorMessage.emailErr && loginEmail.length > 0
+                      ? 'border-red-500'
+                      : loginEmail.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
                 />
-              </div>
-              <div class="gap-2">
-                <p class="font-semibold">
-                  Password <span class="text-red-500">*</span>
+                <p
+                  v-if="errorMessage.emailErr && loginEmail.length > 0"
+                  class="text-red-500 pl-3 pb-2"
+                >
+                  {{ errorMessage.emailErr }}
                 </p>
-                <input
-                  type="password"
-                  id="password"
-                  v-model="loginPassword"
-                  required
-                  class="w-full p-2 rounded-md my-1 bg-gray-100"
-                />
               </div>
+
+              <div class="relative mt-2 gap-2" style="position: relative">
+                <label for="password" class="font-semibold">
+                  Password <span class="text-red-500">*</span>
+                </label>
+                <div style="position: relative">
+                  <input
+                    :type="showPassword ? 'text' : 'password'"
+                    id="password"
+                    v-model="loginPassword"
+                    placeholder="Password"
+                    required
+                    class="border w-full p-2 rounded-md my-1 bg-gray-100 pr-10"
+                    :class="{
+                      'border-red-500': errorMessage.passwordErr,
+                      'border-green-500': registerPassword.length > 0,
+                    }"
+                    style="padding-right: 2.5rem"
+                  />
+                  <button
+                    type="button"
+                    class="absolute inset-y-0 right-0 flex items-center password-toggle-button"
+                    style="
+                      top: 50%;
+                      transform: translateY(-50%);
+                      right: 0.75rem;
+                    "
+                  >
+                    <icon
+                      :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'"
+                      class="text-lg cursor-pointer"
+                      @click.stop="toggleShowPassword"
+                    />
+                  </button>
+                </div>
+                <p
+                  class="px-3 py-1 rounded-md text-red-500"
+                  v-if="errorMessage.passwordErr && loginPassword.length > 0"
+                >
+                  {{ errorMessage.passwordErr }}
+                </p>
+              </div>
+
               <div class="my-5">
                 <button
                   type="submit"
@@ -299,7 +349,7 @@
                     'bg-gray-100',
                     errorMessage.houseNumberErr && registerHouseno.length > 0
                       ? 'border-red-500'
-                      : contactNumber.length > 0
+                      : registerHouseno.length > 0
                       ? 'border-green-500'
                       : 'border-gray-300',
                   ]"
@@ -420,17 +470,21 @@ export default {
           },
           { headers: { "Content-Type": "application/json" } }
         );
+        errorMessage.emailErr = res.data.messageEmail;
+        errorMessage.passwordErr = res.data.message;
 
         name.value = res.data.customer;
         localStorage.setItem("user", JSON.stringify(name.value));
-        refreshPage();
-        const role = res.data.role;
-        if (role === "admin") {
-          router.push("/admin_dashboard");
-        } else {
-          router.push("/home");
-          emit("update:isVisible", false);
-          emit("login-completed", name.value);
+        if (res.data.success) {
+          refreshPage();
+          const role = res.data.role;
+          if (role === "admin") {
+            router.push("/admin_dashboard");
+          } else {
+            router.push("/home");
+            emit("update:isVisible", false);
+            emit("login-completed", name.value);
+          }
         }
       } catch {}
     };
@@ -440,7 +494,7 @@ export default {
     const registerName = ref("");
     const registerPassword = ref("");
     const contactNumber = ref("");
-    const customerRole = "customer";
+    const customerRole = ref("customer");
     const address = ref("Legazpi City");
     const registerResponseMessage = ref("");
     const errorMessage = reactive({
@@ -450,6 +504,24 @@ export default {
       contactNumberErr: null,
       houseNumberErr: null, // New error field for house number validation
     });
+
+    const checkNameExists = debounce(async (name) => {
+      try {
+        const response = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/auth.php?action=checkName`,
+          {
+            name: name,
+          }
+        );
+        if (response.data.exists) {
+          errorMessage.nameErr = "This name is already exists.";
+        } else {
+          errorMessage.nameErr = nameValidation.value; // continue with other validations
+        }
+      } catch (error) {
+        console.error("Error checking name:", error);
+      }
+    }, 500); // 500ms debounce delay
 
     const nameValidation = computed(() => {
       const pattern = /^[\p{L}'\- \p{M}]*$/u;
@@ -520,10 +592,15 @@ export default {
     });
 
     // Watch for changes in the name and email fields to validate them
+
     watch(
       registerName,
       () => {
-        errorMessage.nameErr = nameValidation.value;
+        if (registerName.value) {
+          checkNameExists(registerName.value); // Trigger the debounced email existence check
+        } else {
+          errorMessage.nameErr = nameValidation.value;
+        }
       },
       { immediate: false }
     );
@@ -586,8 +663,19 @@ export default {
         );
         return;
       }
+
       try {
-        console.log("barangay id: ", selectedBarangay.value);
+        // console.log("Registration Data:");
+        // console.log("Name:", registerName.value);
+        // console.log("Email:", registerEmail.value);
+        // console.log("Password:", registerPassword.value); // Note: Be cautious logging sensitive data like passwords
+        // console.log("Contact Number:", contactNumber.value);
+        // console.log("Role:", customerRole.value);
+        // console.log("Address:", address.value);
+        // console.log("Barangay:", selectedBarangay.value);
+        // console.log("Zone:", registerZone.value);
+        // console.log("House Number:", registerHouseno.value);
+
         const urli = `${url}/Ecommerce/vue-project/src/backend/auth.php?action=register`;
         const res = await axios.post(
           urli,
@@ -596,7 +684,7 @@ export default {
             email: registerEmail.value,
             password: registerPassword.value,
             contact_number: contactNumber.value,
-            role: customerRole,
+            role: customerRole.value,
             address: address.value,
             barangay: selectedBarangay.value,
             zone: registerZone.value,
@@ -605,14 +693,31 @@ export default {
           { headers: { "Content-Type": "application/json" } }
         );
         registerResponseMessage.value = res.data.message;
-      } catch (res) {
-        console.log(res.data.success);
+        console.log("Im here", res.data);
+      } catch (error) {
+        console.error("Error during registration:", error);
+        if (error.response) {
+          // Server responded with an error
+          registerResponseMessage.value =
+            error.response.data.message ||
+            "Registration failed. Please try again.";
+        } else if (error.request) {
+          // The request was made but no response was received
+          registerResponseMessage.value =
+            "No response from the server. Please check your internet connection.";
+        } else {
+          // Something happened in setting up the request that triggered an error
+          registerResponseMessage.value =
+            "An error occurred while registering. Please try again later.";
+        }
       }
+
       registerName.value = "";
       registerEmail.value = "";
       registerPassword.value = "";
       contactNumber.value = "";
-      role.value = "";
+      registerZone.value = "";
+      registerHouseno.value = "";
     };
 
     return {

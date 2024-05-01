@@ -21,11 +21,50 @@ switch ($action) {
     case 'save':
         save();
         break;
+    case 'checkName':
+        checkName();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function checkName()
+{
+    global $conn;
+
+    // Read JSON data from the POST input
+    $data = json_decode(file_get_contents("php://input"), true);
+    $name = $data['name']; // Ensure the key matches what is sent from the client
+
+    // Prepare the SQL statement to check for the email
+    $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM users WHERE username = ?");
+    if (!$stmt) {
+        echo json_encode(['error' => "Error preparing statement: " . $conn->error]);
+        return;
+    }
+
+    // Bind the email parameter and execute the query
+    $stmt->bind_param("s", $name);
+    if (!$stmt->execute()) {
+        echo json_encode(['error' => "Error executing query: " . $stmt->error]);
+        $stmt->close();
+        return;
+    }
+
+    // Get the result and determine if email exists
+    $result = $stmt->get_result();
+    if ($result) {
+        $data = $result->fetch_assoc();
+        $stmt->close();
+        // Return JSON indicating whether the email exists
+        echo json_encode(['exists' => $data['count'] > 0]);
+    } else {
+        echo json_encode(['error' => "Error fetching results: " . $stmt->error]);
+        $stmt->close();
+    }
 }
 
 function save()
