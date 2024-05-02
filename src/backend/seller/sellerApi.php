@@ -75,7 +75,8 @@ function getOrdersAdmin()
     u.*,
     us.store_name,
     r.rider_name,
-    pr.*
+    pr.*,
+    rev.revenue_amount
 FROM 
     order_details AS od
 LEFT JOIN
@@ -90,6 +91,8 @@ LEFT JOIN
     users AS u ON u.user_id = o.user_id
 LEFT JOIN
     rider AS r ON r.rider_id = od.rider_id
+LEFT JOIN
+    revenue AS rev ON rev.order_detail_id = od.order_detail_id
 WHERE 
     od.status NOT IN ('pending', 'confirmed', 'processing', 'cancelled')
 ORDER BY 
@@ -605,23 +608,37 @@ function EditStatus()
             $stmt->execute();
             break;
 
-        case 'cancelled':
-            $stmt = $conn->prepare("UPDATE order_details SET status = ?, cancelled_date = ? WHERE order_detail_id = ?");
-            $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
-            if ($stmt->execute() && $stmt->affected_rows > 0) {
-                // Assuming inventory needs to be updated upon cancellation
-                $stmt = $conn->prepare("SELECT quantity, product_id FROM order_details WHERE order_detail_id = ?");
-                $stmt->bind_param("i", $id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                if ($row = $result->fetch_assoc()) {
-                    $updateInventoryStmt = $conn->prepare("UPDATE inventory SET quantity = quantity + ? WHERE product_id = ?");
-                    $updateInventoryStmt->bind_param("ii", $row['quantity'], $row['product_id']);
-                    $updateInventoryStmt->execute();
-                    $updateInventoryStmt->close();
+            case 'cancelled':
+                // Update the order details to reflect the cancellation
+                $stmt = $conn->prepare("UPDATE order_details SET status = ?, cancelled_date = ? WHERE order_detail_id = ?");
+                $stmt->bind_param("ssi", $newStatus, $UpdateDate, $id);
+                if ($stmt->execute() && $stmt->affected_rows > 0) {
+                    // Assuming inventory needs to be updated upon cancellation
+                    $stmt = $conn->prepare("SELECT quantity, product_id FROM order_details WHERE order_detail_id = ?");
+                    $stmt->bind_param("i", $id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    if ($row = $result->fetch_assoc()) {
+                        $updateInventoryStmt = $conn->prepare("UPDATE inventory SET quantity = quantity + ? WHERE product_id = ?");
+                        $updateInventoryStmt->bind_param("ii", $row['quantity'], $row['product_id']);
+                        $updateInventoryStmt->execute();
+                        $updateInventoryStmt->close();
+                    }
+                    $stmt->close();
+            
+                    // Delete revenue records associated with the cancelled order detail
+                    $deleteRevenueStmt = $conn->prepare("DELETE FROM revenue WHERE order_detail_id = ?");
+                    $deleteRevenueStmt->bind_param("i", $id);
+                    $deleteRevenueStmt->execute();
+                    if ($deleteRevenueStmt->affected_rows > 0) {
+                        // Log or handle the success of deletion
+                    } else {
+                        // Log or handle the case where no revenue record was found or deletion did not occur
+                    }
+                    $deleteRevenueStmt->close();
                 }
-            }
-            break;
+                break;
+            
         case 'delayed':
             $stmt = $conn->prepare("UPDATE order_details SET status = ?, estimated_delivery = ? WHERE order_detail_id = ?");
             $stmt->bind_param("ssi", $newStatus, $estdate, $id);

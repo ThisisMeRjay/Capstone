@@ -70,6 +70,7 @@
                   <th scope="col" class="px-6 py-2">QUANTITY</th>
                   <th scope="col" class="px-6 py-2">CUSTOMER NAME</th>
                   <th scope="col" class="px-6 py-2">PRICE</th>
+                  <th scope="col" class="px-6 py-2">Shipping fee</th>
                   <th scope="col" class="px-6 py-2">PAYMENT METHOD</th>
                   <th scope="col" class="px-6 py-2">ESTIMATED DELIVERY</th>
                   <th scope="col" class="px-6 py-2">out for delivery</th>
@@ -118,6 +119,7 @@
                   <td class="px-6 py-1">{{ item.quantity }}</td>
                   <td class="px-6 py-1">{{ item.username }}</td>
                   <td class="px-6 py-1">{{ item.total_price_products }}</td>
+                  <td class="px-6 py-1">{{ item.revenue_amount }}</td>
                   <td class="px-6 py-1">
                     <p class="text-violet-600">
                       {{ item.payment_method }}

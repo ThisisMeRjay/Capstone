@@ -158,7 +158,7 @@
             <strong>Estimated Delivery:</strong> {{ detail.estimated_delivery }}
           </li>
           <li><strong>Quantity:</strong> {{ detail.quantity }}</li>
-          <li><strong>Price:</strong> {{ detail.total_price_products }}</li>
+          <li><strong>Price:</strong> {{ detail.total_revenue_and_price }}</li>
         </ul>
         <div class="mt-4 flex justify-between">
           <div></div>
