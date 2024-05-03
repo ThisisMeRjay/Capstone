@@ -40,9 +40,9 @@
               <option value="delayed">Delayed</option>
               <option value="return_in_progress">Return in Progress</option>
               <option value="return_completed">Return Completed</option>
-              <option value="return_requested">Return Requested</option>
+              <!-- <option value="return_requested">Return Requested</option>
               <option value="return_declined">Return Declined</option>
-              <option value="return_approved">Return Approved</option>
+              <option value="return_approved">Return Approved</option> -->
               <option value="closed">Closed</option>
             </select>
           </form>

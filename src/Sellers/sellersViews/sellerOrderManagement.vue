@@ -44,9 +44,9 @@
               <option value="delayed">Delayed</option>
               <option value="return_in_progress">Return in Progress</option>
               <option value="return_completed">Return Completed</option>
-              <option value="return_requested">Return Requested</option>
+              <!-- <option value="return_requested">Return Requested</option>
               <option value="return_declined">Return Declined</option>
-              <option value="return_approved">Return Approved</option>
+              <option value="return_approved">Return Approved</option> -->
               <option value="closed">Closed</option>
             </select>
           </form>
@@ -406,6 +406,12 @@ export default {
         options.value = [
           { value: "delivered", text: "Delivered" },
           { value: "closed", text: "Closed" },
+        ];
+      } else if (selectValue.value === "return_in_progress") {
+        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
+        options.value = [
+          { value: "return_in_progress", text: "Return in progress" },
+          { value: "return_completed", text: "Return completed" },
         ];
       }
     }; 
