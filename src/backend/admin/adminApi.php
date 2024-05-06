@@ -401,6 +401,17 @@ function DeleteCustomer()
     $conn->begin_transaction();
 
     try {
+        $stmt = $conn->prepare("DELETE FROM profile WHERE user_id = ?");
+        if (!$stmt) {
+            throw new Exception('Failed to prepare the cart SQL statement: ' . $conn->error);
+        }
+
+        // Bind the customer_id to the prepared statement for cart deletion
+        $stmt->bind_param("i", $customer_id);
+
+        // Execute the cart deletion statement
+        $stmt->execute();
+        $stmt->close(); // Close the cart deletion statement
         // Prepare the SQL query to delete the customer's cart entries first
         $stmt = $conn->prepare("DELETE FROM cart WHERE user_id = ?");
         if (!$stmt) {

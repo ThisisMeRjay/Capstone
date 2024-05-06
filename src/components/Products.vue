@@ -92,26 +92,36 @@
         <div>
           <h1 class="text-sm px-3 text-sky-800">Ratings</h1>
           <div class="mx-3 text-xs">
-            <template v-for="rating in 5" :key="`rating-${6 - rating}`">
-              <div
-                @click="filterByRating(6 - rating)"
-                class="py-2 px-3 hover:bg-slate-700/10 rounded-md transition flex items-center"
-              >
-                <div class="flex items-center">
-                  <template v-for="star in 6 - rating" :key="`star-${star}`">
-                    <span class="star-colored">&#9733;</span>
-                  </template>
-                  <template
-                    v-for="emptyStar in rating - 1"
-                    :key="`empty-star-${emptyStar}`"
-                  >
-                    <span class="star-grey">&#9733;</span>
-                  </template>
+            <!-- Loop from 6 to 1 (6 - rating gives 0 to 5) -->
+            <div
+              v-for="rating in 6"
+              :key="`rating-${6 - rating}`"
+              @click="filterByRating(6 - rating)"
+              class="py-2 px-3 hover:bg-slate-700/10 rounded-md transition flex items-center cursor-pointer"
+            >
+              <div class="flex items-center">
+                <!-- Generate filled stars based on 6 - rating -->
+                <div
+                  v-for="star in 6 - rating"
+                  :key="`star-${star}`"
+                  class="star-colored"
+                >
+                  &#9733;
+                  <!-- Star icon -->
                 </div>
-                <span v-if="6 - rating < 5">&nbsp; And Up</span>
-                <span v-else></span>
+                <!-- Generate empty stars based on rating - 1 (handles 0 case as well) -->
+                <div
+                  v-for="emptyStar in rating - 1"
+                  :key="`empty-star-${emptyStar}`"
+                  class="star-grey"
+                >
+                  &#9733;
+                  <!-- Star icon -->
+                </div>
               </div>
-            </template>
+              <!-- Display "And Up" for ratings less than 5 -->
+              <span v-if="6 - rating < 5">&nbsp; And Up</span>
+            </div>
           </div>
         </div>
       </div>
@@ -122,7 +132,7 @@
           <h2
             class="md:text-2xl text-lg font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r drop-shadow-lg from-blue-600 from-10% to-violet-500"
           >
-           {{ selectedCategoryName || 'Products' }} 
+            {{ selectedCategoryName || "Products" }}
           </h2>
         </div>
 
@@ -221,21 +231,14 @@ export default {
     const showCategory = ref(true);
     const categories = ref([]);
     const selectedCategoryName = ref("");
-    const spec_data = ref(null);
-    const temp_data_for_ratings = ref([]);
-    const temp_data_for_price = ref([]);
     const storeName = ref([]);
-    const temp_data_for_store = ref([]);
-    const temp_data_for_category = ref([]);
+    const temp_data = ref([]);
 
     const filterbyStoreName = async (storeID) => {
-      temp_data_for_ratings.value = "";
-      temp_data_for_price.value = "";
-      temp_data_for_category.value = "";
-      if (temp_data_for_store.value.length === 0) {
-        temp_data_for_store.value = products.value;
+      if (temp_data.value.length === 0) {
+        temp_data.value = products.value;
       } else {
-        products.value = temp_data_for_store.value;
+        products.value = temp_data.value;
       }
       //    console.log("store ID", storeID);
       // Assuming product.value was a typo and it should be products.value
@@ -265,14 +268,11 @@ export default {
     };
 
     const filterByRating = (minRatingValue) => {
-      temp_data_for_price.value = "";
-      temp_data_for_store.value = "";
-      temp_data_for_category.value = "";
       // Filter products based on rounded ratings
-      if (temp_data_for_ratings.value.length === 0) {
-        temp_data_for_ratings.value = products.value;
+      if (temp_data.value.length === 0) {
+        temp_data.value = products.value;
       } else {
-        products.value = temp_data_for_ratings.value;
+        products.value = temp_data.value;
       }
       const filtered = products.value.filter((product) => {
         const roundedRating = Math.round(product.ratings); // Assuming product.ratings is a decimal
@@ -282,21 +282,32 @@ export default {
     };
 
     const filterByPrice = () => {
-      // Assuming `props.products` contains all products you might want to filter
-      // And these are already available in the `products` ref
-      temp_data_for_ratings.value = "";
-      temp_data_for_store.value = "";
-      temp_data_for_category.value = "";
-      if (temp_data_for_price.value.length === 0) {
-        temp_data_for_price.value = products.value;
+      // Clear any previously set temporary data for other filters
+
+      // Reset to all products if the temporary price data is not already set
+      if (temp_data.value.length === 0) {
+        temp_data.value = products.value;
       } else {
-        products.value = temp_data_for_price.value;
+        // Use the temporary data as the current product list
+        products.value = temp_data.value;
       }
+
+      // Check if both minPrice and maxPrice are zero
+      if (minPrice.value === 0 && maxPrice.value === 0) {
+        products.value = temp_data.value;
+        console.log("No price filtering applied, returning all products.");
+        return;
+      }
+
+      // Proceed with filtering if minPrice or maxPrice are not zero
       const filtered = products.value.filter((product) => {
-        const price = parseFloat(product.price); // Ensure the price is a number
+        const price = parseFloat(product.price); // Convert price string to a number
         return price >= minPrice.value && price <= maxPrice.value;
       });
+
+      // Update the main products list with the filtered results
       products.value = filtered;
+      console.log("Filtered range", products.value);
     };
 
     const fetchSpecifications = async (productId) => {
@@ -343,10 +354,6 @@ export default {
     };
 
     const fetchProducts = async () => {
-      temp_data_for_ratings.value = "";
-      temp_data_for_price.value = "";
-      temp_data_for_store.value = "";
-      temp_data_for_category.value = "";
       try {
         const response = await axios.get(
           `${url}/Ecommerce/vue-project/src/backend/api.php?action=getProducts`
@@ -386,13 +393,10 @@ export default {
 
     // Use axios.post instead of axios.get, and pass data in the request body
     const filterByCategory = async (id, name) => {
-      temp_data_for_ratings.value = "";
-      temp_data_for_price.value = "";
-      temp_data_for_store.value = "";
-      if (temp_data_for_category.value.length === 0) {
-        temp_data_for_category.value = products.value;
+      if (temp_data.value.length === 0) {
+        temp_data.value = products.value;
       } else {
-        products.value = temp_data_for_category.value;
+        products.value = temp_data.value;
       }
       //   console.log("Category id", id);
       // Assuming product.value was a typo and it should be products.value
@@ -417,7 +421,7 @@ export default {
       getCategories();
       fetchProducts();
       handleResize(); // Call the handler right away to set the initial state
-      window.addEventListener('resize', handleResize); // Add event listener on mount
+      window.addEventListener("resize", handleResize); // Add event listener on mount
     });
 
     const onHeartClick = (product) => {
@@ -458,14 +462,10 @@ export default {
       maxPrice,
       filterByPrice,
       filterByRating,
-      temp_data_for_ratings,
-      temp_data_for_price,
-      temp_data_for_store,
-      temp_data_for_category,
 
       fetchSpecifications,
-      spec_data,
       GetStorename,
+      temp_data,
       storeName,
     };
   },

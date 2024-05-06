@@ -260,7 +260,7 @@ function login()
 {
     session_start();
     global $conn, $res, $globalUser;
-    
+
     $post_data = json_decode(file_get_contents("php://input"), true);
 
     // Basic input validation
@@ -282,8 +282,8 @@ function login()
         return;
     }
 
-    // Use prepared statements to prevent SQL injection
-    $stmt = $conn->prepare("SELECT u.*, b.* FROM users AS u LEFT JOIN barangay AS b ON u.barangay_id = b.barangay_id WHERE email=?");
+    // Use prepared statements to prevent SQL injection with BINARY keyword for case-sensitive comparison
+    $stmt = $conn->prepare("SELECT u.*, b.* FROM users AS u LEFT JOIN barangay AS b ON u.barangay_id = b.barangay_id WHERE BINARY email=?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();

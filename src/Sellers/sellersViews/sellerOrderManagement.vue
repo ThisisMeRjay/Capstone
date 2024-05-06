@@ -90,7 +90,7 @@
                   </td>
                   <td class="px-6 py-1">{{ item.product_name }}</td>
                   <td class="px-6 py-1">
-                    <p
+                    <div
                       @click="editStatus(item.order_detail_id)"
                       class="shadow px-3 py-1 text-center rounded-full flex justify-center gap-3 cursor-pointer hover:bg-slate-200 transition"
                       :class="{
@@ -129,11 +129,11 @@
                       </div>
                       <div>
                         <Icon
-                        icon="material-symbols:edit"
-                        class="text-lg text-green-500"
-                      />
+                          icon="material-symbols:edit"
+                          class="text-lg text-green-500"
+                        />
                       </div>
-                    </p>
+                    </div>
                   </td>
                   <td class="px-6 py-1">{{ item.quantity }}</td>
                   <td class="px-6 py-1">{{ item.username }}</td>
@@ -296,8 +296,8 @@ export default {
           editableOrderStatus.value.status == "confirmed" ||
           editableOrderStatus.value.status == "processing" ||
           editableOrderStatus.value.status == "return_requested" ||
-          editableOrderStatus.value.status == "return_in_progress"  ||
-          editableOrderStatus.value.status == "delivered" 
+          editableOrderStatus.value.status == "return_in_progress" ||
+          editableOrderStatus.value.status == "delivered"
         ) {
           showStatusModal.value = true;
         } else {
@@ -414,8 +414,8 @@ export default {
           { value: "return_completed", text: "Return completed" },
         ];
       }
-    }; 
-    
+    };
+
     return {
       options,
       barangayname,

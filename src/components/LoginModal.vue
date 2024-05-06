@@ -252,29 +252,32 @@
               </div>
 
               <div class="gap-2 mt-2">
-                <label for="number" class="font-semibold"
-                  >Contact Number <span class="text-red-500">*</span></label
+                <label for="number" class="font-semibold">
+                  Contact Number <span class="text-red-500">*</span>
+                </label>
+                <div
+                  class="flex border w-full p-2 rounded-md my-1 bg-gray-100 items-center"
                 >
-                <input
-                  type="tel"
-                  id="number"
-                  v-model="contactNumber"
-                  placeholder="09123456789"
-                  required
-                  :class="[
-                    'border',
-                    'w-full',
-                    'p-2',
-                    'rounded-md',
-                    'my-1',
-                    'bg-gray-100',
-                    errorMessage.contactNumberErr && contactNumber.length > 0
-                      ? 'border-red-500'
-                      : contactNumber.length > 0
-                      ? 'border-green-500'
-                      : 'border-gray-300',
-                  ]"
-                />
+                  <span class="bg-gray-200 px-2">+63</span>
+                  <input
+                    type="tel"
+                    id="number"
+                    v-model="contactNumber"
+                    placeholder="8123456789 or 9123456789"
+                    required
+                    :class="[
+                      'flex-1',
+                      'border-none',
+                      'outline-none',
+                      'bg-gray-100',
+                      errorMessage.contactNumberErr && contactNumber.length > 0
+                        ? 'border-red-500'
+                        : contactNumber.length > 0
+                        ? 'border-green-500'
+                        : 'border-gray-300',
+                    ]"
+                  />
+                </div>
                 <p
                   v-if="
                     errorMessage.contactNumberErr && contactNumber.length > 0
@@ -287,7 +290,7 @@
 
               <div class="gap-2 mt-2">
                 <label for="address" class="font-semibold"
-                  >Address <span class="text-red-500">*</span></label
+                  >City <span class="text-red-500">*</span></label
                 >
                 <input
                   type="text"
@@ -315,7 +318,7 @@
               </div>
               <div class="gap-2 mt-2">
                 <label for="zone" class="font-semibold">
-                  Zone <span class="text-red-500">*</span>
+                  Street <span class="text-red-500">*</span>
                 </label>
                 <select
                   id="zone"
@@ -323,7 +326,7 @@
                   required
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
                 >
-                  <option value="" disabled selected>Select your zone</option>
+                  <option value="" disabled selected>Select your street</option>
                   <option v-for="zone in 7" :key="zone" :value="'Zone ' + zone">
                     Zone {{ zone }}
                   </option>
@@ -577,9 +580,10 @@ export default {
     });
 
     const contactNumberValidation = computed(() => {
-      const pattern = /^\d{11}$/; // Ensures exactly 11 digits
+      // This pattern checks for numbers starting with '8' or '9' after the '+63' prefix and ensures they are 10 digits in total.
+      const pattern = /^[89]\d{9}$/;
       if (!pattern.test(contactNumber.value)) {
-        return "Contact number must start with '09' and be exactly 11 digits.";
+        return "Contact number must start with '8' or '9' after the '+63' prefix and be exactly 10 digits long.";
       }
       return null;
     });
@@ -642,6 +646,9 @@ export default {
       { immediate: true }
     );
 
+    const showRegister = ref(false);
+    const showLogin = ref(true);
+
     const signUp = async () => {
       // Perform a final validation check on form submission
       errorMessage.nameErr = nameValidation.value;
@@ -696,6 +703,10 @@ export default {
         );
         registerResponseMessage.value = res.data.message;
         console.log("Im here", res.data);
+        if (res.data.success) {
+          showRegister.value = false;
+          showLogin.value = true;
+        }
       } catch (error) {
         console.error("Error during registration:", error);
         if (error.response) {
@@ -720,6 +731,8 @@ export default {
       contactNumber.value = "";
       registerZone.value = "";
       registerHouseno.value = "";
+      address.value = "";
+      selectedBarangay.value = "";
     };
 
     return {
@@ -736,6 +749,8 @@ export default {
       registerEmail,
       registerPassword,
       contactNumber,
+      showRegister,
+      showLogin,
       signUp,
       registerZone,
       registerHouseno,
@@ -748,7 +763,7 @@ export default {
   },
 };
 </script>
-<style>
+<style scoped>
 @media (max-width: 640px) {
   .password-toggle-button {
     padding-right: 0px; /* Slightly less padding on small screens */
