@@ -659,6 +659,7 @@
                   </button>
 
                   <img
+                    @click="showModal(items)"
                     :src="'data:image/png;base64,' + items.image"
                     alt=""
                     class="w-16 h-16 rounded-md"
@@ -667,7 +668,7 @@
                     <h1 class="font-bold text-xs">
                       {{ items.product_name }}
                     </h1>
-                    <p class="text-xs font-semibold">{{ items.price }}</p>
+                    <p class="text-xs font-semibold">{{ items.totalPrice }}</p>
 
                     <div class="flex gap-2">
                       <div
@@ -689,7 +690,7 @@
                       </button>
                       <button
                         @click="increment(items.product_id)"
-                        :disabled="items.quantity === 3"
+                        :disabled="items.quantity === items.stock"
                         class="p-0.5 flex justify-center items-center w-7 rounded-full border"
                       >
                         <Icon icon="mingcute:add-line" />
@@ -725,6 +726,12 @@
         </div>
       </div>
     </div>
+    <product-modal
+      :is-visible="isModalVisible"
+      :product="selectedProduct"
+      :specifications="spec_data"
+      @update:isVisible="isModalVisible = $event"
+    ></product-modal>
 
     <!-- payment popup -->
     <div
@@ -820,22 +827,24 @@
                       </button>
                       <button
                         @click="onPyment"
+                        disabled
                         :class="{
                           ' shadow-md shadow-blue-500/50 border-blue-500':
                             selectedPayment === 'payment',
                         }"
-                        class="p-2 bg-green-blue/10 rounded-full flex justify-center items-center gap-1 my-1 border border-gray-600/50 w-full text-blue-600 font-medium text-sm"
+                        class="p-2 bg-green-blue/10 rounded-full flex justify-center items-center gap-1 my-1 border border-gray-600/50 w-full text-gray-600 font-medium text-sm"
                       >
                         <Icon icon="material-symbols:wallet" class="text-lg" />
                         Payment Center/E-wallet
                       </button>
                       <button
                         @click="onCredit"
+                        disabled
                         :class="{
                           ' shadow-md shadow-orange-500/50 border-orange-500':
                             selectedPayment === 'credit',
                         }"
-                        class="p-2 bg-green-orange/10 rounded-full flex justify-center items-center gap-1 my-1 border border-gray-600/50 w-full text-orange-600 font-medium text-sm"
+                        class="p-2 bg-green-orange/10 rounded-full flex justify-center items-center gap-1 my-1 border border-gray-600/50 w-full text-gray-600 font-medium text-sm"
                       >
                         <Icon
                           icon="material-symbols:credit-card"

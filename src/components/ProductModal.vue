@@ -12,7 +12,10 @@
         @click="closeModal()"
         class="bg-slate-700/20 absolute right-3 top-3 p-2 rounded-full"
       >
-        <Icon icon="gravity-ui:xmark" class="text-xs sm:text-lg hover:text-red-500" />
+        <Icon
+          icon="gravity-ui:xmark"
+          class="text-xs sm:text-lg hover:text-red-500"
+        />
       </button>
       <div
         class="w-full flex gap-2 capitalize justify-start items-center font-medium text-black-700"
@@ -35,7 +38,9 @@
         <form class="flex-auto p-1 sm:p-6">
           <div class="flex flex-wrap">
             <div>
-              <h1 class="flex-auto text-sm sm:text-xl font-semibold text-gray-900">
+              <h1
+                class="flex-auto text-sm sm:text-xl font-semibold text-gray-900"
+              >
                 {{ product.product_name }}
               </h1>
               <div>
@@ -51,7 +56,7 @@
               class="w-full flex gap-2 justify-start items-center text-sm font-medium text-black-700"
             >
               <span>In stock</span>
-              <span class="text-blue-500">{{ product.quantity || "0" }}</span>
+              <span class="text-blue-500">{{ product.stock || "0" }}</span>
             </div>
           </div>
 
@@ -80,7 +85,7 @@
                   <button
                     type="button"
                     @click="increment"
-                    :disabled="quantity === 3"
+                    :disabled="quantity === product.stock"
                     class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg px-2 h-8 focus:ring-gray-100 focus:ring-2 focus:outline-none"
                   >
                     <Icon icon="tabler:plus" />
@@ -117,7 +122,9 @@
       </div>
       <div class="">
         <div>
-          <h1 class="p-2 bg-slate-800/10 text-blue-500 rounded-md text-sm sm:text-base">
+          <h1
+            class="p-2 bg-slate-800/10 text-blue-500 rounded-md text-sm sm:text-base"
+          >
             Specifications :
           </h1>
         </div>
@@ -127,7 +134,9 @@
             :key="index"
             class="flex gap-2 justify-start items-center"
           >
-            <span class="font-medium text-xs sm:text-base">{{ spec.spec_key }}</span
+            <span class="font-medium text-xs sm:text-base">{{
+              spec.spec_key
+            }}</span
             >: <span class="text-xs sm:text-sm">{{ spec.spec_value }}</span>
           </li>
         </ul>
@@ -139,11 +148,11 @@
             Customer reviews
           </p>
           <p
-          @click="getReviews(product.product_id)"
-          class="text-xs sm:text-md font-medium text-blue-800 hover:text-blue-600 cursor-pointer"
-        >
-          view
-        </p>
+            @click="getReviews(product.product_id)"
+            class="text-xs sm:text-md font-medium text-blue-800 hover:text-blue-600 cursor-pointer"
+          >
+            view
+          </p>
         </div>
         <div v-if="reviews.length">
           <div
@@ -167,6 +176,7 @@ import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { ref, watch, onMounted, reactive } from "vue";
 import { API_URL } from "@/config";
+import { compileScript } from "vue/compiler-sfc";
 export default {
   props: {
     isVisible: Boolean,
@@ -182,29 +192,37 @@ export default {
       location.reload(true);
     };
 
-
-    const quantity = ref(1);
+    const quantity = ref(1); // Initialize with product.quantity if product exists, or fallback to 1
     const finalQuantity = ref("");
     const isHeartRed = reactive([]);
     const closeModal = () => {
       emit("update:isVisible", false);
       reviews.value = [];
+      quantity.value = 1; // Reset quantity to product.quantity if product exists, or 1
     };
 
     const increment = () => {
-      quantity.value = Math.min(Number(quantity.value) + 1, 3); // Ensure the quantity does not exceed 3
-      finalQuantity.value = quantity.value * props.product.price;
+      if (props.product) {
+        quantity.value = Math.min(
+          Number(quantity.value) + 1,
+          props.product.stock
+        );
+        finalQuantity.value = quantity.value * props.product.price;
+      }
     };
+
     watch(
       () => (props.product ? props.product.price : null),
       (newPrice) => {
-        finalQuantity.value = newPrice || 0;
+        finalQuantity.value = newPrice ? quantity.value * newPrice : 0;
       }
     );
 
     const decrement = () => {
-      quantity.value = Math.max(Number(quantity.value) - 1, 1); // Ensure the quantity does not go below 1
-      finalQuantity.value = quantity.value * props.product.price;
+      if (props.product) {
+        quantity.value = Math.max(Number(quantity.value) - 1, 1);
+        finalQuantity.value = quantity.value * props.product.price;
+      }
     };
 
     const userLogin = ref([]);

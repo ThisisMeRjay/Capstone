@@ -2,30 +2,116 @@
   <div>
     <Header @search-completed="handleSearchCompleted"></Header>
   </div>
-  <div>
-    <!-- after navigator -->
-    <div
-      class="flex py-2 pl-2 sm:pl-8 bg-gradient-to-r from-blue-500/20 from-10% to-blue-500/0 to-100% gap-2 sm:text-sm text-xs"
+  <div
+    class="flex py-2 pl-2 sm:pl-8 bg-gradient-to-r from-blue-500/20 from-10% to-blue-500/0 to-100% gap-2 sm:text-sm text-xs"
+  >
+    <button
+      @click="handleSidebarCategory"
+      class="bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full text-slate-800 font-semibold shadow-lg border hover:border-slate-300"
     >
-      <button
-        @click="handleSidebarCategory"
-        class="bg-slate-700/10 py-2 px-4 rounded-full text-slate-800 font-semibold shadow-lg border"
+      Category
+    </button>
+    <button
+      @click="fetchProducts"
+      class="bg-blue-500 hover:bg-blue-600 py-2 text-slate-100 px-4 rounded-full font-semibold shadow"
+    >
+      Home
+    </button>
+    <button
+      @click="fetchAllStores"
+      class="bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full text-slate-800 font-semibold shadow-lg border hover:border-slate-300"
+    >
+      {{ selectedStore ? "Selected Store" : "View All Stores" }}
+    </button>
+    <div v-if="selectedStore" class="flex items-center gap-2">
+      <img
+        :src="'data:image/png;base64,' + selectedStore.logo"
+        :alt="selectedStore.store_name"
+        class="h-8 w-8 rounded-full"
+      />
+      <span class="text-gray-800 font-semibold">{{
+        selectedStore.store_name
+      }}</span>
+    </div>
+  </div>
+
+  <!-- Modal for viewing all stores -->
+  <div
+    v-if="showStoresModal"
+    class="fixed z-50 inset-0 overflow-y-auto"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+    >
+      <div
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        aria-hidden="true"
+      ></div>
+
+      <span
+        class="hidden sm:inline-block sm:align-middle sm:h-screen"
+        aria-hidden="true"
+        >&#8203;</span
       >
-        Category
-      </button>
-      <button
-        @click="fetchProducts"
-        class="bg-blue-500 py-2 text-slate-100 px-4 rounded-full font-semibold shadow"
+
+      <div
+        class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-7xl sm:w-full sm:p-6"
       >
-        Home
-      </button>
+        <div class="sm:flex sm:items-start">
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3
+              class="text-lg leading-6 font-medium text-gray-900"
+              id="modal-title"
+            >
+              All Stores
+            </h3>
+            <div class="mt-2">
+              <div
+                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+              >
+                <div
+                  v-for="store in storeName"
+                  :key="store.store_id"
+                  class="bg-white rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow"
+                  @click="selectStore(store.store_id)"
+                >
+                  <div class="flex justify-center items-center h-32">
+                    <img
+                      :src="'data:image/png;base64,' + store.logo"
+                      :alt="store.store_name"
+                      class="h-24"
+                    />
+                  </div>
+                  <div class="px-4 py-2 text-center">
+                    <p class="text-gray-800 font-semibold">
+                      {{ store.store_name }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+          <button
+            type="button"
+            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+            @click="showStoresModal = false"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
   <div :class="showCategory ? 'flex' : ''">
     <div
       v-if="showCategory"
-      class="text-base h-full w-72 shadow absolute z-10 sm:relative font-medium bg-gray-50 border border-r-slate-700/10"
+      class="text-base min-h-full w-72 shadow absolute z-10 sm:relative font-medium bg-gray-50 border border-r-slate-700/10"
     >
       <div class="min-h-screen">
         <p class="px-3 pt-5 pb-3 text-sm text-sky-800">Catergories</p>
@@ -38,25 +124,6 @@
           >
             <button class="py-1 text-xs my-1 px-2 rounded-md">
               {{ cat.category_name }}
-            </button>
-          </div>
-        </div>
-        <hr class="my-2" />
-
-        <!-- Stores filter -->
-        <div>
-          <h1 class="text-sm px-3 text-sky-800">Stores</h1>
-          <div
-            v-for="name in storeName"
-            :key="name.store_id"
-            class="mx-3 hover:bg-slate-700/10 rounded-md transition"
-            @click="filterbyStoreName(name.store_id)"
-          >
-            <button
-              class="py-2 text-sm flex gap-2 justify-start text-blue-500 items-center capitalize my-1 px-2 rounded-md"
-            >
-              <Icon icon="fa-solid:store" class="text-lg" />
-              <span class="font-semibold"> {{ name.store_name }}</span>
             </button>
           </div>
         </div>
@@ -261,7 +328,7 @@ export default {
           `${url}/Ecommerce/vue-project/src/backend/api.php?action=getStorename`
         );
         storeName.value = response.data;
-        console.log(response.data);
+        console.log("stores", response.data);
       } catch (error) {
         console.error("Error fetching storenames: ", error);
       }
@@ -438,7 +505,25 @@ export default {
       }
     };
 
+    const showStoresModal = ref(false);
+
+    const fetchAllStores = () => {
+      showStoresModal.value = true;
+    };
+
+    const selectedStore = ref(null);
+
+    const selectStore = (storeId) => {
+      filterbyStoreName(storeId);
+      const selectedStoreData = storeName.value.find(
+        (store) => store.store_id === storeId
+      );
+      selectedStore.value = selectedStoreData;
+      showStoresModal.value = false;
+    };
+
     return {
+      selectedStore,
       handleResize,
       products,
       getStars,
@@ -467,6 +552,9 @@ export default {
       GetStorename,
       temp_data,
       storeName,
+      showStoresModal,
+      fetchAllStores,
+      selectStore,
     };
   },
 };

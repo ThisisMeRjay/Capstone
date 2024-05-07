@@ -7,11 +7,13 @@ import axios from "axios";
 import { getDistance } from "geolib";
 import { API_URL } from "@/config";
 import moment from "moment-timezone";
+import ProductModal from "@/components/ProductModal.vue";
 export default {
   components: {
     Icon,
     SearchModal,
     LoginModal,
+    ProductModal,
   },
   emits: ["search-completed"],
 
@@ -90,8 +92,32 @@ export default {
             cart_id: userLogin.value.user_id,
           }
         );
-        cartItemsValue.value = res.data;
-        // console.log(userLogin.value.user_id);
+        console.log("cart value before", res.data);
+
+        // Merge and update cart items with totalPrice calculation
+        const updatedCartItems = [];
+        for (const item of res.data) {
+          // Calculate the total price for the item
+          item.totalPrice = item.price * item.quantity;
+
+          const existingItemIndex = updatedCartItems.findIndex(
+            (cartItem) => cartItem.product_id === item.product_id
+          );
+
+          if (existingItemIndex !== -1) {
+            // Product already in cart, update quantity and total price
+            const existingItem = updatedCartItems[existingItemIndex];
+            const newQuantity = existingItem.quantity + item.quantity;
+            const maxQuantity = Math.min(newQuantity, item.stock); // Limit quantity to available stock
+            existingItem.quantity = maxQuantity;
+            existingItem.totalPrice = existingItem.totalPrice * newQuantity; // Update total price based on new quantity
+          } else {
+            // New product, add to cart
+            updatedCartItems.push(item);
+          }
+        }
+
+        cartItemsValue.value = updatedCartItems;
         console.log("cart value: ", cartItemsValue.value);
       } catch (error) {
         console.error("Error fetching cart items:", error);
@@ -163,29 +189,31 @@ export default {
         (item) => item.product_id === productId
       );
       if (itemIndex !== -1) {
+        const currentItem = cartItemsValue.value[itemIndex];
         const updatedQuantity = Math.min(
-          Number(cartItemsValue.value[itemIndex].quantity || 1) + 1,
-          3
+          currentItem.quantity + 1,
+          currentItem.stock // Use the stock as the maximum limit
         );
         // Update the quantity of the specific product
         cartItemsValue.value[itemIndex].quantity = updatedQuantity;
       }
     };
 
-    //  update the quantity in local storage
     const decrement = (productId) => {
       const itemIndex = cartItemsValue.value.findIndex(
         (item) => item.product_id === productId
       );
       if (itemIndex !== -1) {
-        const updatedQuantity = Math.min(
-          Number(cartItemsValue.value[itemIndex].quantity || 1) - 1,
-          3
+        const currentItem = cartItemsValue.value[itemIndex];
+        const updatedQuantity = Math.max(
+          currentItem.quantity - 1,
+          1 // Ensure the quantity does not go below 1
         );
         // Update the quantity of the specific product
         cartItemsValue.value[itemIndex].quantity = updatedQuantity;
       }
     };
+
     const deleteCartItems = async (cart_id) => {
       let id = cart_id;
       // console.log(id);
@@ -269,8 +297,7 @@ export default {
           weightKg * quantity * weightFactor +
           volumeCm3 * quantity * volumeFactor;
 
-        const dis = baseShippingFee +
-          distanceMeters * distanceFactor;
+        const dis = baseShippingFee + distanceMeters * distanceFactor;
         const vol = volumeCm3 * quantity * volumeFactor;
         const wei = weightKg * quantity * weightFactor;
         console.log("Shipping Fee:", shippingFee.toFixed(2));
@@ -368,11 +395,7 @@ export default {
       console.log("Quantities", quantities);
       let eachshipping = itemsToCheckout.value.map((item) => item.shippingFee);
       let eachproduct = itemsToCheckout.value.map((item) =>
-        parseFloat(
-          (
-            parseFloat(item.price) * item.quantity
-          ).toFixed(2)
-        )
+        parseFloat((parseFloat(item.price) * item.quantity).toFixed(2))
       );
       console.log("each product", eachproduct);
       console.log("each shipping", eachshipping);
@@ -457,8 +480,6 @@ export default {
     const orderTracking = () => {
       toggleSidebar();
       showOrderTracking.value = !showOrderTracking.value;
-      
-
     };
     const closeOrderTracking = () => {
       showOrderTracking.value = false;
@@ -545,6 +566,7 @@ export default {
     const getUserprofile = async () => {
       try {
         console.log("id", userLogin.value.user_id);
+        console.log("IP", url);
         const res = await axios.post(
           `${url}/Ecommerce/vue-project/src/backend/auth.php?action=getProfile`,
           {
@@ -627,7 +649,39 @@ export default {
       refreshPage();
     };
 
+    const fetchSpecifications = async (productId) => {
+      console.log("specs id", productId);
+      try {
+        const response = await axios.get(
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=getProductSpecifications&id=${productId}`
+        );
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching specifications: ", error);
+        return null;
+      }
+    };
+
+    const selectedProduct = ref(null);
+    const isModalVisible = ref(false);
+
+    const showModal = async (product) => {
+      showCart.value = false;
+      console.log("modal good", product);
+      const specifications = await fetchSpecifications(product.product_id);
+      //   console.log("specs result in query", specifications);
+      selectedProduct.value = { ...product, specifications };
+      //   console.log("s afeifabsb", selectedProduct); // Combine product and specifications
+      console.log("selectedProduct good", selectedProduct.value);
+      isModalVisible.value = true;
+      //console.log(selectedProduct.value);
+    };
+
     return {
+      selectedProduct,
+      isModalVisible,
+      fetchSpecifications,
+      showModal,
       cancelOrder,
       saveProfile,
       triggerFileInput,

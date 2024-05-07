@@ -1,6 +1,6 @@
 <?php
 
-include('db.php');
+include ('db.php');
 
 // Set headers for CORS
 include ('header.php');
@@ -47,7 +47,8 @@ switch ($action) {
         break;
 }
 
-function submitReviews() {
+function submitReviews()
+{
     global $conn;
     $data = json_decode(file_get_contents("php://input"), true);
 
@@ -76,7 +77,7 @@ function submitReviews() {
         $result = $avgStmt->get_result();
         $row = $result->fetch_assoc();
         $avgRating = $row['average_rating'];
-        
+
         // Update the product's rating
         $updateQuery = "UPDATE products SET ratings = ? WHERE product_id = ?";
         $stmtUpdate = $conn->prepare($updateQuery);
@@ -123,7 +124,12 @@ function getStorename()
 {
     global $conn;
     $role = 'seller';
-    $stmt = $conn->prepare("SELECT * FROM user_store WHERE store_role = ?");
+    $stmt = $conn->prepare("SELECT 
+    us.*,
+    sl.logo
+    FROM user_store AS us
+    LEFT JOIN store_logo AS sl ON us.store_id = sl.store_id
+    WHERE us.store_role = ?");
     $stmt->bind_param("s", $role);
     $stmt->execute();
 
@@ -132,6 +138,7 @@ function getStorename()
 
     $specs = [];
     while ($row = $result->fetch_assoc()) {
+        $row['logo'] = base64_encode($row['logo']);
         $specs[] = $row;
     }
 
@@ -145,7 +152,7 @@ function trackOrder()
 
     $data = json_decode(file_get_contents("php://input"), true);
     $id = $data['id'];
-    
+
 
     // Use prepared statement to prevent SQL injection
     $stmt = $conn->prepare("SELECT 
@@ -190,9 +197,53 @@ function deleteCartItem()
 
     if (isset($data['id'])) {
         $id = $data['id'];
-        mysqli_query($conn, "DELETE FROM cart_items WHERE cart_item_id=$id");
-        $res['success'] = true;
-        $res['message'] = 'Delete successful.';
+
+        // Start transaction to ensure data integrity
+        mysqli_begin_transaction($conn);
+
+        try {
+            // Select the product_id and cart_id from the cart_items table
+            $selectQuery = "SELECT product_id, cart_id FROM cart_items WHERE cart_item_id = ?";
+            $stmt = mysqli_prepare($conn, $selectQuery);
+            mysqli_stmt_bind_param($stmt, 'i', $id);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+
+            if ($row = mysqli_fetch_assoc($result)) {
+                $product_id = $row['product_id'];
+                $cart_id = $row['cart_id'];
+
+                // Delete all cart items with the same product_id and cart_id
+                $deleteQuery = "DELETE FROM cart_items WHERE product_id = ? AND cart_id = ?";
+                $stmtDelete = mysqli_prepare($conn, $deleteQuery);
+                mysqli_stmt_bind_param($stmtDelete, 'ii', $product_id, $cart_id);
+                mysqli_stmt_execute($stmtDelete);
+
+                // Check if the delete was successful
+                if (mysqli_stmt_affected_rows($stmtDelete) > 0) {
+                    $res['success'] = true;
+                    $res['message'] = 'All items with product_id ' . $product_id . ' in cart_id ' . $cart_id . ' deleted successfully.';
+                } else {
+                    throw new Exception("No items found with product_id $product_id in cart_id $cart_id.");
+                }
+            } else {
+                throw new Exception("Item with ID $id not found.");
+            }
+
+            // Commit the transaction
+            mysqli_commit($conn);
+        } catch (Exception $e) {
+            // An error occurred, roll back the transaction
+            mysqli_rollback($conn);
+            $res['success'] = false;
+            $res['message'] = $e->getMessage();
+        }
+
+        // Close statement
+        mysqli_stmt_close($stmt);
+        if (isset($stmtDelete)) {
+            mysqli_stmt_close($stmtDelete);
+        }
     } else {
         $res['success'] = false;
         $res['message'] = 'ID not provided.';
@@ -200,6 +251,7 @@ function deleteCartItem()
 
     echo json_encode($res);
 }
+
 
 function CheckoutOrder()
 {
@@ -226,7 +278,7 @@ function CheckoutOrder()
         $price = $data['price'][$key];
         $revenueAmount = $data['revenue'][$key];
         $order_number = generateUniqueOrderNumber($conn);
-    
+
         $stmt->bind_param("iiidds", $order_number, $order_id, $product_id, $quantity, $price, $payment);
         $stmt->execute();
 
@@ -257,7 +309,8 @@ function CheckoutOrder()
     $conn->close();
 }
 
-function generateUniqueOrderNumber($conn) {
+function generateUniqueOrderNumber($conn)
+{
     do {
         // Generate random 11-digit number
         $order_number = rand(10000, 99999);
@@ -333,7 +386,7 @@ function fetchProducts()
     $sql = "SELECT 
                 p.*, 
                 i.inventory_id, 
-                i.quantity,
+                i.quantity AS stock,
                 us.store_name,
                 c.category_name
             FROM 
@@ -365,7 +418,7 @@ function fetchProducts()
     while ($row = $result->fetch_assoc()) {
         // Assuming $row['image'] contains the BLOB image data
         // Encode the image data to base64
-        if(isset($row['image'])) {
+        if (isset($row['image'])) {
             $row['image'] = base64_encode($row['image']);
         }
         $products[] = $row;
@@ -392,16 +445,16 @@ function fetchCartItems()
     p.*, 
     ci.*,
     i.location,
+    i.quantity AS stock,
     b.*
-   
 FROM 
     products AS p
 LEFT JOIN 
-    cart_items AS ci ON  ci.product_id = p.product_id
+    cart_items AS ci ON ci.product_id = p.product_id
 LEFT JOIN 
-    inventory AS i ON  i.product_id = ci.product_id
+    inventory AS i ON i.product_id = ci.product_id
 LEFT JOIN 
-    barangay AS b ON  b.barangay_id = i.location
+    barangay AS b ON b.barangay_id = i.location
 WHERE 
     ci.cart_id = ?");
     $stmt->bind_param("i", $id);
@@ -414,7 +467,9 @@ WHERE
     $products = [];
     while ($row = $result->fetch_assoc()) {
         // Assuming $row['image'] contains the BLOB image data
-        $row['image'] = base64_encode($row['image']);
+        if (!empty($row['image'])) {
+            $row['image'] = base64_encode($row['image']);
+        }
         $products[] = $row;
     }
 
