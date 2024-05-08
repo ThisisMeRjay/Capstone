@@ -176,7 +176,6 @@ import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { ref, watch, onMounted, reactive } from "vue";
 import { API_URL } from "@/config";
-import { compileScript } from "vue/compiler-sfc";
 export default {
   props: {
     isVisible: Boolean,
@@ -195,33 +194,54 @@ export default {
     const quantity = ref(1); // Initialize with product.quantity if product exists, or fallback to 1
     const finalQuantity = ref("");
     const isHeartRed = reactive([]);
+
     const closeModal = () => {
       emit("update:isVisible", false);
       reviews.value = [];
-      quantity.value = 1; // Reset quantity to product.quantity if product exists, or 1
     };
 
     const increment = () => {
       if (props.product) {
+        // Ensure the quantity is incremented by 1 and remains a decimal
         quantity.value = Math.min(
-          Number(quantity.value) + 1,
+          parseFloat((Number(quantity.value) + 1).toFixed(2)), // Adding 1 and fixing to two decimal places
           props.product.stock
         );
-        finalQuantity.value = quantity.value * props.product.price;
+        // Calculate final quantity in decimal
+        finalQuantity.value = parseFloat(
+          (quantity.value * props.product.price).toFixed(2)
+        );
       }
     };
 
     watch(
       () => (props.product ? props.product.price : null),
       (newPrice) => {
-        finalQuantity.value = newPrice ? quantity.value * newPrice : 0;
+        if (props.product.quantity) {
+          // Ensure quantity is treated as a decimal
+          quantity.value = parseFloat(props.product.quantity.toFixed(2));
+        } else {
+          // Start from 1.00 if no initial quantity set
+          quantity.value = 1.0;
+        }
+        // Calculate new final quantity based on new price
+        finalQuantity.value = newPrice
+          ? parseFloat((quantity.value * newPrice).toFixed(2))
+          : 0;
       }
     );
 
     const decrement = () => {
       if (props.product) {
-        quantity.value = Math.max(Number(quantity.value) - 1, 1);
-        finalQuantity.value = quantity.value * props.product.price;
+        // Ensure the quantity is decremented by 1 and remains a decimal
+        quantity.value = Math.max(
+          parseFloat((Number(quantity.value) - 1).toFixed(2)),
+          1
+        );
+        // Calculate final quantity in decimal
+        finalQuantity.value = parseFloat(
+          (quantity.value * props.product.price).toFixed(2)
+        );
       }
     };
 

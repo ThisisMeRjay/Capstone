@@ -40,6 +40,9 @@ switch ($action) {
     case 'submitReviews':
         submitReviews();
         break;
+    case 'updateCart':
+        updateCart();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
@@ -358,25 +361,76 @@ function addCart()
 {
     global $conn, $res;
     $data = json_decode(file_get_contents("php://input"), true);
+
     // Extract data from the array
     $product_id = $data['product_id'];
     $quantity = $data['quantity'];
     $cart_id = $data['cart_id'];
 
-    $stmt = $conn->prepare("INSERT INTO cart_items (cart_id, product_id, quantity) VALUES (?, ?, ?)");
-    $stmt->bind_param("iii", $cart_id, $product_id, $quantity);
-    $stmt->execute();
-    if ($stmt->affected_rows > 0) {
-        $res['success'] = true;
-        $res['message'] = 'Product added successfully.';
+    // Check if the product already exists in the cart
+    $checkStmt = $conn->prepare("SELECT quantity FROM cart_items WHERE cart_id = ? AND product_id = ?");
+    $checkStmt->bind_param("ii", $cart_id, $product_id);
+    $checkStmt->execute();
+    $result = $checkStmt->get_result(); 
+
+    if ($result->num_rows > 0) {
+        // If product exists, update the quantity
+
+        $updateStmt = $conn->prepare("UPDATE cart_items SET quantity = ? WHERE cart_id = ? AND product_id = ?");
+        $updateStmt->bind_param("iii", $quantity, $cart_id, $product_id);
+        $updateStmt->execute();
+
+        if ($updateStmt->affected_rows > 0) {
+            $res['success'] = true;
+            $res['message'] = 'Quantity updated successfully.';
+        } else {
+            $res['success'] = false;
+            $res['message'] = 'Failed to update quantity.';
+        }
+        $updateStmt->close();
     } else {
-        $res['success'] = false;
-        $res['message'] = 'Failed to add product.';
+        // If product does not exist, insert new record
+        $insertStmt = $conn->prepare("INSERT INTO cart_items (cart_id, product_id, quantity) VALUES (?, ?, ?)");
+        $insertStmt->bind_param("iii", $cart_id, $product_id, $quantity);
+        $insertStmt->execute();
+
+        if ($insertStmt->affected_rows > 0) {
+            $res['success'] = true;
+            $res['message'] = 'Product added successfully.';
+        } else {
+            $res['success'] = false;
+            $res['message'] = 'Failed to add product.';
+        }
+        $insertStmt->close();
     }
-    $stmt->close();
+
+    $checkStmt->close();
     echo json_encode($res);
 }
 
+function updateCart()
+{
+    global $conn, $res;
+    $data = json_decode(file_get_contents('php://input'), true);
+    $product_id = $data['product_id'];
+    $quantity = $data['quantity'];
+    $cart_id = $data['cart_id'];
+
+    // Update the quantity in the cart table
+    $sql = "UPDATE cart_items SET quantity = ? WHERE product_id = ? AND cart_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iis", $quantity, $product_id, $cart_id);
+    $stmt->execute();
+
+    // Return a success or error response
+    if ($stmt->affected_rows > 0) {
+        $response = array('success' => true);
+    } else {
+        $response = array('success' => false, 'error' => 'Failed to update cart quantity');
+    }
+
+    echo json_encode($response);
+}
 
 function fetchProducts()
 {
@@ -446,7 +500,8 @@ function fetchCartItems()
     ci.*,
     i.location,
     i.quantity AS stock,
-    b.*
+    b.*,
+    us.*
 FROM 
     products AS p
 LEFT JOIN 
@@ -455,6 +510,8 @@ LEFT JOIN
     inventory AS i ON i.product_id = ci.product_id
 LEFT JOIN 
     barangay AS b ON b.barangay_id = i.location
+LEFT JOIN 
+    user_store AS us ON us.store_id = p.store_id
 WHERE 
     ci.cart_id = ?");
     $stmt->bind_param("i", $id);

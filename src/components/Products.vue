@@ -261,7 +261,6 @@
           <product-modal
             :is-visible="isModalVisible"
             :product="selectedProduct"
-            :specifications="spec_data"
             @update:isVisible="isModalVisible = $event"
           ></product-modal>
         </div>
@@ -307,18 +306,18 @@ export default {
       } else {
         products.value = temp_data.value;
       }
-      //    console.log("store ID", storeID);
-      // Assuming product.value was a typo and it should be products.value
-      const filtered = products.value.filter((product) => {
-        // Debugging: Check if IDs match
-        const isMatch = product.store_id === storeID;
-        //    console.log("Is Match:", isMatch);
 
-        return isMatch;
-      });
-
-      //   console.log("Filtered products:", filtered);
-      products.value = filtered;
+      if (selectedStore.value) {
+        // Filter based on the selected store
+        const filtered = products.value.filter((product) => {
+          const isMatch = product.store_id === storeID;
+          return isMatch;
+        });
+        products.value = filtered;
+      } else {
+        // No store selected, show all products
+        products.value = temp_data.value;
+      }
     };
 
     //Get stores
@@ -335,45 +334,77 @@ export default {
     };
 
     const filterByRating = (minRatingValue) => {
-      // Filter products based on rounded ratings
       if (temp_data.value.length === 0) {
         temp_data.value = products.value;
       } else {
         products.value = temp_data.value;
       }
-      const filtered = products.value.filter((product) => {
-        const roundedRating = Math.round(product.ratings); // Assuming product.ratings is a decimal
-        return roundedRating >= minRatingValue;
-      });
-      products.value = filtered;
+
+      if (selectedStore.value) {
+        // Filter by rating for the selected store
+        const filtered = products.value.filter((product) => {
+          const roundedRating = Math.round(product.ratings);
+          const isRatingMatch = roundedRating >= minRatingValue;
+          const isStoreMatch =
+            product.store_id === selectedStore.value.store_id;
+          return isRatingMatch && isStoreMatch;
+        });
+        products.value = filtered;
+      } else {
+        // No store selected, filter all products by rating
+        const filtered = products.value.filter((product) => {
+          const roundedRating = Math.round(product.ratings);
+          return roundedRating >= minRatingValue;
+        });
+        products.value = filtered;
+      }
     };
 
     const filterByPrice = () => {
       // Clear any previously set temporary data for other filters
-
-      // Reset to all products if the temporary price data is not already set
       if (temp_data.value.length === 0) {
         temp_data.value = products.value;
       } else {
-        // Use the temporary data as the current product list
         products.value = temp_data.value;
       }
 
       // Check if both minPrice and maxPrice are zero
       if (minPrice.value === 0 && maxPrice.value === 0) {
-        products.value = temp_data.value;
-        console.log("No price filtering applied, returning all products.");
+        if (selectedStore.value) {
+          // Filter by store when no price range is specified
+          const filtered = products.value.filter((product) => {
+            const isStoreMatch =
+              product.store_id === selectedStore.value.store_id;
+            return isStoreMatch;
+          });
+          products.value = filtered;
+        } else {
+          products.value = temp_data.value;
+          console.log("No price filtering applied, returning all products.");
+        }
         return;
       }
 
-      // Proceed with filtering if minPrice or maxPrice are not zero
-      const filtered = products.value.filter((product) => {
-        const price = parseFloat(product.price); // Convert price string to a number
-        return price >= minPrice.value && price <= maxPrice.value;
-      });
+      if (selectedStore.value) {
+        // Filter by price range for the selected store
+        const filtered = products.value.filter((product) => {
+          const price = parseFloat(product.price);
+          const isPriceMatch =
+            price >= minPrice.value && price <= maxPrice.value;
+          const isStoreMatch =
+            product.store_id === selectedStore.value.store_id;
+          return isPriceMatch && isStoreMatch;
+        });
+        products.value = filtered;
+      } else {
+        // No store selected, filter all products by price range
+        const filtered = products.value.filter((product) => {
+          const price = parseFloat(product.price);
+          return price >= minPrice.value && price <= maxPrice.value;
+        });
+        products.value = filtered;
+      }
 
-      // Update the main products list with the filtered results
-      products.value = filtered;
       console.log("Filtered range", products.value);
     };
 
@@ -428,6 +459,8 @@ export default {
         //  console.log("API Response Data:", response.data);
         products.value = response.data;
 
+        selectedStore.value = "";
+
         selectedCategoryName.value = "";
       } catch (error) {
         //     console.error("Error fetching products: ", error);
@@ -465,20 +498,26 @@ export default {
       } else {
         products.value = temp_data.value;
       }
-      //   console.log("Category id", id);
-      // Assuming product.value was a typo and it should be products.value
-      const filtered = products.value.filter((product) => {
-        // Debugging: Check if IDs match
-        selectedCategoryName.value = name;
-        console.log("cat", selectedCategoryName.value);
-        const isMatch = product.category_id === id;
-        //  console.log("Is Match:", isMatch);
 
-        return isMatch;
-      });
+      if (selectedStore.value) {
+        // Filter by category for the selected store
+        const filtered = products.value.filter((product) => {
+          const isCategoryMatch = product.category_id === id;
+          const isStoreMatch =
+            product.store_id === selectedStore.value.store_id;
+          return isCategoryMatch && isStoreMatch;
+        });
+        products.value = filtered;
+      } else {
+        // No store selected, filter all products by category
+        const filtered = products.value.filter((product) => {
+          const isMatch = product.category_id === id;
+          return isMatch;
+        });
+        products.value = filtered;
+      }
 
-      //   console.log("Filtered products:", filtered);
-      products.value = filtered;
+      selectedCategoryName.value = name;
       handleResize();
     };
 
@@ -514,11 +553,16 @@ export default {
     const selectedStore = ref(null);
 
     const selectStore = (storeId) => {
-      filterbyStoreName(storeId);
-      const selectedStoreData = storeName.value.find(
-        (store) => store.store_id === storeId
-      );
-      selectedStore.value = selectedStoreData;
+      if (storeId) {
+        filterbyStoreName(storeId);
+        const selectedStoreData = storeName.value.find(
+          (store) => store.store_id === storeId
+        );
+        selectedStore.value = selectedStoreData;
+      } else {
+        selectedStore.value = null;
+        fetchProducts();
+      }
       showStoresModal.value = false;
     };
 

@@ -1,13 +1,14 @@
 import SearchModal from "@/components/SearchModal.vue";
 import LoginModal from "@/components/LoginModal.vue";
 import { Icon } from "@iconify/vue";
-import { onMounted, ref, computed, toRefs } from "vue";
+import { onMounted, ref, computed, toRefs, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { getDistance } from "geolib";
 import { API_URL } from "@/config";
 import moment from "moment-timezone";
 import ProductModal from "@/components/ProductModal.vue";
+import debounce from "lodash/debounce";
 export default {
   components: {
     Icon,
@@ -184,7 +185,7 @@ export default {
     // set  initial quantities from local storage or default values
 
     //  Update the quantity in local storage when a user changes it
-    const increment = (productId) => {
+    const increment = async (productId) => {
       const itemIndex = cartItemsValue.value.findIndex(
         (item) => item.product_id === productId
       );
@@ -194,12 +195,77 @@ export default {
           currentItem.quantity + 1,
           currentItem.stock // Use the stock as the maximum limit
         );
-        // Update the quantity of the specific product
-        cartItemsValue.value[itemIndex].quantity = updatedQuantity;
+        console.log("cart ID ", userLogin.value.user_id);
+
+        try {
+          // Make an API call to update the cart quantity
+          const response = await axios.post(
+            `${url}/Ecommerce/vue-project/src/backend/api.php?action=updateCart`,
+            {
+              product_id: productId,
+              quantity: updatedQuantity,
+              cart_id: userLogin.value.user_id,
+            }
+          );
+          console.log("response update ", response.data);
+
+          // Update the quantity of the specific product
+          cartItemsValue.value[itemIndex].quantity = updatedQuantity;
+          if (selectedProduct.value.product_id === productId) {
+            selectedProduct.value.quantity = updatedQuantity;
+            console.log("cart item with new quantity ", selectedProduct.value);
+          }
+        } catch (error) {
+          console.error("Error updating cart quantity:", error);
+        }
       }
     };
 
-    const decrement = (productId) => {
+    const updatedPrices = ref({});
+    let isUpdatingFromFirstWatch = false;
+    const updatePrices = debounce(() => {
+      const updatedPriceData = {};
+      cartItemsValue.value.forEach((item) => {
+        const numericPrice = parseFloat(item.price); // Ensure the price is a number
+        updatedPriceData[item.product_id] = parseFloat(numericPrice.toFixed(2));
+      });
+      updatedPrices.value = updatedPriceData;
+      cartItemsValue.value = cartItemsValue.value.map((item) => {
+        const numericPrice = parseFloat(item.price); // Ensure the price is a number
+        const newPrice = updatedPrices.value[item.product_id] || numericPrice;
+        const formattedNewPrice = parseFloat(newPrice.toFixed(2));
+        const newTotalPrice = newPrice
+          ? parseFloat((item.quantity * formattedNewPrice).toFixed(2))
+          : 0;
+        return { ...item, price: formattedNewPrice, totalPrice: newTotalPrice };
+      });
+    }, 100);
+
+    watch(
+      () =>
+        cartItemsValue.value.map((item) => ({
+          productId: item.product_id,
+          price: item.price,
+        })),
+      () => {
+        updatePrices();
+      },
+      { deep: true }
+    );
+
+    watch(
+      () => updatedPrices.value,
+      () => {
+        if (!isUpdatingFromFirstWatch) {
+          isUpdatingFromFirstWatch = true;
+          updatePrices();
+          isUpdatingFromFirstWatch = false;
+        }
+      },
+      { deep: true }
+    );
+
+    const decrement = async (productId) => {
       const itemIndex = cartItemsValue.value.findIndex(
         (item) => item.product_id === productId
       );
@@ -209,8 +275,26 @@ export default {
           currentItem.quantity - 1,
           1 // Ensure the quantity does not go below 1
         );
-        // Update the quantity of the specific product
-        cartItemsValue.value[itemIndex].quantity = updatedQuantity;
+
+        try {
+          // Make an API call to update the cart quantity
+          const response = await axios.post(
+            `${url}/Ecommerce/vue-project/src/backend/api.php?action=updateCart`,
+            {
+              product_id: productId,
+              quantity: updatedQuantity,
+              cart_id: userLogin.value.user_id,
+            }
+          );
+
+          // Update the quantity of the specific product
+          cartItemsValue.value[itemIndex].quantity = updatedQuantity;
+          if (selectedProduct.value.product_id === productId) {
+            selectedProduct.value.quantity = updatedQuantity;
+          }
+        } catch (error) {
+          console.error("Error updating cart quantity:", error);
+        }
       }
     };
 
@@ -350,11 +434,21 @@ export default {
       // After calculating shipping for all items, assign them to itemsToCheckout
       itemsToCheckout.value = itemsWithShipping;
 
+      // Assuming itemsToCheckout.value is an array of objects, each with a 'quantity' property
+      totalQuantity.value = itemsToCheckout.value.reduce(
+        (accumulator, currentItem) => {
+          return accumulator + currentItem.quantity;
+        },
+        0
+      ); // Initial value of the
+
       // Assign the total price to priceTotalAll
       priceTotalAll.value = priceTotalPerItem.value.toFixed(2);
 
       console.log("Items to checkout:", itemsToCheckout.value);
     };
+
+    const totalQuantity = ref("");
 
     const onDelivery = () => {
       selectedPayment.value = "cash on delivery";
@@ -662,7 +756,7 @@ export default {
       }
     };
 
-    const selectedProduct = ref(null);
+    const selectedProduct = ref([]);
     const isModalVisible = ref(false);
 
     const showModal = async (product) => {
@@ -676,8 +770,32 @@ export default {
       isModalVisible.value = true;
       //console.log(selectedProduct.value);
     };
+    const selectedItem = ref(null);
+    const openModalId = ref(null);
+
+    function toggleStoreModal(id) {
+      console.log("id", id);
+      if (openModalId.value === id) {
+        // If the modal for this ID is already open, close it
+        openModalId.value = null;
+      } else {
+        // Otherwise, open the modal for this ID and find the corresponding item
+        selectedItem.value = itemsToCheckout.value.find(
+          (item) => item.product_id === id
+        );
+        openModalId.value = id;
+      }
+    }
+
+    function closeStoreModal() {
+      openModalId.value = null;
+    }
 
     return {
+      openModalId,
+      selectedItem,
+      toggleStoreModal,
+      closeStoreModal,
       selectedProduct,
       isModalVisible,
       fetchSpecifications,
@@ -744,6 +862,10 @@ export default {
       onPyment,
       submitOrder,
       selectedPayment,
+      updatedPrices,
+      isUpdatingFromFirstWatch,
+      updatePrices,
+      totalQuantity,
     };
   },
 };

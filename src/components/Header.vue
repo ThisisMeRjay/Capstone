@@ -618,261 +618,6 @@
         </div>
       </div>
     </div>
-    <!-- cart modal -->
-    <div v-if="showCart" class="flex justify-center items-center">
-      <div class="cart-modal z-30">
-        <div
-          class="bg-slate-300 border border-slate-900/20 shadow-lg px-3 py-2 rounded-lg"
-        >
-          <div class="flex justify-end">
-            <div
-              @click="closeCart"
-              class="bg-slate-600/20 rounded-full text-red-500 shadow p-2"
-            >
-              <Icon icon="iconamoon:close-bold" />
-            </div>
-          </div>
-          <div>
-            <h1 class="font-semibold text-lg">Cart</h1>
-          </div>
-          <div
-            v-if="cartItemsValue.length !== 0"
-            class="p-2 bg-slate-500/10 h-96 overflow-scroll overflow-x-hidden rounded-md shadow-sm"
-          >
-            <div class="flex gap-2 font-semibold mb-2">
-              <input type="checkbox" @change="checkAll" />Select All
-            </div>
-            <div v-for="items in cartItemsValue" :key="items">
-              <div class="my-1 relative">
-                <div class="flex justify-start items-center gap-2">
-                  <input
-                    type="checkbox"
-                    :checked="isChecked(items.product_id)"
-                    @change="toggleCheckbox(items.product_id)"
-                  />
-
-                  <button
-                    @click="deleteCartItems(items.cart_item_id)"
-                    class="flex my-1 absolute top-0 right-0 text-red-500 p-1 rounded-full bg-slate-400/75 shadow-sm"
-                  >
-                    <Icon icon="ic:round-delete" class="text-lg text-red-500" />
-                  </button>
-
-                  <img
-                    @click="showModal(items)"
-                    :src="'data:image/png;base64,' + items.image"
-                    alt=""
-                    class="w-16 h-16 rounded-md"
-                  />
-                  <div>
-                    <h1 class="font-bold text-xs">
-                      {{ items.product_name }}
-                    </h1>
-                    <p class="text-xs font-semibold">{{ items.totalPrice }}</p>
-
-                    <div class="flex gap-2">
-                      <div
-                        class="flex justify-center items-center gap-2 font-semibold text-slate-800"
-                      >
-                        <p>Qtty:</p>
-                        <p
-                          class="p-0.5 flex justify-center items-center w-7 rounded-md border-blue-500/50 border"
-                        >
-                          {{ items.quantity }}
-                        </p>
-                      </div>
-                      <button
-                        @click="decrement(items.product_id)"
-                        :disabled="items.quantity === 1"
-                        class="p-0.5 flex justify-center items-center w-7 rounded-full border"
-                      >
-                        <Icon icon="tabler:minus" />
-                      </button>
-                      <button
-                        @click="increment(items.product_id)"
-                        :disabled="items.quantity === items.stock"
-                        class="p-0.5 flex justify-center items-center w-7 rounded-full border"
-                      >
-                        <Icon icon="mingcute:add-line" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <hr />
-            </div>
-            <!--  -->
-            <div
-              v-if="atLeastOneItemChecked || allItemsChecked"
-              class="gap-2 my-2 shadow justify-center w-full items-center"
-            >
-              <button
-                @click="checkout"
-                class="flex justify-center w-full items-center gap-2 bg-blue-500 text-gray-100 p-2 rounded-md"
-              >
-                <Icon
-                  icon="ic:outline-shopping-cart-checkout"
-                  class="text-lg"
-                />Checkout
-              </button>
-            </div>
-            <!--  -->
-          </div>
-          <div v-if="cartItemsValue.length === 0">
-            <p class="px-5 py-2 text-red-500 bg-red-400/10 rounded-full shadow">
-              No items
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <product-modal
-      :is-visible="isModalVisible"
-      :product="selectedProduct"
-      :specifications="spec_data"
-      @update:isVisible="isModalVisible = $event"
-    ></product-modal>
-
-    <!-- payment popup -->
-    <div
-      v-if="showPayment"
-      class="justify-center items-center flex w-full h-full overflow-scroll"
-    >
-      <div
-        @click="closePayment()"
-        class="fixed z-40 w-full top-0 left-0 h-full backdrop-blur bg-slate-900 bg-opacity-50"
-      ></div>
-      <div
-        class="fixed z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 justify-center items-center flex"
-      >
-        <div class="overflow-scroll bg-slate-100 h-[500px] rounded-md">
-          <div class="p-5 bg-slate-100 rounded-md h-full w-96">
-            <div class="h-full">
-              <h1 class="font-semibold text-lg">Checkout</h1>
-              <div class="bg-slate-200 rounded-md p-2 my-1">
-                <span class="text-slate-900 text-sm">Customer Information</span>
-                <div v-if="userLogin" class="text-xs text-slate-800">
-                  <p>Name: {{ userLogin.username }}</p>
-                  <p>Contact No: {{ userLogin.contact_number }}</p>
-                  <p>Address: {{ userLogin.address }}, {{ userLogin.name }}</p>
-                </div>
-              </div>
-              <div class="bg-slate-200 rounded-md p-2">
-                <div
-                  class="my-1"
-                  v-for="(items, index) in itemsToCheckout"
-                  :key="index"
-                >
-                  <hr class="border my-2 border-gray-700/10" />
-                  <div>
-                    <div class="flex gap-2 justify-start items-center">
-                      <div>
-                        <img
-                          :src="'data:image/png;base64,' + items.image"
-                          alt=""
-                          class="w-10 h-10 rounded-md"
-                        />
-                      </div>
-                      <div>
-                        <span class="text-sm font-semibold">{{
-                          items.product_name
-                        }}</span>
-                        <p class="text-xs">{{ items.price }}</p>
-                        <p class="text-xs">x{{ items.quantity }}</p>
-                      </div>
-                    </div>
-                    <div class="my-2">
-                      <div
-                        class="flex gap-2 justify-between items-center border-y p-2 border-cyan-500/50 bg-cyan-300/10"
-                      >
-                        <span class="text-sm font-medium">Shipping Fee</span>
-                        <p class="text-xs">
-                          {{ items.shippingFee.toFixed(2) }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="my-1">
-                <div
-                  class="flex gap-2 justify-between items-center p-2 rounded-md bg-blue-300/10"
-                >
-                  <span class="text-xs"
-                    >Order Total
-                    <span>({{ itemsToCheckout.length }})</span> Item</span
-                  >
-                  <p class="text-sm font-medium text-red-500">
-                    ₱{{ priceTotalAll }}
-                  </p>
-                </div>
-              </div>
-              <div class="my-1">
-                <div
-                  class="flex gap-2 justify-between items-center p-2 rounded-md bg-blue-500/10"
-                >
-                  <div class="w-full">
-                    <span class="text-sm font-semibold"> Payment Option</span>
-                    <div class="block w-full my-2">
-                      <button
-                        @click="onDelivery"
-                        :class="{
-                          ' shadow-md shadow-green-500/50 border-green-500':
-                            selectedPayment === 'cash on delivery',
-                        }"
-                        class="p-2 bg-green-500/10 flex justify-center items-center gap-1 rounded-full my-1 border border-gray-600/50 w-full text-green-600 font-medium text-sm"
-                      >
-                        <Icon icon="iconoir:cash-solid" class="text-lg" /> Cash
-                        on Delivery
-                      </button>
-                      <button
-                        @click="onPyment"
-                        disabled
-                        :class="{
-                          ' shadow-md shadow-blue-500/50 border-blue-500':
-                            selectedPayment === 'payment',
-                        }"
-                        class="p-2 bg-green-blue/10 rounded-full flex justify-center items-center gap-1 my-1 border border-gray-600/50 w-full text-gray-600 font-medium text-sm"
-                      >
-                        <Icon icon="material-symbols:wallet" class="text-lg" />
-                        Payment Center/E-wallet
-                      </button>
-                      <button
-                        @click="onCredit"
-                        disabled
-                        :class="{
-                          ' shadow-md shadow-orange-500/50 border-orange-500':
-                            selectedPayment === 'credit',
-                        }"
-                        class="p-2 bg-green-orange/10 rounded-full flex justify-center items-center gap-1 my-1 border border-gray-600/50 w-full text-gray-600 font-medium text-sm"
-                      >
-                        <Icon
-                          icon="material-symbols:credit-card"
-                          class="text-lg"
-                        />
-                        Credit Card
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="my-3">
-                <button
-                  :disabled="selectedPayment === ''"
-                  :class="{
-                    ' cursor-not-allowed opacity-75': selectedPayment === '',
-                  }"
-                  @click="submitOrder"
-                  class="w-full rounded-full bg-blue-500 p-2 text-slate-100 text-lg font-semibold shadow-md shadow-blue-500/50"
-                >
-                  Place Order
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!--  -->
     <!-- cart modal -->
@@ -972,6 +717,303 @@
       </div>
     </div>
   </div>
+  <!-- cart modal -->
+  <div
+    v-if="showCart"
+    class="flex justify-center items-center"
+    @click="closeCart"
+  >
+    <div class="cart-modal z-30" @click.stop>
+      <div
+        class="bg-slate-300 border border-slate-900/20 shadow-lg px-3 py-2 rounded-lg"
+      >
+        <div class="flex justify-end">
+          <div
+            @click="closeCart"
+            class="bg-slate-600/20 rounded-full text-red-500 shadow p-2"
+          >
+            <Icon icon="iconamoon:close-bold" />
+          </div>
+        </div>
+        <div>
+          <h1 class="font-semibold text-lg">Cart</h1>
+        </div>
+        <div
+          v-if="cartItemsValue.length !== 0"
+          class="p-2 bg-slate-500/10 h-96 overflow-scroll overflow-x-hidden rounded-md shadow-sm"
+        >
+          <div class="flex gap-2 font-semibold mb-2">
+            <input type="checkbox" @change="checkAll" />Select All
+          </div>
+          <div v-for="items in cartItemsValue" :key="items">
+            <div class="my-1 relative">
+              <div class="flex justify-start items-center gap-2">
+                <input
+                  type="checkbox"
+                  :checked="isChecked(items.product_id)"
+                  @change="toggleCheckbox(items.product_id)"
+                />
+
+                <button
+                  @click="deleteCartItems(items.cart_item_id)"
+                  class="flex my-1 absolute top-0 right-0 text-red-500 p-1 rounded-full bg-slate-400/75 shadow-sm"
+                >
+                  <Icon icon="ic:round-delete" class="text-lg text-red-500" />
+                </button>
+
+                <img
+                  @click="showModal(items)"
+                  :src="'data:image/png;base64,' + items.image"
+                  alt=""
+                  class="w-16 h-16 rounded-md"
+                />
+                <div>
+                  <h1 class="font-bold text-xs">
+                    {{ items.product_name }}
+                  </h1>
+                  <p class="text-xs font-semibold">{{ items.totalPrice }}</p>
+
+                  <div class="flex gap-2">
+                    <div
+                      class="flex justify-center items-center gap-2 font-semibold text-slate-800"
+                    >
+                      <p>Qtty:</p>
+                      <p
+                        class="p-0.5 flex justify-center items-center w-7 rounded-md border-blue-500/50 border"
+                      >
+                        {{ items.quantity }}
+                      </p>
+                    </div>
+                    <button
+                      @click="decrement(items.product_id)"
+                      :disabled="items.quantity === 1"
+                      class="p-0.5 flex justify-center items-center w-7 rounded-full border"
+                    >
+                      <Icon icon="tabler:minus" />
+                    </button>
+                    <button
+                      @click="increment(items.product_id)"
+                      :disabled="items.quantity === items.stock"
+                      class="p-0.5 flex justify-center items-center w-7 rounded-full border"
+                    >
+                      <Icon icon="mingcute:add-line" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr />
+          </div>
+          <!--  -->
+          <div
+            v-if="atLeastOneItemChecked || allItemsChecked"
+            class="gap-2 my-2 shadow justify-center w-full items-center"
+          >
+            <button
+              @click="checkout"
+              class="flex justify-center w-full items-center gap-2 bg-blue-500 text-gray-100 p-2 rounded-md"
+            >
+              <Icon
+                icon="ic:outline-shopping-cart-checkout"
+                class="text-lg"
+              />Checkout
+            </button>
+          </div>
+          <!--  -->
+        </div>
+        <div v-if="cartItemsValue.length === 0">
+          <p class="px-5 py-2 text-red-500 bg-red-400/10 rounded-full shadow">
+            No items
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <product-modal
+    :is-visible="isModalVisible"
+    :product="selectedProduct"
+    @update:isVisible="isModalVisible = $event"
+  ></product-modal>
+
+  <!-- payment popup -->
+  <div
+    v-if="showPayment"
+    class="justify-center items-center flex w-full h-full overflow-scroll"
+  >
+    <div
+      @click="closePayment()"
+      class="fixed z-40 w-full top-0 left-0 h-full backdrop-blur bg-slate-900 bg-opacity-50"
+    ></div>
+    <div
+      class="fixed z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 justify-center items-center flex"
+    >
+      <div class="overflow-scroll bg-slate-100 h-[500px] rounded-md">
+        <div class="p-5 bg-slate-100 rounded-md h-full w-96">
+          <div class="h-full">
+            <div class="flex justify-end">
+              <div
+                @click="closePayment"
+                class="bg-slate-600/20 rounded-full text-red-500 shadow p-2"
+              >
+                <Icon icon="iconamoon:close-bold" />
+              </div>
+            </div>
+            <h1 class="font-semibold text-lg">Checkout</h1>
+            <div class="bg-slate-200 rounded-md p-2 my-1">
+              <span class="text-slate-900 text-sm">Customer Information</span>
+              <div v-if="userLogin" class="text-xs text-slate-800">
+                <p>Name: {{ userLogin.username }}</p>
+                <p>Contact No: {{ userLogin.contact_number }}</p>
+                <p>Address: {{ userLogin.address }}, {{ userLogin.name }}</p>
+              </div>
+            </div>
+            <div class="bg-slate-200 rounded-md p-2">
+              <div
+                class="my-1"
+                v-for="(items, index) in itemsToCheckout"
+                :key="index"
+              >
+                <div>
+                  <div class="flex gap-2 justify-start items-center">
+                    <div>
+                      <img
+                        :src="'data:image/png;base64,' + items.image"
+                        alt=""
+                        class="w-10 h-10 rounded-md"
+                      />
+                    </div>
+                    <div class="w-full">
+                      <div class="flex justify-between">
+                        <span class="text-sm font-semibold">{{
+                          items.product_name
+                        }}</span>
+                        <span
+                          class="text-sm font-semibold bg-slate-600/30 rounded p-1"
+                          @click="toggleStoreModal(items.product_id)"
+                          >{{ items.store_name }}</span
+                        >
+                        <!-- Modal Element -->
+                        <div
+                          v-if="openModalId === items.product_id"
+                          class="modal absolute inset-x-0 mx-3 md:right-0 md:mt-1 md:w-64 md:translate-x-full bg-white shadow-lg rounded-lg p-4 transition-transform"
+                        >
+                          <div class="flex justify-end">
+                            <button
+                              @click="closeStoreModal"
+                              class="rounded-full p-1 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                            >
+                              <Icon icon="iconamoon:close-bold" />
+                            </button>
+                          </div>
+                          <div class="mt-2">
+                            <h3 class="font-semibold text-lg flex justify-center">
+                              {{ selectedItem.store_name }}
+                            </h3>
+                            <p class="text-sm mt-1">
+                              Address: {{ selectedItem.store_address }}
+                            </p>
+                            <p class="text-sm mt-1">
+                              Contact no: {{ selectedItem.store_contact_number }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <p class="text-xs">{{ items.price }}</p>
+                      <p class="text-xs">x{{ items.quantity }}</p>
+                    </div>
+                  </div>
+                  <div class="my-2">
+                    <div
+                      class="flex gap-2 justify-between items-center border-y p-2 border-cyan-500/50 bg-cyan-300/10"
+                    >
+                      <span class="text-sm font-medium">Shipping Fee</span>
+                      <p class="text-xs">
+                        {{ items.shippingFee.toFixed(2) }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <hr class="border my-2 border-gray-700/10" />
+              </div>
+            </div>
+            <div class="my-1">
+              <div
+                class="flex gap-2 justify-between items-center p-2 rounded-md bg-blue-300/10"
+              >
+                <span class="text-xs"
+                  >Order Total <span>({{ totalQuantity }})</span> Item</span
+                >
+                <p class="text-sm font-medium text-red-500">
+                  ₱{{ priceTotalAll }}
+                </p>
+              </div>
+            </div>
+            <div class="my-1">
+              <div
+                class="flex gap-2 justify-between items-center p-2 rounded-md bg-blue-500/10"
+              >
+                <div class="w-full">
+                  <span class="text-sm font-semibold"> Payment Option</span>
+                  <div class="block w-full my-2">
+                    <button
+                      @click="onDelivery"
+                      :class="{
+                        ' shadow-md shadow-green-500/50 border-green-500':
+                          selectedPayment === 'cash on delivery',
+                      }"
+                      class="p-2 bg-green-500/10 flex justify-center items-center gap-1 rounded-full my-1 border border-gray-600/50 w-full text-green-600 font-medium text-sm"
+                    >
+                      <Icon icon="iconoir:cash-solid" class="text-lg" /> Cash on
+                      Delivery
+                    </button>
+                    <button
+                      @click="onPyment"
+                      disabled
+                      :class="{
+                        ' shadow-md shadow-blue-500/50 border-blue-500':
+                          selectedPayment === 'payment',
+                      }"
+                      class="p-2 bg-green-blue/10 rounded-full flex justify-center items-center gap-1 my-1 border border-gray-600/50 w-full text-gray-600 font-medium text-sm"
+                    >
+                      <Icon icon="material-symbols:wallet" class="text-lg" />
+                      Payment Center/E-wallet
+                    </button>
+                    <button
+                      @click="onCredit"
+                      disabled
+                      :class="{
+                        ' shadow-md shadow-orange-500/50 border-orange-500':
+                          selectedPayment === 'credit',
+                      }"
+                      class="p-2 bg-green-orange/10 rounded-full flex justify-center items-center gap-1 my-1 border border-gray-600/50 w-full text-gray-600 font-medium text-sm"
+                    >
+                      <Icon
+                        icon="material-symbols:credit-card"
+                        class="text-lg"
+                      />
+                      Credit Card
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="my-3">
+              <button
+                :disabled="selectedPayment === ''"
+                :class="{
+                  ' cursor-not-allowed opacity-75': selectedPayment === '',
+                }"
+                @click="submitOrder"
+                class="w-full rounded-full bg-blue-500 p-2 text-slate-100 text-lg font-semibold shadow-md shadow-blue-500/50"
+              >
+                Place Order
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 <script>
 import Header from "../scripts/Header";
@@ -1027,4 +1069,30 @@ textarea {
     z-index: 30; /* High z-index to keep it above other content */
   }
 }
+/* Base styles */
+.modal {
+  transition: transform 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .modal {
+    /* On small screens, make the modal take up most of the screen width */
+    width: calc(100% - 1.5rem); /* 1.5rem accounts for the margin */
+    transform: translateY(-50%); /* Adjust translate for better centering on small screens */
+    top: 50%; /* Center vertically */
+    right: 50%;
+    translate: translateX(50%);
+  }
+}
+
+/* Desktop specific styles */
+@media (min-width: 769px) {
+  .modal {
+    width: 256px; /* Fixed width on larger screens */
+    transform: translateX(100%);
+    top: 1rem; /* Adjust top margin for desktop */
+    right: 1rem; /* Align to the right on desktop */
+  }
+}
+
 </style>
