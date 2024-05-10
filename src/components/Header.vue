@@ -38,7 +38,15 @@
           class="p-5 bg-slate-100 rounded-md h-full w-[330px] sm:w-[600px] text-slate-800 text-xs"
         >
           <div class="h-full">
-            <h1 class="font-semibold text-lg">Order Tracking</h1>
+            <div class="flex justify-between">
+              <h1 class="font-semibold text-lg">Order Tracking</h1>
+              <div
+                @click="closeOrderTracking"
+                class="bg-slate-600/20 rounded-full text-red-500 shadow p-2"
+              >
+                <Icon icon="iconamoon:close-bold" />
+              </div>
+            </div>
             <hr class="my-2" />
             <div v-if="orderData.length !== 0">
               <h1 class="text-base font-semibold py-1">
@@ -74,15 +82,54 @@
                         class="h-20 w-20 object-center"
                       />
                     </div>
-                    <div>
-                      <h1 class="text-base font-semibold">
-                        {{ items.product_name }}
-                      </h1>
+                    <div class="w-full">
+                      <div class="flex justify-between">
+                        <div>
+                          <h1 class="text-base font-semibold">
+                            {{ items.product_name }}
+                          </h1>
+                        </div>
+                        <div>
+                          <span
+                            class="text-sm font-semibold bg-slate-600/30 rounded p-1 cursor-pointer"
+                            @click="toggleStoreModal2(items.store_id)"
+                            >{{ items.store_name }}</span
+                          >
+                        </div>
+                      </div>
+                      Modal Element
+                      <div
+                        v-if="openModalId === items.store_id"
+                        class="modal absolute inset-x-0 mx-3 md:right-0 md:mt-1 md:w-64 md:translate-x-full bg-white shadow-lg rounded-lg p-4 transition-transform"
+                      >
+                        <div class="flex justify-between">
+                          <h3
+                            class="font-semibold text-lg flex justify-center text-blue-500"
+                          >
+                            {{ selectedItem.store_name }}
+                          </h3>
+                          <button
+                            @click="closeStoreModal"
+                            class="rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                          >
+                            <Icon icon="iconamoon:close-bold" />
+                          </button>
+                        </div>
+                        <div class="mt-2 font-semibold">
+                          <p class="text-sm mt-1">
+                            Address: {{ selectedItem.store_address }}
+                          </p>
+                          <p class="text-sm mt-1">
+                            Contact no:
+                            {{ selectedItem.store_contact_number }}
+                          </p>
+                        </div>
+                      </div>
                       <p class="font-semibold">
                         Total:
                         <span
                           class="text-red-500 py-1 px-2 bg-slate-500/10 rounded-md"
-                          >₱{{ items.total_price_products }}</span
+                          >₱{{ items.priceTrack }}</span
                         >
                       </p>
                     </div>
@@ -255,15 +302,70 @@
                       </div>
                       <!-- if review sent -->
                       <div v-if="items.comment !== null">
-                        <p
-                          class="text-base font-semibold text-gray-500 px-5 py-2 bg-gray-300 rounded border my-2"
-                        >
-                          Review Sent
-                        </p>
+                        <div v-if="!isEditingReview">
+                          <div class="ratings flex justify-center">
+                            <span
+                              v-for="number in 5"
+                              :key="`rating-${number}-${index}`"
+                              :class="{ active: items.rating >= number }"
+                            >
+                              <span v-if="items.rating >= number">★</span>
+                              <span v-else>☆</span>
+                            </span>
+                          </div>
+                          <p
+                            class="text-base font-semibold text-gray-500 px-5 py-2 bg-gray-300 rounded border my-2"
+                          >
+                            Review Sent: {{ items.comment }}
+                          </p>
+                          <button
+                            class="px-3 py-1 bg-blue-500 text-white rounded"
+                            @click="
+                              isEditingReview = true;
+                              editedRating = items.rating;
+                              editedComment = items.comment;
+                            "
+                          >
+                            Edit Review
+                          </button>
+                        </div>
+                        <div v-else>
+                          <div class="ratings flex justify-center">
+                            <button
+                              v-for="number in 5"
+                              :key="`rating-${number}-${index}`"
+                              @click="editedRating = number"
+                              :class="{ active: editedRating >= number }"
+                            >
+                              <span v-if="editedRating >= number">★</span>
+                              <span v-else>☆</span>
+                            </button>
+                          </div>
+                          <textarea
+                            v-model="editedComment"
+                            placeholder="Edit your comment"
+                            class="my-4 p-2 rounded"
+                          ></textarea>
+                          <div class="flex justify-end">
+                            <button
+                              class="px-3 py-1 bg-blue-500 text-white rounded mr-2"
+                              @click="saveEditedReview(items)"
+                            >
+                              Save
+                            </button>
+                            <button
+                              class="px-3 py-1 bg-red-500 text-white rounded"
+                              @click="isEditingReview = false"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
                       </div>
+
                       <!-- ratings and comment here -->
                       <div
-                        v-if="items.status === 7 && items.comment === null"
+                        v-else-if="items.status >= 7 && items.comment === null"
                         class="rating-and-comment"
                       >
                         <div class="ratings flex justify-center">
@@ -898,12 +1000,12 @@
                         }}</span>
                         <span
                           class="text-sm font-semibold bg-slate-600/30 rounded p-1 cursor-pointer"
-                          @click="toggleStoreModal(items.product_id)"
+                          @click="toggleStoreModal(items.store_id)"
                           >{{ items.store_name }}</span
                         >
                         <!-- Modal Element -->
                         <div
-                          v-if="openModalId === items.product_id"
+                          v-if="openModalId === items.store_id"
                           class="modal absolute inset-x-0 mx-3 md:right-0 md:mt-1 md:w-64 md:translate-x-full bg-white shadow-lg rounded-lg p-4 transition-transform"
                         >
                           <div class="flex justify-between">

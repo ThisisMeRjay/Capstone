@@ -611,6 +611,39 @@ export default {
       }
     };
 
+    const editedRating = ref(null);
+    const editedComment = ref(null);
+
+    const saveEditedReview = async (item) => {
+      try {
+        // Make an API call to update the rating and comment
+        const response = await axios.put(
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=updateReview`,
+          {
+            rating: editedRating.value,
+            comment: editedComment.value,
+            orderId: item.order_number,
+          }
+        );
+
+        if (response.status === 200) {
+          // Update the rating and comment locally
+          item.rating = editedRating.value;
+          item.comment = editedComment.value;
+          isEditingReview.value = false;
+          editedRating.value = null;
+          editedComment.value = "";
+          console.log("Review updated successfully");
+        } else {
+          console.error("Failed to update review");
+        }
+      } catch (error) {
+        console.error("Error updating review:", error);
+      }
+    };
+
+    const isEditingReview = ref(false);
+
     const isEditing = ref(false);
     const toggleEdit = () => {
       isEditing.value = !isEditing.value;
@@ -760,7 +793,7 @@ export default {
     const isModalVisible = ref(false);
 
     const showModal = async (product) => {
-      console.log('click')
+      console.log("click");
       if (selectedProduct.value !== product) {
         showCart.value = false;
         console.log("modal good", product);
@@ -781,10 +814,27 @@ export default {
       } else {
         // Otherwise, open the modal for this ID and find the corresponding item
         selectedItem.value = itemsToCheckout.value.find(
-          (item) => item.product_id === id
+          (item) => item.store_id === id
+        );
+
+        openModalId.value = id;
+      }
+      console.log("selected item", selectedItem.value);
+    }
+
+    function toggleStoreModal2(id) {
+      console.log("id", id);
+      if (openModalId.value === id) {
+        // If the modal for this ID is already open, close it
+        openModalId.value = null;
+      } else {
+        // Otherwise, open the modal for this ID and find the corresponding item
+        selectedItem.value = orderData.value.find(
+          (item) => item.store_id === id
         );
         openModalId.value = id;
       }
+      console.log("selected item 2", selectedItem.value);
     }
 
     function closeStoreModal() {
@@ -792,6 +842,11 @@ export default {
     }
 
     return {
+      isEditingReview,
+      editedRating,
+      editedComment,
+      saveEditedReview,
+      toggleStoreModal2,
       openModalId,
       selectedItem,
       toggleStoreModal,

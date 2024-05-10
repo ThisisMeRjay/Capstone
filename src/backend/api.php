@@ -43,11 +43,50 @@ switch ($action) {
     case 'updateCart':
         updateCart();
         break;
+    case 'updateReview':
+        updateReview();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function updateReview() {
+    global $conn;
+
+    // Fetch the JSON data from the request
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    // Prepare the SQL statement with correct SQL syntax
+    $stmt = $conn->prepare("UPDATE reviews SET rating = ?, comment = ? WHERE order_number = ?");
+
+    if (!$stmt) {
+        echo json_encode(['error' => 'Failed to prepare statement']);
+        exit;
+    }
+
+    // Bind parameters to the prepared statement
+    $rating = $data['rating'];
+    $comment = $data['comment'];
+    $orderNumber = $data['orderId']; // Ensure this is correctly named as per your database schema
+
+    $stmt->bind_param("isi", $rating, $comment, $orderNumber);
+
+    // Execute the statement and check for errors
+    if ($stmt->execute()) {
+        // Check if any rows were updated
+        if ($stmt->affected_rows > 0) {
+            echo json_encode(['success' => 'Review updated successfully']);
+        } else {
+            echo json_encode(['error' => 'No review found with the specified order number, or no changes were made']);
+        }
+    } else {
+        echo json_encode(['error' => 'Failed to update review']);
+    }
+
+    $stmt->close();
 }
 
 function submitReviews()
@@ -162,7 +201,12 @@ function trackOrder()
     p.*, 
     o.*,
     od.*,
-    r.comment
+    r.comment,
+    r.rating,
+    rev.revenue_amount + od.total_price_products AS priceTrack,
+    us.store_name,
+    us.store_address,
+    us.store_contact_number
 FROM 
     products AS p
 LEFT JOIN 
@@ -171,6 +215,10 @@ LEFT JOIN
     orders AS o ON od.order_id = o.order_id 
 LEFT JOIN
     reviews AS r ON r.product_id = od.product_id AND r.user_id = o.user_id AND  r.order_number = od.order_number
+LEFT JOIN
+    revenue AS rev ON rev.order_detail_id = od.order_detail_id 
+LEFT JOIN
+    user_store AS us ON us.store_id = p.store_id 
 WHERE 
     o.user_id = ?
 ORDER BY
