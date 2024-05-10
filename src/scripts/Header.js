@@ -760,15 +760,15 @@ export default {
     const isModalVisible = ref(false);
 
     const showModal = async (product) => {
-      showCart.value = false;
-      console.log("modal good", product);
-      const specifications = await fetchSpecifications(product.product_id);
-      //   console.log("specs result in query", specifications);
-      selectedProduct.value = { ...product, specifications };
-      //   console.log("s afeifabsb", selectedProduct); // Combine product and specifications
-      console.log("selectedProduct good", selectedProduct.value);
-      isModalVisible.value = true;
-      //console.log(selectedProduct.value);
+      console.log('click')
+      if (selectedProduct.value !== product) {
+        showCart.value = false;
+        console.log("modal good", product);
+        const specifications = await fetchSpecifications(product.product_id);
+        selectedProduct.value = { ...product, specifications };
+        console.log("selectedProduct good", selectedProduct.value);
+        isModalVisible.value = true;
+      }
     };
     const selectedItem = ref(null);
     const openModalId = ref(null);

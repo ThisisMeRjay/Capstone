@@ -291,6 +291,14 @@ export default {
     const minPrice = ref(0);
     const maxPrice = ref(0);
 
+    const showStoresModal = ref(false);
+
+    const fetchAllStores = () => {
+      showStoresModal.value = true;
+    };
+
+    const selectedStore = ref(null);
+
     const products = ref(props.products || []);
     const isModalVisible = ref(false);
     const selectedProduct = ref(null);
@@ -300,23 +308,35 @@ export default {
     const storeName = ref([]);
     const temp_data = ref([]);
 
+    const selectStore = (storeId) => {
+      if (storeId) {
+        filterbyStoreName(storeId);
+        const selectedStoreData = storeName.value.find(
+          (store) => store.store_id === storeId
+        );
+        selectedStore.value = selectedStoreData;
+      } else {
+        selectedStore.value = null;
+        filterbyStoreName(null); // Call filterbyStoreName with null to reset products
+      }
+      showStoresModal.value = false;
+    };
+
     const filterbyStoreName = async (storeID) => {
       if (temp_data.value.length === 0) {
-        temp_data.value = products.value;
-      } else {
-        products.value = temp_data.value;
+        temp_data.value = [...products.value]; // Create a new copy of the original products array
       }
 
-      if (selectedStore.value) {
+      if (storeID) {
         // Filter based on the selected store
-        const filtered = products.value.filter((product) => {
+        const filtered = temp_data.value.filter((product) => {
           const isMatch = product.store_id === storeID;
           return isMatch;
         });
         products.value = filtered;
       } else {
         // No store selected, show all products
-        products.value = temp_data.value;
+        products.value = [...temp_data.value]; // Reset products to the original array
       }
     };
 
@@ -542,28 +562,6 @@ export default {
       } else {
         showCategory.value = true;
       }
-    };
-
-    const showStoresModal = ref(false);
-
-    const fetchAllStores = () => {
-      showStoresModal.value = true;
-    };
-
-    const selectedStore = ref(null);
-
-    const selectStore = (storeId) => {
-      if (storeId) {
-        filterbyStoreName(storeId);
-        const selectedStoreData = storeName.value.find(
-          (store) => store.store_id === storeId
-        );
-        selectedStore.value = selectedStoreData;
-      } else {
-        selectedStore.value = null;
-        fetchProducts();
-      }
-      showStoresModal.value = false;
     };
 
     return {

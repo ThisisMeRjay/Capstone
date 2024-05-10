@@ -750,23 +750,30 @@
               <div class="flex justify-start items-center gap-2">
                 <input
                   type="checkbox"
+                  class="cursor-pointer"
                   :checked="isChecked(items.product_id)"
-                  @change="toggleCheckbox(items.product_id)"
+                  @click.stop="toggleCheckbox(items.product_id)"
+                  @pointerup.stop="toggleCheckbox(items.product_id)"
                 />
 
                 <button
-                  @click="deleteCartItems(items.cart_item_id)"
+                  @click.stop="deleteCartItems(items.cart_item_id)"
+                  @pointerup.stop="deleteCartItems(items.cart_item_id)"
                   class="flex my-1 absolute top-0 right-0 text-red-500 p-1 rounded-full bg-slate-400/75 shadow-sm"
                 >
                   <Icon icon="ic:round-delete" class="text-lg text-red-500" />
                 </button>
 
-                <img
-                  @click="showModal(items)"
-                  :src="'data:image/png;base64,' + items.image"
-                  alt=""
-                  class="w-16 h-16 rounded-md"
-                />
+                <div
+                  @click.stop="showModal(items)"
+                  @pointerup.stop="showModal(items)"
+                >
+                  <img
+                    :src="'data:image/png;base64,' + items.image"
+                    alt=""
+                    class="w-16 h-16 rounded-md"
+                  />
+                </div>
                 <div>
                   <h1 class="font-bold text-xs">
                     {{ items.product_name }}
@@ -785,14 +792,16 @@
                       </p>
                     </div>
                     <button
-                      @click="decrement(items.product_id)"
+                      @click.stop="decrement(items.product_id)"
+                      @pointerup.stop="decrement(items.product_id)"
                       :disabled="items.quantity === 1"
                       class="p-0.5 flex justify-center items-center w-7 rounded-full border"
                     >
                       <Icon icon="tabler:minus" />
                     </button>
                     <button
-                      @click="increment(items.product_id)"
+                      @click.stop="increment(items.product_id)"
+                      @pointerup.stop="increment(items.product_id)"
                       :disabled="items.quantity === items.stock"
                       class="p-0.5 flex justify-center items-center w-7 rounded-full border"
                     >
@@ -888,7 +897,7 @@
                           items.product_name
                         }}</span>
                         <span
-                          class="text-sm font-semibold bg-slate-600/30 rounded p-1"
+                          class="text-sm font-semibold bg-slate-600/30 rounded p-1 cursor-pointer"
                           @click="toggleStoreModal(items.product_id)"
                           >{{ items.store_name }}</span
                         >
@@ -897,23 +906,26 @@
                           v-if="openModalId === items.product_id"
                           class="modal absolute inset-x-0 mx-3 md:right-0 md:mt-1 md:w-64 md:translate-x-full bg-white shadow-lg rounded-lg p-4 transition-transform"
                         >
-                          <div class="flex justify-end">
+                          <div class="flex justify-between">
+                            <h3
+                              class="font-semibold text-lg flex justify-center text-blue-500"
+                            >
+                              {{ selectedItem.store_name }}
+                            </h3>
                             <button
                               @click="closeStoreModal"
-                              class="rounded-full p-1 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                              class="rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
                             >
                               <Icon icon="iconamoon:close-bold" />
                             </button>
                           </div>
-                          <div class="mt-2">
-                            <h3 class="font-semibold text-lg flex justify-center">
-                              {{ selectedItem.store_name }}
-                            </h3>
+                          <div class="mt-2 font-semibold">
                             <p class="text-sm mt-1">
                               Address: {{ selectedItem.store_address }}
                             </p>
                             <p class="text-sm mt-1">
-                              Contact no: {{ selectedItem.store_contact_number }}
+                              Contact no:
+                              {{ selectedItem.store_contact_number }}
                             </p>
                           </div>
                         </div>
@@ -1078,7 +1090,9 @@ textarea {
   .modal {
     /* On small screens, make the modal take up most of the screen width */
     width: calc(100% - 1.5rem); /* 1.5rem accounts for the margin */
-    transform: translateY(-50%); /* Adjust translate for better centering on small screens */
+    transform: translateY(
+      -50%
+    ); /* Adjust translate for better centering on small screens */
     top: 50%; /* Center vertically */
     right: 50%;
     translate: translateX(50%);
@@ -1094,5 +1108,4 @@ textarea {
     right: 1rem; /* Align to the right on desktop */
   }
 }
-
 </style>
