@@ -97,7 +97,7 @@
                           >
                         </div>
                       </div>
-                      Modal Element
+                      <!-- Modal Element -->
                       <div
                         v-if="openModalId === items.store_id"
                         class="modal absolute inset-x-0 mx-3 md:right-0 md:mt-1 md:w-64 md:translate-x-full bg-white shadow-lg rounded-lg p-4 transition-transform"
@@ -125,7 +125,14 @@
                           </p>
                         </div>
                       </div>
-                      <p class="font-semibold">
+                      <p class="font-semibold pt-1">
+                        Quantity:
+                        <span
+                          class="text-red-500 py-1 px-2 bg-slate-500/10 rounded-md"
+                          >{{ items.quantity }}</span
+                        >
+                      </p>
+                      <p class="font-semibold pt-3">
                         Total:
                         <span
                           class="text-red-500 py-1 px-2 bg-slate-500/10 rounded-md"
@@ -300,6 +307,64 @@
                           </p>
                         </div>
                       </div>
+
+                      <div v-if="items.status >= 7 && items.status !== 8">
+                        <!-- Refund Process -->
+                        <div v-if="isRefundAvailable(items)">
+                          <p class="text-xs text-gray-500 pb-2">
+                            You have {{ getRemainingDays(items) }} days left to
+                            request a refund.
+                          </p>
+                          <button
+                            class="px-3 py-1 bg-red-500 text-white rounded mb-2"
+                            @click="submitRefundRequest(items)"
+                          >
+                            Request Refund
+                          </button>
+                        </div>
+                        <div v-if="refundDetailModal">
+                          <p class="text-sm font-semibold mb-2">
+                            Refund Process: 
+                          </p>
+                          <div class="mb-2">
+                            <label for="refund-video" class="block mb-1"
+                              >Upload Video Evidence:</label
+                            >
+                            <input
+                              id="refund-video"
+                              type="file"
+                              accept="video/*"
+                              @change="handleVideoUpload($event, items)"
+                            />
+                          </div>
+                          <div class="mb-2">
+                            <label for="refund-reason" class="block mb-1"
+                              >Reason for Refund:</label
+                            >
+                            <textarea
+                              id="refund-reason"
+                              v-model="items.refundReason"
+                              placeholder="Enter the reason for refund"
+                              class="w-full p-2 rounded"
+                            ></textarea>
+                          </div>
+                          <div class="flex justify-end">
+                            <button
+                              class="px-3 py-1 bg-blue-500 text-white rounded mr-2"
+                              @click="submitRefundRequest(items)"
+                            >
+                              Submit
+                            </button>
+                            <button
+                              class="px-3 py-1 bg-red-500 text-white rounded"
+                              @click="cancelRefundProcess(items)"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
                       <!-- if review sent -->
                       <div v-if="items.comment !== null">
                         <div v-if="!isEditingReview">
@@ -363,33 +428,41 @@
                         </div>
                       </div>
 
-                      <!-- ratings and comment here -->
-                      <div
-                        v-else-if="items.status >= 7 && items.comment === null"
-                        class="rating-and-comment"
-                      >
-                        <div class="ratings flex justify-center">
-                          <button
-                            v-for="number in 5"
-                            :key="`rating-${number}-${index}`"
-                            @click="items.userRating = number"
-                            :class="{ active: items.userRating >= number }"
-                          >
-                            <span v-if="items.userRating >= number">★</span>
-                            <span v-else>☆</span>
-                          </button>
-                        </div>
-                        <textarea
-                          v-model="items.userComment"
-                          placeholder="Leave a comment"
-                          class="my-4 p-2 rounded"
-                        ></textarea>
-                        <button
-                          class="px-3 py-1 bg-blue-500 text-white rounded"
-                          @click="submitComment(items, index)"
+                      <div v-if="items.status >= 7 && items.comment === null">
+                        <!-- Rating and Comment -->
+                        <div
+                          class="rating-and-comment mt-4"
+                          v-for="(item, index) in ComentandReview"
                         >
-                          Submit
-                        </button>
+                          <div
+                            v-if="
+                              items.order_detail_id === item.order_detail_id
+                            "
+                          >
+                            <div class="ratings flex justify-center">
+                              <button
+                                v-for="number in 5"
+                                :key="`rating-${number}-${index}`"
+                                @click="item.userRating = number"
+                                :class="{ active: item.userRating >= number }"
+                              >
+                                <span v-if="item.userRating >= number">★</span>
+                                <span v-else>☆</span>
+                              </button>
+                            </div>
+                            <textarea
+                              v-model="item.userComment"
+                              placeholder="Leave a comment"
+                              class="my-4 p-2 rounded"
+                            ></textarea>
+                            <button
+                              class="px-3 py-1 bg-blue-500 text-white rounded"
+                              @click="submitComment(item, index)"
+                            >
+                              Submit
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

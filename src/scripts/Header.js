@@ -8,7 +8,7 @@ import { getDistance } from "geolib";
 import { API_URL } from "@/config";
 import moment from "moment-timezone";
 import ProductModal from "@/components/ProductModal.vue";
-import debounce from "lodash/debounce";
+import { debounce } from "lodash";
 export default {
   components: {
     Icon,
@@ -23,6 +23,7 @@ export default {
       showSearch: false,
       showLogin: false,
       user: [],
+      
     };
   },
   methods: {
@@ -40,6 +41,28 @@ export default {
       this.user = name;
       this.$emit("login-completed", name);
     },
+    isRefundAvailable(item) {
+      // Check if the order was delivered within the last 7 days
+      const deliveredDate = new Date(item.delivered_date);
+      // console.log("delivered date", deliveredDate);
+      const currentDate = new Date();
+      const timeDiff = currentDate.getTime() - deliveredDate.getTime();
+      const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      return daysDiff <= 7;
+    },
+    getRemainingDays(item) {
+      // Calculate the remaining days to request a refund
+      const deliveredDate = new Date(item.delivered_date);
+      const currentDate = new Date();
+      const timeDiff = currentDate.getTime() - deliveredDate.getTime();
+      const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      return 7 - daysDiff;
+    },
+    startRefundProcess(item) {
+      // Start the refund process for the given order item
+      // You can implement the refund process logic here
+    },
+    // Other methods...
   },
   setup(props) {
     const url = API_URL;
@@ -48,6 +71,34 @@ export default {
     const isSidebarOpen = ref(false);
     const cartItemsValue = ref([]);
     const router = useRouter();
+
+    const refundDetailModal = ref(false);
+
+    const submitRefundRequest = async (item) => {
+      try {
+        const formData = new FormData();
+        formData.append("order_id", item.order_detail_id);
+        formData.append("video_evidence", item.refundVideo);
+        formData.append("reason", item.refundReason);
+
+        const response = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=submitRefundRequest`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        refundDetailModal.value = !refundDetailModal.value;
+
+        console.log(response.data);
+        // Handle the successful response here
+      } catch (error) {
+        console.error("Error submitting refund request:", error);
+        // Handle the error here
+      }
+    };
 
     const toggleSidebar = () => {
       isSidebarOpen.value = !isSidebarOpen.value;
@@ -527,6 +578,7 @@ export default {
     cartItems();
 
     const orderData = ref([]);
+
     const getTrackingOrder = async () => {
       try {
         const res = await axios.post(
@@ -545,13 +597,40 @@ export default {
         }));
 
         orderData.value = transformedData; // Update the reactive variable with the transformed data
-        console.log("order value: ", orderData.value);
+        // console.log("order value: ", orderData.value);
       } catch (error) {
         console.error("Error fetching orders :", error); // return an error
       }
     };
 
-    getTrackingOrder();
+    const ComentandReview = ref([]);
+
+    const ThisIsForCommentAndReview = async () => {
+      try {
+        const res = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=getTrackOrder`,
+          {
+            id: userLogin.value.user_id, // get the user id
+          }
+        );
+
+        // Assuming res.data.order_records is an array
+        const transformedData = res.data.order_records.map((item) => ({
+          ...item,
+          userRating: 0, // Default user rating
+          userComment: "", // Default user comment
+          status: statusMapping[item.status.toLowerCase().replace(/\s+/g, "_")], // transform the status
+        }));
+
+        ComentandReview.value = transformedData; // Update the reactive variable with the transformed data
+        // console.log("order value: ", orderData.value);
+      } catch (error) {
+        console.error("Error fetching orders :", error); // return an error
+      }
+    };
+    setInterval(getTrackingOrder, 50);
+
+    ThisIsForCommentAndReview();
 
     const statusMapping = {
       pending: 1,
@@ -574,6 +653,8 @@ export default {
     const orderTracking = () => {
       toggleSidebar();
       showOrderTracking.value = !showOrderTracking.value;
+      if ((showOrderTracking.value = true)) {
+      }
     };
     const closeOrderTracking = () => {
       showOrderTracking.value = false;
@@ -842,6 +923,8 @@ export default {
     }
 
     return {
+      refundDetailModal,
+      submitRefundRequest,
       isEditingReview,
       editedRating,
       editedComment,
@@ -921,6 +1004,8 @@ export default {
       isUpdatingFromFirstWatch,
       updatePrices,
       totalQuantity,
+      ComentandReview,
+      ThisIsForCommentAndReview,
     };
   },
 };
