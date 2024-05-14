@@ -23,7 +23,6 @@ export default {
       showSearch: false,
       showLogin: false,
       user: [],
-      
     };
   },
   methods: {
@@ -73,27 +72,87 @@ export default {
     const router = useRouter();
 
     const refundDetailModal = ref(false);
+    const selectedFile = ref(null);
+
+    const handleVideoUpload = (event) => {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        selectedFile.value = files[0];
+      } else {
+        selectedFile.value = null;
+      }
+    };
+
+    const openRefundModal = (item) => {
+      refundDetailModal.value = !refundDetailModal.value;
+      item.reason = "";
+    };
+
+    const cancelRefundProcess = (item) => {
+      refundDetailModal.value = false;
+      selectedFile.value = null;
+      item.reason = "";
+    };
 
     const submitRefundRequest = async (item) => {
       try {
-        const formData = new FormData();
-        formData.append("order_id", item.order_detail_id);
-        formData.append("video_evidence", item.refundVideo);
-        formData.append("reason", item.refundReason);
+        const requestData = {
+          order_id: item.order_detail_id,
+          reason: item.reason,
+        };
 
-        const response = await axios.post(
-          `${url}/Ecommerce/vue-project/src/backend/api.php?action=submitRefundRequest`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        refundDetailModal.value = !refundDetailModal.value;
+        if (selectedFile.value) {
+          const fileReader = new FileReader();
+          fileReader.readAsDataURL(selectedFile.value);
 
-        console.log(response.data);
-        // Handle the successful response here
+          fileReader.onload = () => {
+            requestData.video_evidence = fileReader.result.split(",")[1];
+
+            axios
+              .post(
+                `${url}/Ecommerce/vue-project/src/backend/api.php?action=submitRefundRequest`,
+                requestData,
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              )
+              .then((response) => {
+                refundDetailModal.value = false;
+                selectedFile.value = null;
+                item.reason = "";
+                console.log(response.data);
+                // Handle the successful response here
+              })
+              .catch((error) => {
+                console.error("Error submitting refund request:", error);
+                // Handle the error here
+              });
+          };
+        } else {
+          axios
+            .post(
+              `${url}/Ecommerce/vue-project/src/backend/api.php?action=submitRefundRequest`,
+              requestData,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            )
+            .then((response) => {
+              refundDetailModal.value = false;
+              selectedFile.value = null;
+              item.reason = "";
+              console.log(response.data);
+              // Handle the successful response here
+            })
+            .catch((error) => {
+              console.error("Error submitting refund request:", error);
+              // Handle the error here
+            });
+        }
       } catch (error) {
         console.error("Error submitting refund request:", error);
         // Handle the error here
@@ -923,8 +982,12 @@ export default {
     }
 
     return {
-      refundDetailModal,
+      selectedFile,
+      handleVideoUpload,
+      openRefundModal,
+      cancelRefundProcess,
       submitRefundRequest,
+      refundDetailModal,
       isEditingReview,
       editedRating,
       editedComment,

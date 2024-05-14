@@ -91,7 +91,7 @@
                         </div>
                         <div>
                           <span
-                            class="text-sm font-semibold bg-slate-600/30 rounded p-1 cursor-pointer"
+                            class="text-sm font-semibold bg-slate-400/30 rounded p-1 cursor-pointer hover:bg-slate-400/50"
                             @click="toggleStoreModal2(items.store_id)"
                             >{{ items.store_name }}</span
                           >
@@ -308,59 +308,89 @@
                         </div>
                       </div>
 
-                      <div v-if="items.status >= 7 && items.status !== 8">
+                      <div
+                        v-if="items.status >= 7 && items.status !== 8"
+                        v-for="(item, index) in ComentandReview"
+                      >
                         <!-- Refund Process -->
-                        <div v-if="isRefundAvailable(items)">
-                          <p class="text-xs text-gray-500 pb-2">
-                            You have {{ getRemainingDays(items) }} days left to
-                            request a refund.
-                          </p>
-                          <button
-                            class="px-3 py-1 bg-red-500 text-white rounded mb-2"
-                            @click="submitRefundRequest(items)"
+                        <div
+                          v-if="items.order_detail_id === item.order_detail_id"
+                        >
+                          <div
+                            v-if="
+                              isRefundAvailable(items) &&
+                              items.video_evidence === null
+                            "
                           >
-                            Request Refund
-                          </button>
-                        </div>
-                        <div v-if="refundDetailModal">
-                          <p class="text-sm font-semibold mb-2">
-                            Refund Process: 
-                          </p>
-                          <div class="mb-2">
-                            <label for="refund-video" class="block mb-1"
-                              >Upload Video Evidence:</label
-                            >
-                            <input
-                              id="refund-video"
-                              type="file"
-                              accept="video/*"
-                              @change="handleVideoUpload($event, items)"
-                            />
-                          </div>
-                          <div class="mb-2">
-                            <label for="refund-reason" class="block mb-1"
-                              >Reason for Refund:</label
-                            >
-                            <textarea
-                              id="refund-reason"
-                              v-model="items.refundReason"
-                              placeholder="Enter the reason for refund"
-                              class="w-full p-2 rounded"
-                            ></textarea>
-                          </div>
-                          <div class="flex justify-end">
+                            <p class="text-xs text-gray-500 pb-2">
+                              You have {{ getRemainingDays(items) }} days left
+                              to request a refund.
+                            </p>
                             <button
-                              class="px-3 py-1 bg-blue-500 text-white rounded mr-2"
-                              @click="submitRefundRequest(items)"
+                              class="px-3 py-1 bg-red-500 text-white rounded mb-2"
+                              @click="openRefundModal(item)"
                             >
-                              Submit
+                              Request Refund
                             </button>
-                            <button
-                              class="px-3 py-1 bg-red-500 text-white rounded"
-                              @click="cancelRefundProcess(items)"
+                          </div>
+                          <div
+                            v-else-if="items.video_evidence !== null && items.status !== 14"
+                            class="mb-3 flex items-center gap-2"
+                          >
+                            <p
+                              class="bg-green-300/20 w-fit p-1 rounded text-md font-semibold text-green-400 shadow"
                             >
-                              Cancel
-                            </button>
+                              Refund Resquest sent
+                            </p>
+                            <p class="font-bold ml-4">Status:</p>
+                            <div class="font-semibold bg-gray-300 p-1 rounded">
+                              <p v-if="items.status === 9">Pending</p>
+                              <p v-else-if="items.status === 10">Approved</p>
+                              <p v-else-if="items.status === 11">In progress</p>
+                              <p v-else-if="items.status === 12">Completed</p>
+                              <p v-else-if="items.status === 13">Declined</p>
+                            </div>
+                          </div>
+                          <div v-if="refundDetailModal">
+                            <p class="text-sm font-semibold mb-2">
+                              Refund Process:
+                            </p>
+                            <div class="mb-2">
+                              <label for="refund-video" class="block mb-1"
+                                >Upload Video Evidence:</label
+                              >
+                              <input
+                                id="refund-video"
+                                type="file"
+                                accept="video/*"
+                                @change="handleVideoUpload($event)"
+                              />
+                            </div>
+                            <div class="mb-2">
+                              <label for="refund-reason" class="block mb-1"
+                                >Reason for Refund:</label
+                              >
+                              <textarea
+                                id="refund-reason"
+                                v-model="item.reason"
+                                placeholder="Enter the reason for refund"
+                                class="w-full p-2 rounded"
+                              ></textarea>
+                            </div>
+                            <div class="flex justify-end">
+                              <button
+                                class="px-3 py-1 bg-blue-500 text-white rounded mr-2"
+                                @click="submitRefundRequest(item)"
+                              >
+                                Submit
+                              </button>
+                              <button
+                                class="px-3 py-1 bg-red-500 text-white rounded"
+                                @click="cancelRefundProcess(item)"
+                              >
+                                Cancel
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>

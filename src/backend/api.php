@@ -46,6 +46,9 @@ switch ($action) {
     case 'updateReview':
         updateReview();
         break;
+    case 'submitRefundRequest':
+        submitRefundRequest();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
@@ -53,7 +56,56 @@ switch ($action) {
         break;
 }
 
-function updateReview() {
+function submitRefundRequest()
+{
+    global $conn;
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    $orderId = $data['order_id'];
+    $refundReason = $data['reason'];
+    $videoEvidence = $data['video_evidence'];
+
+    // Create the upload directory path
+    $uploadDir = 'uploads/videos/';
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+
+    // Decode the base64 video evidence
+    if ($videoEvidence) {
+        $videoData = base64_decode($videoEvidence);
+        $videoFileName = uniqid() . '.mp4';
+        $videoFilePath = $uploadDir . $videoFileName;
+
+        // Store the video file on the server
+        file_put_contents($videoFilePath, $videoData);
+
+        // Store the video file path in the database
+        $query = "INSERT INTO refund_requests (order_detail_id, video_evidence, reason) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('iss', $orderId, $videoFilePath, $refundReason);
+        $stmt->execute();
+
+        // Handle the response
+        if ($stmt->affected_rows > 0) {
+            $status = 12;
+            $query = "UPDATE order_details SET status = ? WHERE order_detail_id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param('ii', $status, $orderId);
+            $stmt->execute();
+            echo json_encode(['message' => 'Refund request submitted successfully.']);
+        } else {
+            echo json_encode(['error' => 'Failed to submit refund request.']);
+        }
+
+        $stmt->close();
+    } else {
+        echo json_encode(['error' => 'Error uploading video file.']);
+    }
+}
+
+function updateReview()
+{
     global $conn;
 
     // Fetch the JSON data from the request
@@ -206,7 +258,10 @@ function trackOrder()
     rev.revenue_amount + od.total_price_products AS priceTrack,
     us.store_name,
     us.store_address,
-    us.store_contact_number
+    us.store_contact_number,
+    rr.id,
+    rr.video_evidence,
+    rr.reason
 FROM 
     products AS p
 LEFT JOIN 
@@ -219,6 +274,8 @@ LEFT JOIN
     revenue AS rev ON rev.order_detail_id = od.order_detail_id 
 LEFT JOIN
     user_store AS us ON us.store_id = p.store_id 
+LEFT JOIN
+    refund_requests AS rr ON rr.order_detail_id = od.order_detail_id 
 WHERE 
     o.user_id = ?
 ORDER BY
@@ -419,7 +476,7 @@ function addCart()
     $checkStmt = $conn->prepare("SELECT quantity FROM cart_items WHERE cart_id = ? AND product_id = ?");
     $checkStmt->bind_param("ii", $cart_id, $product_id);
     $checkStmt->execute();
-    $result = $checkStmt->get_result(); 
+    $result = $checkStmt->get_result();
 
     if ($result->num_rows > 0) {
         // If product exists, update the quantity
