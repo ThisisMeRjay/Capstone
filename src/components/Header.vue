@@ -9,6 +9,25 @@
         <span class="text-blue-500 text-base"> 09123456789</span>
       </p>
     </div>
+
+    <div
+      class="flex items-center text-violet-600 underline hover:text-violet-800"
+      v-if="userLogin.length === 0"
+    >
+      <RouterLink
+        to="/seller_dashboard"
+        :class="$route.name === 'seller_dashboard'"
+        >Sign in as Seller</RouterLink
+      >
+    </div>
+    <div
+      class="flex items-center text-violet-600 underline hover:text-violet-800"
+      v-if="userLogin.length === 0"
+    >
+      <RouterLink to="/rider_home" :class="$route.name === 'rider_home'"
+        >Sign in as Rider</RouterLink
+      >
+    </div>
     <div
       class="flex items-center gap-2 px-3 py-2 bg-blue-400/10 rounded-full shadow text-blue-500 hover:font-semibold transition"
       @click="orderTracking()"
@@ -334,7 +353,10 @@
                             </button>
                           </div>
                           <div
-                            v-else-if="items.video_evidence !== null && items.status !== 14"
+                            v-else-if="
+                              items.video_evidence !== null &&
+                              items.status !== 14
+                            "
                             class="mb-3 flex items-center gap-2"
                           >
                             <p
@@ -528,7 +550,7 @@
       >
         <button
           @click="showSearch = true"
-          class="w-50 lg:w-80 p-2 hover:bg-gray-200/20"
+          class="w-50 lg:w-80 p-2 hover:bg-gray-300"
         >
           <div class="flex items-center text-white lg:text-black">
             <Icon
@@ -712,28 +734,81 @@
                 </div>
               </div>
             </div>
-            <div class="flex items-center justify-between">
-              <label for="username" class="mr-2">Name:</label>
-              <input
-                id="username"
-                v-model="userLogin.username"
-                placeholder="Username"
-                class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
-              />
+            <div class="relative">
+              <div class="flex justify-end gap-5 items-center">
+                <label for="username" class="">Name:</label>
+                <input
+                  type="text"
+                  id="name"
+                  v-model="userLogin.username"
+                  placeholder="Name"
+                  required
+                  :class="[
+                    'border',
+                    'w-full',
+                    'p-2',
+                    'rounded-md',
+                    'my-1',
+                    'bg-gray-100',
+                    errorMessage.nameErr && userLogin.contact_number.lenght > 0
+                      ? 'border-red-500'
+                      : userLogin.username.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
+                />
+              </div>
+              <p
+                class="px-3 py-1 rounded-md text-red-500"
+                v-if="errorMessage.nameErr && userLogin.username.length > 0"
+              >
+                {{ errorMessage.nameErr }}
+              </p>
             </div>
 
-            <div class="flex items-center justify-between">
-              <label for="contact_number" class="mr-2">Contact No:</label>
-              <input
-                id="contact_number"
-                v-model="userLogin.contact_number"
-                placeholder="Contact Number"
-                class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
-              />
+            <div class="relative">
+              <div class="flex justify-end gap-5 items-center">
+                <label for="username" class="">Contact no:</label>
+                <div
+                  class="flex border w-full p-2 rounded-md my-1 bg-gray-100 items-center"
+                >
+                  <span class="bg-gray-200 px-2">+63</span>
+                  <input
+                    type="tel"
+                    id="number"
+                    v-model="userLogin.contact_number"
+                    placeholder="8123456789 or 9123456789"
+                    required
+                    :class="[
+                      'border',
+                      'w-full',
+                      'p-2',
+                      'rounded-md',
+                      'my-1',
+                      'bg-gray-100',
+                      errorMessage.contactNumberErr &&
+                      userLogin.contact_number.length > 0
+                        ? 'border-red-500'
+                        : userLogin.contact_number.length > 0
+                        ? 'border-green-500'
+                        : 'border-gray-300',
+                    ]"
+                  />
+                </div>
+              </div>
+              <p
+                v-if="
+                  errorMessage.contactNumberErr &&
+                  userLogin.contact_number.length > 0
+                "
+                class="text-red-500"
+              >
+                {{ errorMessage.contactNumberErr }}
+              </p>
             </div>
 
-            <div class="flex items-center justify-between">
-              <label for="address" class="mr-2">Municipality:</label>
+            <div class="flex justify-end gap-5 items-center">
+              <label for="address" class="">City:</label>
               <input
                 id="address"
                 v-model="userLogin.address"
@@ -742,8 +817,8 @@
               />
             </div>
 
-            <div class="flex items-center justify-between">
-              <label for="barangay" class="mr-2">Barangay:</label>
+            <div class="flex justify-end gap-5 items-center">
+              <label for="barangay" class="">Barangay:</label>
               <select
                 id="barangay"
                 class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
@@ -759,6 +834,55 @@
                   {{ brgy.name }}
                 </option>
               </select>
+            </div>
+
+            <div class="flex justify-end gap-5 items-center">
+              <label for="address" class="">Street:</label>
+              <select
+                id="zone"
+                v-model="userLogin.Zone"
+                required
+                class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
+              >
+                <option value="" disabled selected>Select your street</option>
+                <option v-for="zone in 7" :key="zone" :value="'Zone ' + zone">
+                  Zone {{ zone }}
+                </option>
+              </select>
+            </div>
+
+            <div class="relative">
+              <div class="flex justify-end gap-5 items-center">
+                <label for="address" class="">House no:</label>
+                <input
+                  type="text"
+                  id="houseno"
+                  v-model="userLogin.House_no"
+                  placeholder="House no."
+                  required
+                  :class="[
+                    'border',
+                    'w-full',
+                    'p-2',
+                    'rounded-md',
+                    'my-1',
+                    'bg-gray-100',
+                    errorMessage.houseNumberErr && userLogin.House_no.length > 0
+                      ? 'border-red-500'
+                      : userLogin.House_no.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
+                />
+              </div>
+              <p
+                v-if="
+                  errorMessage.houseNumberErr && userLogin.House_no.length > 0
+                "
+                class="text-red-500"
+              >
+                {{ errorMessage.houseNumberErr }}
+              </p>
             </div>
 
             <div class="text-right mt-4">
@@ -807,7 +931,7 @@
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="mr-2">Municipality:</span>
+              <span class="mr-2">City:</span>
               <p class="border-2 rounded-lg border-gray-300 p-2 w-3/4">
                 {{ userLogin.address }}
               </p>
@@ -817,6 +941,20 @@
               <span class="mr-2">Barangay:</span>
               <p class="border-2 rounded-lg border-gray-300 p-2 w-52">
                 {{ userLogin.name }}
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="mr-2">Street:</span>
+              <p class="border-2 rounded-lg border-gray-300 p-2 w-52">
+                {{ userLogin.Zone }}
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="mr-2">House no:</span>
+              <p class="border-2 rounded-lg border-gray-300 p-2 w-52">
+                {{ userLogin.House_no }}
               </p>
             </div>
           </div>
@@ -916,6 +1054,28 @@
             >
               <Icon icon="bi:person" class="text-xl" />
               <h1 class="text-base font-medium">Sign in</h1>
+            </div>
+            <div class="flex justify-center ml-4 gap-4 mt-10">
+              <div
+                class="flex items-center text-slate-100 underline hover:text-violet-500"
+                v-if="userLogin.length === 0"
+              >
+                <RouterLink
+                  to="/seller_dashboard"
+                  :class="$route.name === 'seller_dashboard'"
+                  >Sign in as Seller</RouterLink
+                >
+              </div>
+              <div
+                class="flex items-center text-slate-100 underline hover:text-violet-500"
+                v-if="userLogin.length === 0"
+              >
+                <RouterLink
+                  to="/rider_home"
+                  :class="$route.name === 'rider_home'"
+                  >Sign in as Rider</RouterLink
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -1234,6 +1394,7 @@
 </template>
 <script>
 import Header from "../scripts/Header";
+import { computed } from "vue";
 export default {
   ...Header,
 };

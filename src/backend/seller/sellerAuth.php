@@ -247,7 +247,7 @@ function login()
     }
 
     // Use prepared statements to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM user_store WHERE store_email=?");
+    $stmt = $conn->prepare("SELECT * FROM user_store WHERE BINARY store_email=?");
     $stmt->bind_param("s", $store_email);
     $stmt->execute();
     $result = $stmt->get_result();

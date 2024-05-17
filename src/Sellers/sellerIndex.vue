@@ -1,10 +1,25 @@
 <template>
   <div class="min-h-screen bg-slate-300">
     <header
-      class="py-5 absolute w-full top-0 bg-gradient-to-r z-0 from-blue-500/75 from-30% via-violet-500/50 shadow-md shadow-blue-400/25 via-60% to-orange-500/25 to-90% font-semibold text-white text-xl px-10"
+      class="py-5 flex items-center absolute w-full top-0 bg-gradient-to-r z-0 from-blue-500/75 from-30% via-violet-500/50 shadow-md shadow-blue-400/25 via-60% to-orange-500/25 to-90% font-semibold text-white text-xl px-10"
     >
-      <img src="../assets/logo.jpg" alt="" class="w-12 h-12 rounded-full mr-2"/>
+      <img
+        src="../assets/logo.jpg"
+        alt=""
+        class="w-12 h-12 rounded-full mr-2"
+      />
+      <div class="text-sm ml-10">
+        <RouterLink
+          to="/home"
+          :class="$route.name === 'home'"
+          class="flex items-center hover:text-gray-200"
+        >
+          <Icon icon="mdi:arrow-left" class="mr-2" />
+          Back to home
+        </RouterLink>
+      </div>
     </header>
+
     <div class="min-h-screen">
       <div class="flex justify-center items-center h-full">
         <div class="sm:flex gap-10 py-10">
@@ -32,3 +47,13 @@
     </div>
   </div>
 </template>
+<script>
+import { RouterLink } from "vue-router";
+import { Icon } from "@iconify/vue";
+
+export default {
+  components: {
+    Icon,
+  },
+};
+</script>

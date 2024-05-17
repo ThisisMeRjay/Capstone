@@ -3,7 +3,7 @@
     <div class="py-3 px-10 font-bold text-2xl text-slate-700">
       <h1>Add Products</h1>
     </div>
-    
+
     <div class="gap-5">
       <!-- Add Category Section -->
       <div class="my-4">
@@ -367,15 +367,15 @@
           </div>
         </div>
         <div>
-      <div class="flex justify-center">
-        <button
-          @click="saveProduct"
-          class="bg-blue-800/20 text-blue-900 px-3 font-medium text-sm py-2 rounded-full mb-2 shadow"
-        >
-          Save Product
-        </button>
-      </div>
-    </div>
+          <div class="flex justify-center">
+            <button
+              @click="saveProduct"
+              class="bg-blue-800/20 text-blue-900 px-3 font-medium text-sm py-2 rounded-full mb-2 shadow"
+            >
+              Save Product
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -415,17 +415,59 @@ export default {
     const Length = ref(null);
     const Width = ref(null);
     const saveProduct = async () => {
-      // Implementation to save the product along with specifications
-      console.log("selectedCategory:", selectedCategory.value);
-      console.log("image:", image.value);
-      console.log("Productname:", productName.value);
-      console.log("productDescription:", productDescription.value);
-      console.log("price:", price.value);
-      console.log("shipping:", shipping.value);
-      console.log("quantity:", quantity.value);
-      console.log("Product and specifications saved:", specifications.value);
-      console.log("Store ID:", userLogin.value.store_id);
-      console.log("barangay ID:", selectedBarangay.value);
+      // Validate that no required field is empty
+      if (!selectedCategory.value) {
+        alert("Please select a category.");
+        return;
+      }
+      if (!image.value) {
+        alert("Please upload an image.");
+        return;
+      }
+      if (!productName.value.trim()) {
+        alert("Please enter a product name.");
+        return;
+      }
+      if (!productDescription.value.trim()) {
+        alert("Please enter a product description.");
+        return;
+      }
+      if (!price.value) {
+        alert("Please enter a price.");
+        return;
+      }
+      if (!quantity.value) {
+        alert("Please enter a quantity.");
+        return;
+      }
+      if (!specifications.value.trim()) {
+        alert("Please enter specifications.");
+        return;
+      }
+      if (!userLogin.value.store_id) {
+        alert("Store ID is missing.");
+        return;
+      }
+      if (!Weight.value) {
+        alert("Please enter the weight.");
+        return;
+      }
+      if (!Height.value) {
+        alert("Please enter the height.");
+        return;
+      }
+      if (!Length.value) {
+        alert("Please enter the length.");
+        return;
+      }
+      if (!Width.value) {
+        alert("Please enter the width.");
+        return;
+      }
+      if (!selectedBarangay.value) {
+        alert("Please select a barangay.");
+        return;
+      }
 
       try {
         const response = await axios.post(
@@ -449,9 +491,11 @@ export default {
         );
         console.log(response.data);
         refreshPage();
+        alert("Product and specifications saved successfully.");
         // Optionally, clear form fields or perform additional actions upon successful save
       } catch (error) {
         console.error("Error saving product:", error);
+        alert("An error occurred while saving the product. Please try again.");
       }
     };
 
@@ -461,6 +505,7 @@ export default {
     const message = ref({ content: "", type: "success" });
 
     const addNewCategory = async () => {
+      // Ensure category name is not empty
       if (newCategory.value.category_name.trim() === "") {
         message.value = {
           content: "Please enter a category name.",
@@ -468,6 +513,7 @@ export default {
         };
         return;
       }
+
       try {
         const response = await axios.post(
           `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=AddCategory`,
@@ -476,17 +522,36 @@ export default {
             category_description: newCategory.value.category_description,
           }
         );
-        getCategories();
-        message.value = {
-          content: "new category added successfully",
-          type: "success",
-        };
+
+        // Check if the response indicates success
+        if (response.status === 200 && response.data.success) {
+          getCategories();
+          message.value = {
+            content: "New category added successfully",
+            type: "success",
+          };
+        } else {
+          message.value = {
+            content: response.data.error || "Error adding new category.",
+            type: "error",
+          };
+        }
       } catch (error) {
         console.error("Error adding new category:", error);
-        message.value = {
-          content: "There was an error while adding the category.",
-          type: "error",
-        };
+        // Handle network or unexpected errors
+        if (error.response) {
+          // Server responded with a status other than 200 range
+          message.value = {
+            content: error.response.data.error || "Error adding new category.",
+            type: "error",
+          };
+        } else {
+          // No response from server or other errors
+          message.value = {
+            content: "Network error. Please try again later.",
+            type: "error",
+          };
+        }
       }
     };
 

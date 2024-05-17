@@ -181,6 +181,7 @@ const fetchRealTimeMonthlySales = async () => {
 const fetchSalesData = async (start, end) => {
   console.log("start ", start);
   console.log("end ", end);
+  console.log("stpreID ", userLogin.value.store_id);
   try {
     const response = await axios.post(
       `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchSalesData`,

@@ -5,7 +5,7 @@
     class="fixed inset-0 flex items-center justify-center bg-gray-500 border-2 border-zinc-300 bg-opacity-75 z-20"
   >
     <div
-      class="bg-white rounded-lg shadow-xl h-80 sm:h-auto w-3/4 sm:max-w-lg overflow-auto p-2 sm:p-6 relative"
+      class="bg-white rounded-lg shadow-xl h-80 sm:h-auto w-3/4 sm:max-w-lg overflow-y-auto p-2 sm:p-6 relative max-h-full"
       @click.stop
     >
       <button
@@ -22,8 +22,7 @@
       >
         <span
           class="px-4 py-1 bg-blue-500/10 text-sm sm:text-base shadow text-blue-500 font-semibold rounded-md"
-          >{{ product.store_name }}</span
-        >
+        >{{ product.store_name }}</span>
       </div>
 
       <div class="flex">
@@ -44,7 +43,7 @@
                 {{ product.product_name }}
               </h1>
               <div>
-                <span class="felx text-xs sm:text-base font-medium">{{
+                <span class="flex text-xs sm:text-base font-medium">{{
                   product.product_description
                 }}</span>
               </div>
@@ -151,7 +150,7 @@
             @click="getReviews(product.product_id)"
             class="text-xs sm:text-md font-medium text-blue-800 hover:text-blue-600 cursor-pointer"
           >
-            view
+            click here to view
           </p>
         </div>
         <div v-if="reviews.length">

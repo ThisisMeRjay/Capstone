@@ -1,7 +1,7 @@
 import SearchModal from "@/components/SearchModal.vue";
 import LoginModal from "@/components/LoginModal.vue";
 import { Icon } from "@iconify/vue";
-import { onMounted, ref, computed, toRefs, watch } from "vue";
+import { onMounted, ref, computed, toRefs, watch, reactive } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { getDistance } from "geolib";
@@ -658,7 +658,7 @@ export default {
         orderData.value = transformedData; // Update the reactive variable with the transformed data
         // console.log("order value: ", orderData.value);
       } catch (error) {
-        console.error("Error fetching orders :", error); // return an error
+        // console.error("Error fetching orders :", error); // return an error
       }
     };
 
@@ -849,7 +849,54 @@ export default {
 
     onMounted(getUserprofile);
 
+    const errorMessage = reactive({
+      nameErr: null,
+      contactNumberErr: null,
+      houseNumberErr: null,
+    });
+
+    const nameValidation = computed(() => {
+      const pattern = /^[\p{L}'\- ]+$/u;
+      if (!pattern.test(userLogin.value.username.trim())) {
+        return "Please enter a valid name.";
+      }
+      return null;
+    });
+
+    const contactNumberValidation = computed(() => {
+      // This pattern checks for numbers starting with '8' or '9' after the '+63' prefix and ensures they are 10 digits in total.
+      const pattern = /^[89]\d{9}$/;
+      if (!pattern.test(userLogin.value.contact_number)) {
+        return "Contact number must start with '8' or '9' after the '+63' prefix and be exactly 10 digits long.";
+      }
+      return null;
+    });
+
+    const houseNumberValidation = computed(() => {
+      const pattern = /^\d+$/; // Ensures only digits are entered
+      if (!pattern.test(userLogin.value.House_no)) {
+        return "House number must be numeric.";
+      }
+      return null;
+    });
+
     const saveProfile = async () => {
+      // Perform a final validation check on form submission
+      errorMessage.nameErr = nameValidation.value;
+      errorMessage.contactNumberErr = contactNumberValidation.value;
+      errorMessage.houseNumberErr = houseNumberValidation.value;
+      if (
+        errorMessage.nameErr ||
+        errorMessage.contactNumberErr ||
+        errorMessage.houseNumberErr
+      ) {
+        console.log(
+          errorMessage.nameErr,
+          errorMessage.contactNumberErr,
+          errorMessage.houseNumberErr
+        );
+        return;
+      }
       try {
         const res = await axios.put(
           `${url}/Ecommerce/vue-project/src/backend/auth.php?action=SaveEditprofile`,
@@ -857,6 +904,8 @@ export default {
             username: userLogin.value.username,
             contact_number: userLogin.value.contact_number,
             address: userLogin.value.address,
+            zone: userLogin.value.Zone,
+            houseno: userLogin.value.House_no,
             barangay_id: selectedBarangay.value,
             user_id: userLogin.value.user_id,
             profile: profile.value,
@@ -982,6 +1031,11 @@ export default {
     }
 
     return {
+      errorMessage,
+      nameValidation,
+      contactNumberValidation,
+      houseNumberValidation,
+
       selectedFile,
       handleVideoUpload,
       openRefundModal,

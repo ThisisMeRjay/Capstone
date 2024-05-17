@@ -6,7 +6,7 @@ include ('db.php');
 include ('header.php');
 
 $res = ['error' => false];
-$action = isset ($_GET['action']) ? $_GET['action'] : '';
+$action = isset($_GET['action']) ? $_GET['action'] : '';
 switch ($action) {
     case 'register':
         register();
@@ -72,7 +72,8 @@ function checkName()
     }
 }
 
-function checkEmail() {
+function checkEmail()
+{
     global $conn;
 
     // Read JSON data from the POST input
@@ -119,17 +120,19 @@ function SaveEditProfile()
     $barangayID = $data['barangay_id']; // Renamed for clarity
     $userID = $data['user_id']; // Assuming this is provided correctly.
     $profile = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data['profile']));
+    $zone = $data['zone'];
+    $houseno = $data['houseno'];
 
     // Start a transaction
     $conn->begin_transaction();
 
     try {
         // Update users table
-        $stmt = $conn->prepare("UPDATE users SET username = ?, contact_number = ?, address = ?, barangay_id = ? WHERE user_id = ?");
+        $stmt = $conn->prepare("UPDATE users SET username = ?, contact_number = ?, address = ?, Zone = ?, House_no = ?, barangay_id = ? WHERE user_id = ?");
         if (!$stmt) {
             throw new Exception("Prepare statement failed: " . $conn->error);
         }
-        $stmt->bind_param("sisii", $username, $contactNumber, $address, $barangayID, $userID);
+        $stmt->bind_param("sissiii", $username, $contactNumber, $address, $zone, $houseno, $barangayID, $userID);
         if (!$stmt->execute()) {
             throw new Exception("Execute failed: " . $stmt->error);
         }

@@ -519,11 +519,12 @@ export default {
     const reviews = ref([]);
 
     const getReviews = async () => {
+      console.log("productID", editProductId.value);
       try {
         const response = await axios.post(
           `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getReviews`,
           {
-            product_id: editProductId,
+            product_id: editProductId.value,
           }
         );
         reviews.value = response.data;
@@ -588,20 +589,62 @@ export default {
     const Width = ref(null);
 
     const handleEditProduct = async () => {
-      console.log(editProductId.value);
-      console.log(product_name.value);
-      console.log(product_price.value);
-      console.log(product_description.value);
-      console.log(shipping_fee.value);
-      console.log(quantity.value);
-      console.log(specifications.value);
-      console.log(image.value);
-      console.log(selectedBarangay.value);
-      console.log(selectedCategory.value);
-      console.log(Weight.value);
-      console.log(Height.value);
-      console.log(Length.value);
-      console.log(Width.value);
+      // Check if any of the required fields are empty
+      if (!editProductId.value) {
+        alert("Please enter the product ID.");
+        return;
+      }
+      if (!product_name.value) {
+        alert("Please enter the product name.");
+        return;
+      }
+      if (!product_price.value) {
+        alert("Please enter the product price.");
+        return;
+      }
+      if (!product_description.value) {
+        alert("Please enter the product description.");
+        return;
+      }
+      // Add alert messages for other required fields here
+      if (!quantity.value) {
+        alert("Please enter the stocks.");
+        return;
+      }
+      if (!image.value) {
+        alert("Please select an image.");
+        return;
+      }
+      if (!selectedBarangay.value) {
+        alert("Please select a barangay.");
+        return;
+      }
+      if (!selectedCategory.value) {
+        alert("Please select a category.");
+        return;
+      }
+      if (!Weight.value) {
+        alert("Please enter the weight.");
+        return;
+      }
+      if (!Height.value) {
+        alert("Please enter the height.");
+        return;
+      }
+      if (!Length.value) {
+        alert("Please enter the length.");
+        return;
+      }
+      if (!Width.value) {
+        alert("Please enter the width.");
+        return;
+      }
+      for (const spec of specifications.value) {
+        if (spec.spec_key === "" || spec.spec_value === "") {
+          alert("Please enter the complete specifications.");
+          return;
+        }
+      }
 
       try {
         const response = await axios.put(

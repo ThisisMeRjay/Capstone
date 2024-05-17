@@ -129,29 +129,32 @@
       </div>
 
       <div class="gap-2 mt-2">
-        <label for="number" class="font-semibold"
-          >Contact Number <span class="text-red-500">*</span></label
+        <label for="number" class="font-semibold">
+          Contact Number <span class="text-red-500">*</span>
+        </label>
+        <div
+          class="flex border w-full p-2 rounded-md my-1 bg-gray-100 items-center"
         >
-        <input
-          type="tel"
-          id="number"
-          v-model="contactNumber"
-          placeholder="09123456789"
-          required
-          :class="[
-            'border',
-            'w-full',
-            'p-2',
-            'rounded-md',
-            'my-1',
-            'bg-gray-100',
-            errorMessage.contactNumberErr && contactNumber.length > 0
-              ? 'border-red-500'
-              : contactNumber.length > 0
-              ? 'border-green-500'
-              : 'border-gray-300',
-          ]"
-        />
+          <span class="bg-gray-200 px-2">+63</span>
+          <input
+            type="tel"
+            id="number"
+            v-model="contactNumber"
+            placeholder="8123456789 or 9123456789"
+            required
+            :class="[
+              'flex-1',
+              'border-none',
+              'outline-none',
+              'bg-gray-100',
+              errorMessage.contactNumberErr && contactNumber.length > 0
+                ? 'border-red-500'
+                : contactNumber.length > 0
+                ? 'border-green-500'
+                : 'border-gray-300',
+            ]"
+          />
+        </div>
         <p
           v-if="errorMessage.contactNumberErr && contactNumber.length > 0"
           class="text-red-500"
@@ -285,9 +288,10 @@ export default {
     });
 
     const contactNumberValidation = computed(() => {
-      const pattern = /^\d{11}$/; // Ensures exactly 11 digits
+      // This pattern checks for numbers starting with '8' or '9' after the '+63' prefix and ensures they are 10 digits in total.
+      const pattern = /^[89]\d{9}$/;
       if (!pattern.test(contactNumber.value)) {
-        return "Contact number must start with '09' and be exactly 11 digits.";
+        return "Contact number must start with '8' or '9' after the '+63' prefix and be exactly 10 digits long.";
       }
       return null;
     });
