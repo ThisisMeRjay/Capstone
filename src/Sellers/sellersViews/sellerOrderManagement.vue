@@ -11,10 +11,10 @@
             class="border rounded-md w-60 shadow flex justify-between items-center px-4"
           >
             <input
-              type="number"
+              type="text"
               v-model="searchQuery"
-              @change="filterBySearch"
-              placeholder="Search by order number"
+              @input="filterBySearch"
+              placeholder="Search orders"
               class="outline-none placeholder:text-sm placeholder:font-light py-2 pl-2 w-full rounded-full"
             />
             <Icon
@@ -28,7 +28,7 @@
             <select
               id="status"
               v-model="selectedStatus"
-              @change="filteredOrders"
+              @change="filterByStatus"
               class="shadow border text-gray-900 outline-none text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-32 px-3 py-2.5"
             >
               <option value="">Default</option>
@@ -81,7 +81,7 @@
               </thead>
               <tbody class="text-center">
                 <tr
-                  v-for="item in orders"
+                  v-for="(item, index) in paginatedOrders"
                   :key="item.id"
                   class="bg-gray-100/10 border-b border-gray-600/50"
                 >
@@ -156,6 +156,50 @@
               </tbody>
             </table>
           </div>
+          <div class="flex justify-center mt-4">
+            <nav aria-label="Pagination">
+              <ul class="flex list-none p-0">
+                <li class="mt-2">
+                  <a
+                    href="#"
+                    @click.prevent="currentPage = 1"
+                    :class="{
+                      'px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700':
+                        currentPage !== 1,
+                      'px-3 py-2 ml-0 leading-tight text-blue-600 bg-blue-50 border border-gray-300 rounded-l-lg cursor-default':
+                        currentPage === 1,
+                    }"
+                    >First</a
+                  >
+                </li>
+                <li
+                  v-for="page in pages"
+                  :key="page"
+                  :class="{
+                    'px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700':
+                      page !== currentPage,
+                    'px-3 py-2 leading-tight text-blue-600 bg-blue-50 border border-gray-300 cursor-default':
+                      page === currentPage,
+                  }"
+                >
+                  <a href="#" @click.prevent="currentPage = page">{{ page }}</a>
+                </li>
+                <li class="mt-2">
+                  <a
+                    href="#"
+                    @click.prevent="currentPage = pages.length"
+                    :class="{
+                      'px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700':
+                        currentPage !== pages.length,
+                      'px-3 py-2 leading-tight text-blue-600 bg-blue-50 border border-gray-300 rounded-r-lg cursor-default':
+                        currentPage === pages.length,
+                    }"
+                    >Last</a
+                  >
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
       </div>
     </div>
@@ -215,13 +259,13 @@
   </div>
 </template>
 <script>
-// YourComponent.vue <script> part
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { Icon } from "@iconify/vue";
 import axios from "axios";
-import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller"; // Adjust the path as necessary
+import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller";
 import moment from "moment-timezone";
 import { API_URL } from "@/config";
+
 export default {
   components: {
     Icon,
@@ -234,50 +278,76 @@ export default {
     };
 
     const selectedStatus = ref("");
-
     const orders = ref([]);
-
-    let selectValue = ref("");
-
-    let estimatedDelivery = ref("");
-
+    const selectValue = ref("");
+    const estimatedDelivery = ref("");
     const showStatusModal = ref(false);
-
     const editableOrderStatus = ref([]);
-
-    const userOrderName = ref(""); // constaining  the name of the order that is being edited in status modal
-
-    let orderIdToEdit = ref(null);
-
-    const temp_orders = ref([]); // pass the id to this
-
+    const userOrderName = ref("");
+    const orderIdToEdit = ref(null);
+    const temp_orders = ref([]);
     const searchQuery = ref("");
+    const paginatedOrders = ref([]);
+    const currentPage = ref(1);
+    const itemsPerPage = 10;
+    const filteredOrders = ref([]);
+    const searchedOrders = ref([]);
 
-    const filterBySearch = () => {
-      if (!searchQuery.value) {
-        fetchOrders(); // Fetch all orders if no status is selected or reset to default
-      } else {
-        // Filter directly if there's a selected status
-        orders.value = orders.value.filter(
-          (order) => order.order_number === searchQuery.value
-        );
-      }
+    const updatePaginatedOrders = () => {
+      const startIndex = (currentPage.value - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      paginatedOrders.value = searchedOrders.value.slice(startIndex, endIndex);
+      console.log("Paginated Orders:", paginatedOrders.value);
     };
 
-    const filteredOrders = () => {
-      if (temp_orders.value.length === 0) {
-        temp_orders.value = orders.value;
-      } else {
-        orders.value = temp_orders.value;
-      }
+    const filterBySearch = () => {
+      const searchString = searchQuery.value.toLowerCase();
+      searchedOrders.value = filteredOrders.value.filter((order) => {
+        return (
+          (order.order_number &&
+            order.order_number.toString().includes(searchString)) ||
+          (order.product_name &&
+            order.product_name.toLowerCase().includes(searchString)) ||
+          (order.status && order.status.toLowerCase().includes(searchString)) ||
+          (order.quantity &&
+            order.quantity.toString().includes(searchString)) ||
+          (order.username &&
+            order.username.toLowerCase().includes(searchString)) ||
+          (order.total_price_products &&
+            order.total_price_products.toString().includes(searchString)) ||
+          (order.payment_method &&
+            order.payment_method.toLowerCase().includes(searchString)) ||
+          (order.date_purchased &&
+            order.date_purchased.toLowerCase().includes(searchString)) ||
+          (order.estimated_delivery &&
+            order.estimated_delivery.toLowerCase().includes(searchString)) ||
+          (order.delivered_date &&
+            order.delivered_date.toLowerCase().includes(searchString))
+        );
+      });
+      currentPage.value = 1;
+      updatePaginatedOrders();
+    };
+
+    const pages = computed(() => {
+      const totalPages = Math.ceil(searchedOrders.value.length / itemsPerPage);
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    });
+
+    watch(currentPage, updatePaginatedOrders);
+    watch(filteredOrders, filterBySearch);
+    watch(searchQuery, filterBySearch);
+    watch(searchedOrders, updatePaginatedOrders);
+
+    const filterByStatus = () => {
       if (!selectedStatus.value) {
-        fetchOrders(); // Fetch all orders if no status is selected or reset to default
+        filteredOrders.value = orders.value;
       } else {
-        // Filter directly if there's a selected status
-        orders.value = orders.value.filter(
+        filteredOrders.value = orders.value.filter(
           (order) => order.status === selectedStatus.value
         );
       }
+      filterBySearch();
     };
 
     const barangayname = ref([]);
@@ -287,56 +357,47 @@ export default {
         (order) => order.order_detail_id === orderId
       );
       if (orderToEdit) {
-        editableOrderStatus.value = orderToEdit; // Direct assignment without spreading
+        editableOrderStatus.value = { ...orderToEdit };
         userOrderName.value = editableOrderStatus.value.username;
         selectValue.value = editableOrderStatus.value.status;
         updateOptions();
         if (
-          editableOrderStatus.value.status == "pending" ||
-          editableOrderStatus.value.status == "confirmed" ||
-          editableOrderStatus.value.status == "processing" ||
-          editableOrderStatus.value.status == "return_requested" ||
-          editableOrderStatus.value.status == "return_in_progress" ||
-          editableOrderStatus.value.status == "delivered"
+          [
+            "pending",
+            "confirmed",
+            "processing",
+            "return_requested",
+            "return_in_progress",
+            "delivered",
+          ].includes(editableOrderStatus.value.status)
         ) {
           showStatusModal.value = true;
         } else {
           showStatusModal.value = false;
         }
-        console.log("info", editableOrderStatus.value);
         try {
           const response = await axios.post(
             `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=barangay`,
-            {
-              id: orderToEdit.barangay_id,
-            }
+            { id: orderToEdit.barangay_id }
           );
-          // Assuming you might want to do something with the response here
           barangayname.value = response.data;
-          console.log(response.data);
         } catch (error) {
           console.error("Error getting barangay:", error);
         }
       }
     };
+
     const closeEditStatusModal = () => {
       showStatusModal.value = false;
     };
 
-    // request a axios to update the status for an order
     const handleEditStatusOrder = async () => {
-      console.log("Status: ", selectValue.value);
-      console.log("orderId:  ", orderIdToEdit.value);
-      console.log("estimated date:  ", estimatedDelivery.value);
-
-      // Generate current date and time in Philippine time zone and format it
       const DateToupdate = moment()
         .tz("Asia/Manila")
         .format("YYYY-MM-DD HH:mm:ss");
-      console.log("date:  ", DateToupdate);
 
       try {
-        const response = await axios.put(
+        await axios.put(
           `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
           {
             id: orderIdToEdit.value,
@@ -345,14 +406,12 @@ export default {
             date: DateToupdate,
           }
         );
-        // Assuming you might want to do something with the response here
-        console.log(response.data);
+        refreshPage();
       } catch (error) {
         console.error("Error editing status:", error);
       }
-      refreshPage();
     };
-    // Now userLogin is directly accessible here  , and it's reactive
+
     onMounted(() => {
       updateOptions();
       getUserFromLocalStorage();
@@ -360,16 +419,15 @@ export default {
     });
 
     const fetchOrders = async () => {
-      console.log("seller ", userLogin.value.store_id);
       try {
         const response = await axios.post(
           `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getOrders`,
-          {
-            store_id: userLogin.value.store_id,
-          }
+          { store_id: userLogin.value.store_id }
         );
         orders.value = response.data;
-        console.log("orders: ", orders.value);
+        temp_orders.value = response.data;
+        filteredOrders.value = response.data; // Initialize filteredOrders with all orders
+        filterByStatus(); // Apply the status filter initially
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
@@ -382,52 +440,49 @@ export default {
     const options = ref([]);
 
     const updateOptions = () => {
-      if (selectValue.value === "pending") {
-        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
-        options.value = [
+      const statusOptions = {
+        pending: [
           { value: "pending", text: "Pending" },
           { value: "confirmed", text: "Confirmed" },
           { value: "cancelled", text: "Cancelled" },
-        ];
-      } else if (selectValue.value === "confirmed") {
-        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
-        options.value = [
+        ],
+        confirmed: [
           { value: "confirmed", text: "Confirmed" },
           { value: "processing", text: "Processing" },
-        ];
-      } else if (selectValue.value === "processing") {
-        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
-        options.value = [
+        ],
+        processing: [
           { value: "processing", text: "Processing" },
           { value: "ready_to_pickup", text: "Ready to Pickup" },
-        ];
-      } else if (selectValue.value === "delivered") {
-        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
-        options.value = [
+        ],
+        delivered: [
           { value: "delivered", text: "Delivered" },
           { value: "closed", text: "Closed" },
-        ];
-      } else if (selectValue.value === "return_in_progress") {
-        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
-        options.value = [
+        ],
+        return_in_progress: [
           { value: "return_in_progress", text: "Return in progress" },
           { value: "return_completed", text: "Return completed" },
-        ];
-      }
+        ],
+      };
+      options.value = statusOptions[selectValue.value] || [];
     };
 
     return {
+      searchedOrders,
+      filterByStatus,
+      filteredOrders,
+      paginatedOrders,
+      currentPage,
+      pages,
+      filterBySearch,
+      updatePaginatedOrders,
       options,
       barangayname,
       orders,
       editData,
       selectValue,
       selectedStatus,
-      filteredOrders,
       temp_orders,
       searchQuery,
-      filterBySearch,
-
       editStatus,
       showStatusModal,
       closeEditStatusModal,
