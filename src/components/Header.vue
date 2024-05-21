@@ -1143,7 +1143,7 @@
                   <h1 class="font-bold text-xs">
                     {{ items.product_name }}
                   </h1>
-                  <p class="text-xs font-semibold">{{ items.totalPrice }}</p>
+                  <p class="text-xs font-semibold">₱{{ items.totalPrice }}</p>
 
                   <div class="flex gap-2">
                     <div
@@ -1295,7 +1295,7 @@
                           </div>
                         </div>
                       </div>
-                      <p class="text-xs">{{ items.price }}</p>
+                      <p class="text-xs">₱{{ items.price }}</p>
                       <p class="text-xs">x{{ items.quantity }}</p>
                     </div>
                   </div>
@@ -1304,7 +1304,7 @@
                       class="flex gap-2 justify-between items-center border-y p-2 border-cyan-500/50 bg-cyan-300/10"
                     >
                       <span class="text-sm font-medium">Shipping Fee</span>
-                      <p class="text-xs">
+                      <p class="text-xs">₱
                         {{ items.shippingFee.toFixed(2) }}
                       </p>
                     </div>

@@ -95,6 +95,7 @@
             <div class="flex text-sm justify-start items-center font-medium">
               <div class="flex-auto my-1 mx-1 sm:mx-2 flex space-x-4">
                 <button
+                  :disabled="product.stock === 0"
                   class="h-10 sm:w-40 px-1 sm:px-6 hover:bg-slate-500/10 font-semibold rounded-md border-2 text-gray-900 text-xs"
                   type="button"
                   @click="addToCart(product.product_name, product.product_id)"

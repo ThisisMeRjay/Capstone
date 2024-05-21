@@ -504,11 +504,28 @@ export default {
     const newCategory = ref({ category_name: "", category_description: "" });
     const message = ref({ content: "", type: "success" });
 
+    const isValidCategoryName = (name) => {
+      // Define a regex pattern for a valid category name (letters and spaces only)
+      const pattern = /^[A-Za-z\s]+$/;
+      return pattern.test(name) && name.length > 2 && name.length <= 50; // Example criteria
+    };
+
     const addNewCategory = async () => {
-      // Ensure category name is not empty
-      if (newCategory.value.category_name.trim() === "") {
+      const categoryName = newCategory.value.category_name.trim();
+
+      // Ensure category name is not empty and valid
+      if (categoryName === "") {
         message.value = {
           content: "Please enter a category name.",
+          type: "error",
+        };
+        return;
+      }
+
+      if (!isValidCategoryName(categoryName)) {
+        message.value = {
+          content:
+            "Invalid category name. Please use only letters and spaces, and ensure it's between 3 and 50 characters long.",
           type: "error",
         };
         return;
@@ -518,7 +535,7 @@ export default {
         const response = await axios.post(
           `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=AddCategory`,
           {
-            category_name: newCategory.value.category_name,
+            category_name: categoryName,
             category_description: newCategory.value.category_description,
           }
         );
@@ -684,6 +701,7 @@ export default {
     };
 
     return {
+      isValidCategoryName,
       shippingtestResult,
       customerbarangay,
       subrgy,

@@ -7,7 +7,9 @@
     <!-- Date Range Selection with Labels -->
     <div class="mb-4 flex items-end gap-4">
       <div class="flex items-center gap-3">
-        <label for="startDate" class="block text-sm font-medium text-slate-700">From:</label>
+        <label for="startDate" class="block text-sm font-medium text-slate-700"
+          >From:</label
+        >
         <input
           id="startDate"
           type="date"
@@ -17,7 +19,9 @@
         />
       </div>
       <div class="flex items-center gap-3">
-        <label for="endDate" class="block text-sm font-medium text-slate-700">To:</label>
+        <label for="endDate" class="block text-sm font-medium text-slate-700"
+          >To:</label
+        >
         <input
           id="endDate"
           type="date"
@@ -53,9 +57,24 @@
         </div>
       </div>
     </div>
-    <!-- Chart -->
-    <div class="chart-container" style="position: relative; height:60vh; width:80vw">
-      <Bar id="my-chart-id" :options="chartOptions" :data="chartData" />
+    <!-- Charts -->
+    <div class="flex gap-5">
+      <div
+        class="chart-container"
+        style="position: relative; height: 60vh; width: 40vw"
+      >
+        <Bar id="my-chart-id" :options="chartOptions" :data="chartData" />
+      </div>
+      <div
+        class="chart-container"
+        style="position: relative; height: 60vh; width: 40vw"
+      >
+        <Bar
+          id="sales-per-stock-chart-id"
+          :options="salesPerStockChartOptions"
+          :data="salesPerStockChartData"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -119,7 +138,79 @@ const chartOptions = ref({
   },
 });
 
+const salesPerStockChartData = ref({
+  labels: [], // Initially empty, will be filled with product names
+  datasets: [
+    {
+      label: "Sales Amount per Stock Item",
+      data: [], // Initially empty, will be filled with sales amounts per stock item
+      backgroundColor: "rgba(153, 102, 255, 0.2)",
+      borderColor: "rgba(153, 102, 255, 1)",
+      borderWidth: 2,
+      borderRadius: 5,
+    },
+  ],
+});
+
+const salesPerStockChartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false, // Add this line
+  plugins: {
+    title: {
+      display: true,
+      text: "SALES AMOUNT PER STOCK ITEM",
+      font: {
+        size: 20,
+      },
+      padding: {
+        top: 30,
+        bottom: 20,
+      },
+    },
+    // Add other plugin options as needed
+  },
+});
+
 const url = API_URL;
+
+const fetchSalesPerStockItem = async () => {
+  try {
+    const response = await axios.post(
+      `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=fetchSalesPerStockItem`,
+      { store_id: userLogin.value.store_id }
+    );
+
+    const salesPerStockItemData = response.data;
+    console.log("Sales per stock item data:", salesPerStockItemData);
+
+    if (salesPerStockItemData.error) {
+      console.error("Error:", salesPerStockItemData.message);
+      return;
+    }
+
+    const labels = salesPerStockItemData.map((item) => item.product_name);
+    const salesAmountsPerStockItem = salesPerStockItemData.map((item) =>
+      parseFloat(item.sales_per_stock_item)
+    );
+
+    salesPerStockChartData.value = {
+      ...salesPerStockChartData.value,
+      labels: labels,
+      datasets: [
+        {
+          ...salesPerStockChartData.value.datasets[0],
+          data: salesAmountsPerStockItem,
+        },
+      ],
+    };
+
+    console.log(
+      "Sales per stock item data fetched and chart updated successfully."
+    );
+  } catch (error) {
+    console.error("Error fetching sales per stock item data:", error);
+  }
+};
 
 const totalSales = ref(0);
 const totalStocks = ref("");
@@ -248,10 +339,12 @@ onMounted(() => {
   fetchSalesData(startDate.value, endDate.value);
   fetchCurrentInventoryStatus();
   fetchRealTimeMonthlySales();
+  fetchSalesPerStockItem();
 });
 </script>
 <style>
-#my-chart-id {
+#my-chart-id,
+#sales-per-stock-chart-id {
   margin-top: 3%;
   border: 2px solid #909090db; /* Example: 2px solid black border */
   border-radius: 5px; /* Optional: if you want rounded corners */

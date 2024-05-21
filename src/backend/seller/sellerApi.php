@@ -54,6 +54,9 @@ switch ($action) {
     case 'getOrdersAdmin':
         getOrdersAdmin();
         break;
+    case 'fetchSalesPerStockItem':
+        fetchSalesPerStockItem();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
@@ -197,6 +200,41 @@ function fetchStocks()
     $stmt->close();
 }
 
+function fetchSalesPerStockItem()
+{
+    global $conn;
+    header('Content-Type: application/json'); // Ensure JSON response
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    if (!isset($data['store_id'])) {
+        echo json_encode(['error' => true, 'message' => 'store_id is missing']);
+        exit;
+    }
+
+    $storeId = $data['store_id'];
+
+    $stmt = $conn->prepare("
+        SELECT p.product_name, SUM(od.total_price_products) AS sales_per_stock_item
+        FROM order_details od
+        JOIN products p ON p.product_id = od.product_id
+        WHERE p.store_id = ?
+          AND (od.status = 'delivered' OR od.status = 'closed')
+        GROUP BY p.product_id
+    ");
+
+    $stmt->bind_param("i", $storeId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $salesPerStockItemData = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $salesPerStockItemData[] = $row;
+    }
+
+    echo json_encode($salesPerStockItemData);
+    $stmt->close();
+}
+
 
 function fetchRealTimeMonthlySales()
 {
@@ -221,7 +259,7 @@ function fetchRealTimeMonthlySales()
         LEFT JOIN products ON products.product_id = order_details.product_id
         WHERE YEAR(order_details.delivered_date) = ?
           AND products.store_id = ?
-          AND order_details.status = 'delivered' OR order_details.status = 'closed'
+          AND (order_details.status = 'delivered' OR order_details.status = 'closed')
         GROUP BY MONTH(order_details.delivered_date)
         ORDER BY MONTH(order_details.delivered_date)
     ");
