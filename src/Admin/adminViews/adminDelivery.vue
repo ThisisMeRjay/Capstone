@@ -11,10 +11,10 @@
             class="border rounded-md w-60 shadow flex justify-between items-center px-4"
           >
             <input
-              type="number"
+              type="text"
               v-model="searchQuery"
-              @change="filterBySearch"
-              placeholder="Search by order number"
+              @input="filterBySearch"
+              placeholder="Search orders"
               class="outline-none placeholder:text-sm placeholder:font-light py-2 pl-2 w-full rounded-full"
             />
             <Icon
@@ -28,7 +28,7 @@
             <select
               id="status"
               v-model="selectedStatus"
-              @change="filteredOrders"
+              @change="filterByStatus"
               class="shadow border text-gray-900 outline-none text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-32 px-3 py-2.5"
             >
               <option value="">Default</option>
@@ -77,11 +77,12 @@
                   <th scope="col" class="px-6 py-2">date delivered</th>
                   <th scope="col" class="px-6 py-2">rider assigned</th>
                   <th scope="col" class="px-6 py-2">Delivery proof</th>
+                  <th scope="col" class="px-6 py-2">action</th>
                 </tr>
               </thead>
               <tbody class="text-center">
                 <tr
-                  v-for="item in orders"
+                  v-for="(item, index) in paginatedOrders"
                   :key="item.id"
                   class="bg-gray-100/10 border-b border-gray-600/50"
                 >
@@ -145,9 +146,61 @@
                       view
                     </button>
                   </td>
+                  <td class="px-6 py-1">
+                    <button
+                      class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                      @click="deleteOrder(item.order_detail_id)"
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="flex justify-center mt-4">
+            <nav aria-label="Pagination">
+              <ul class="flex list-none p-0">
+                <li class="mt-2">
+                  <a
+                    href="#"
+                    @click.prevent="currentPage = 1"
+                    :class="{
+                      'px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700':
+                        currentPage !== 1,
+                      'px-3 py-2 ml-0 leading-tight text-blue-600 bg-blue-50 border border-gray-300 rounded-l-lg cursor-default':
+                        currentPage === 1,
+                    }"
+                    >First</a
+                  >
+                </li>
+                <li
+                  v-for="page in pages"
+                  :key="page"
+                  :class="{
+                    'px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700':
+                      page !== currentPage,
+                    'px-3 py-2 leading-tight text-blue-600 bg-blue-50 border border-gray-300 cursor-default':
+                      page === currentPage,
+                  }"
+                >
+                  <a href="#" @click.prevent="currentPage = page">{{ page }}</a>
+                </li>
+                <li class="mt-2">
+                  <a
+                    href="#"
+                    @click.prevent="currentPage = pages.length"
+                    :class="{
+                      'px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700':
+                        currentPage !== pages.length,
+                      'px-3 py-2 leading-tight text-blue-600 bg-blue-50 border border-gray-300 rounded-r-lg cursor-default':
+                        currentPage === pages.length,
+                    }"
+                    >Last</a
+                  >
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
@@ -287,7 +340,7 @@
 </template>
 <script>
 // YourComponent.vue <script> part
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller"; // Adjust the path as necessary
@@ -337,6 +390,69 @@ export default {
 
     const riderModal = ref(false);
 
+    const paginatedOrders = ref([]);
+    const currentPage = ref(1);
+    const itemsPerPage = 10;
+    const filteredOrders = ref([]);
+    const searchedOrders = ref([]);
+
+    const updatePaginatedOrders = () => {
+      const startIndex = (currentPage.value - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      paginatedOrders.value = searchedOrders.value.slice(startIndex, endIndex);
+      console.log("Paginated Orders:", paginatedOrders.value);
+    };
+
+    const filterBySearch = () => {
+      const searchString = searchQuery.value.toLowerCase();
+      searchedOrders.value = filteredOrders.value.filter((order) => {
+        return (
+          (order.order_number &&
+            order.order_number.toString().includes(searchString)) ||
+          (order.product_name &&
+            order.product_name.toLowerCase().includes(searchString)) ||
+          (order.status && order.status.toLowerCase().includes(searchString)) ||
+          (order.quantity &&
+            order.quantity.toString().includes(searchString)) ||
+          (order.username &&
+            order.username.toLowerCase().includes(searchString)) ||
+          (order.total_price_products &&
+            order.total_price_products.toString().includes(searchString)) ||
+          (order.payment_method &&
+            order.payment_method.toLowerCase().includes(searchString)) ||
+          (order.date_purchased &&
+            order.date_purchased.toLowerCase().includes(searchString)) ||
+          (order.estimated_delivery &&
+            order.estimated_delivery.toLowerCase().includes(searchString)) ||
+          (order.delivered_date &&
+            order.delivered_date.toLowerCase().includes(searchString))
+        );
+      });
+      currentPage.value = 1;
+      updatePaginatedOrders();
+    };
+
+    const pages = computed(() => {
+      const totalPages = Math.ceil(searchedOrders.value.length / itemsPerPage);
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    });
+
+    watch(currentPage, updatePaginatedOrders);
+    watch(filteredOrders, filterBySearch);
+    watch(searchQuery, filterBySearch);
+    watch(searchedOrders, updatePaginatedOrders);
+
+    const filterByStatus = () => {
+      if (!selectedStatus.value) {
+        filteredOrders.value = orders.value;
+      } else {
+        filteredOrders.value = orders.value.filter(
+          (order) => order.status === selectedStatus.value
+        );
+      }
+      filterBySearch();
+    };
+
     const fetchRiders = async () => {
       try {
         const response = await axios.get(
@@ -347,33 +463,6 @@ export default {
         console.log("riders", response.data);
       } catch (error) {
         console.error("Error getting riders:", error);
-      }
-    };
-
-    const filterBySearch = () => {
-      if (!searchQuery.value) {
-        fetchOrders(); // Fetch all orders if no status is selected or reset to default
-      } else {
-        // Filter directly if there's a selected status
-        orders.value = orders.value.filter(
-          (order) => order.order_number === searchQuery.value
-        );
-      }
-    };
-
-    const filteredOrders = () => {
-      if (temp_orders.value.length === 0) {
-        temp_orders.value = orders.value;
-      } else {
-        orders.value = temp_orders.value;
-      }
-      if (!selectedStatus.value) {
-        fetchOrders(); // Fetch all orders if no status is selected or reset to default
-      } else {
-        // Filter directly if there's a selected status
-        orders.value = orders.value.filter(
-          (order) => order.status === selectedStatus.value
-        );
       }
     };
 
@@ -501,6 +590,7 @@ export default {
           `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=getOrdersAdmin`
         );
         orders.value = response.data;
+        filteredOrders.value = response.data;
         console.log("orders: ", orders.value);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -511,6 +601,41 @@ export default {
       console.log(id);
     };
 
+    const deleteOrder = async (orderId) => {
+      console.log("ID", orderId);
+      try {
+        // Show a confirmation dialog before deleting the order
+        const confirmDelete = confirm(
+          "Are you sure you want to delete this order?"
+        );
+
+        if (confirmDelete) {
+          const response = await axios.post(
+            `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=deleteOrder`,
+            {
+              id: orderId,
+            }
+          );
+          console.log("ID", response.data);
+          if (response.data.success) {
+            // Remove the deleted order from the orders array
+            orders.value = orders.value.filter(
+              (order) => order.order_detail_id !== orderId
+            );
+            filteredOrders.value = orders.value.filter(
+              (order) => order.order_detail_id !== orderId
+            );
+            alert("Order deleted successfully!");
+          } else {
+            alert("Failed to delete the order. Please try again.");
+          }
+        }
+      } catch (error) {
+        console.error("Error deleting order:", error);
+        alert("Failed to delete the order. Please try again.");
+      }
+    };
+
     onMounted(() => {
       updateOptions();
       getUserFromLocalStorage();
@@ -519,6 +644,15 @@ export default {
     });
 
     return {
+      deleteOrder,
+      searchedOrders,
+      filterByStatus,
+      filteredOrders,
+      paginatedOrders,
+      currentPage,
+      pages,
+      filterBySearch,
+      updatePaginatedOrders,
       insertRider,
       riderModal,
       Riders,

@@ -62,7 +62,7 @@
           </div>
         </RouterLink>
       </div>
-      <div class="">
+      <div class="ml-2">
         <button
           @click="logout"
           class="flex justify-start items-center font-semibold hover:bg-slate-400/20 rounded-md text-slate-700 w-full py-2"

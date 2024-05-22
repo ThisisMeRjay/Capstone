@@ -1,6 +1,6 @@
 <template>
   <div class="mx-4">
-    <div class="py-3 px-10 font-bold text-2xl text-slate-700">
+    <div class="py-3 font-bold text-2xl text-slate-700">
       <h1>Dashboard</h1>
     </div>
 

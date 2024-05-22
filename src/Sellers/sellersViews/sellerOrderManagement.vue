@@ -77,6 +77,7 @@
                   <th scope="col" class="px-6 py-2">ORDER DATE</th>
                   <th scope="col" class="px-6 py-2">ESTIMATED DELIVERY</th>
                   <th scope="col" class="px-6 py-2">date delivered</th>
+                  <th scope="col" class="px-6 py-2">Action</th>
                 </tr>
               </thead>
               <tbody class="text-center">
@@ -151,6 +152,14 @@
                   </td>
                   <td class="px-6 py-1">
                     {{ item.delivered_date }}
+                  </td>
+                  <td class="px-6 py-1">
+                    <button
+                      class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                      @click="deleteOrder(item.order_detail_id)"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -465,8 +474,43 @@ export default {
       };
       options.value = statusOptions[selectValue.value] || [];
     };
+    const deleteOrder = async (orderId) => {
+      console.log("ID", orderId);
+      try {
+        // Show a confirmation dialog before deleting the order
+        const confirmDelete = confirm(
+          "Are you sure you want to delete this order?"
+        );
+
+        if (confirmDelete) {
+          const response = await axios.post(
+            `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=deleteOrder`,
+            {
+              id: orderId,
+            }
+          );
+          console.log("ID", response.data);
+          if (response.data.success) {
+            // Remove the deleted order from the orders array
+            orders.value = orders.value.filter(
+              (order) => order.order_detail_id !== orderId
+            );
+            filteredOrders.value = orders.value.filter(
+              (order) => order.order_detail_id !== orderId
+            );
+            alert("Order deleted successfully!");
+          } else {
+            alert("Failed to delete the order. Please try again.");
+          }
+        }
+      } catch (error) {
+        console.error("Error deleting order:", error);
+        alert("Failed to delete the order. Please try again.");
+      }
+    };
 
     return {
+      deleteOrder,
       searchedOrders,
       filterByStatus,
       filteredOrders,

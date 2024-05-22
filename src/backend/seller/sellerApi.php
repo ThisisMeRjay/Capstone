@@ -57,11 +57,33 @@ switch ($action) {
     case 'fetchSalesPerStockItem':
         fetchSalesPerStockItem();
         break;
+    case 'deleteOrder':
+        deleteOrder();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function deleteOrder()
+{
+    global $conn;
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    $orderId = $data['id'];
+    $deleteOrderQuery = "DELETE FROM order_details WHERE order_detail_id = ?";
+    $stmt = $conn->prepare($deleteOrderQuery);
+    $stmt->bind_param("i", $orderId);
+
+    if ($stmt->execute()) {
+        $response = array('success' => true, 'message' => 'Order deleted successfully');
+    } else {
+        $response = array('failed' => false, 'message' => 'Failed to delete the order');
+    }
+
+    echo json_encode($response);
 }
 
 function getOrdersAdmin()

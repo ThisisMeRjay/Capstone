@@ -3,6 +3,17 @@
     <div class="py-3 px-10 font-bold text-2xl text-slate-700">
       <h1>Product Lists</h1>
     </div>
+    <div class="flex justify-between mb-4">
+      <div class="flex items-center">
+        <input
+          type="text"
+          v-model="searchQuery"
+          @input="filterProducts"
+          placeholder="Search products..."
+          class="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
     <div class="">
       <div class="relative overflow-x-auto shadow rounded-md">
         <table
@@ -23,7 +34,7 @@
           </thead>
           <tbody class="">
             <tr
-              v-for="item in Products"
+              v-for="item in paginatedProducts"
               :key="item.id"
               class="bg-gray-100/10 border-b border-gray-600/50"
             >
@@ -55,6 +66,50 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="flex justify-center mt-4">
+        <nav aria-label="Pagination">
+          <ul class="flex list-none p-0">
+            <li class="mt-2">
+              <a
+                href="#"
+                @click.prevent="currentPage = 1"
+                :class="{
+                  'px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700':
+                    currentPage !== 1,
+                  'px-3 py-2 ml-0 leading-tight text-blue-600 bg-blue-50 border border-gray-300 rounded-l-lg cursor-default':
+                    currentPage === 1,
+                }"
+                >First</a
+              >
+            </li>
+            <li
+              v-for="page in pages"
+              :key="page"
+              :class="{
+                'px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700':
+                  page !== currentPage,
+                'px-3 py-2 leading-tight text-blue-600 bg-blue-50 border border-gray-300 cursor-default':
+                  page === currentPage,
+              }"
+            >
+              <a href="#" @click.prevent="currentPage = page">{{ page }}</a>
+            </li>
+            <li class="mt-2">
+              <a
+                href="#"
+                @click.prevent="currentPage = pages.length"
+                :class="{
+                  'px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700':
+                    currentPage !== pages.length,
+                  'px-3 py-2 leading-tight text-blue-600 bg-blue-50 border border-gray-300 rounded-r-lg cursor-default':
+                    currentPage === pages.length,
+                }"
+                >Last</a
+              >
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   </div>
@@ -203,151 +258,6 @@
             </div>
           </div>
 
-          <!-- <div class="py-2">
-            <p for="" class="text-sm">Base Shipping Fee:</p>
-            <div class="flex gap-2 justify-between">
-              <input
-                type="number"
-                v-model="shipping_fee"
-                class="p-2 rounded-md"
-              />
-              <button
-                @click="triggertesting"
-                class="text-sm p-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md"
-              >
-                Test Shipping fee first?
-              </button>
-            </div>
-          </div> -->
-
-          <!-- Base Shipping Fee Modal -->
-          <!-- <div
-            v-if="showBaseShippingModal"
-            class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center"
-            @click="showBaseShippingModal = false"
-          >
-            <div
-              class="bg-white w-full max-w-md mx-4 p-6 rounded-lg shadow-lg"
-              @click.stop
-            >
-              <h2 class="text-2xl font-bold mb-6 text-gray-800">
-                Calculate Shipping Fee
-              </h2>
-              <div class="gap-5 flex items-end">
-                <div>
-                  <h1 class="text-xs font-medium">Weight (kg):</h1>
-                  <div class="flex items-center">
-                    <input
-                      type="number"
-                      class="w-full p-2 rounded-md my-1 border outline-none"
-                      v-model="Weight"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <h1 class="text-xs font-medium">Height (cm):</h1>
-                  <div class="flex items-center">
-                    <input
-                      type="number"
-                      class="w-full p-2 rounded-md my-1 border outline-none"
-                      v-model="Height"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <h1 class="text-xs font-medium">Length (cm):</h1>
-                  <div class="flex items-center">
-                    <input
-                      type="number"
-                      class="w-full p-2 rounded-md my-1 border outline-none"
-                      v-model="Length"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <h1 class="text-xs font-medium">Width (cm):</h1>
-                  <div class="flex items-center">
-                    <input
-                      type="number"
-                      class="w-full p-2 rounded-md my-1 border outline-none"
-                      v-model="Width"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div class="mb-4">
-                <label
-                  for="baseFeeInput"
-                  class="block mb-2 text-sm font-medium text-gray-700"
-                  >Sample Base Shipping Fee:</label
-                >
-                <input
-                  id="baseFeeInput"
-                  type="number"
-                  v-model="shipping_fee"
-                  class="block w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="Enter base fee"
-                />
-              </div>
-              <div>
-                <h1 class="text-sm font-medium">Product location:</h1>
-                <select
-                  class="w-full p-2 rounded-md my-1 border outline-none"
-                  v-model="subrgy"
-                  required
-                >
-                  <option
-                    v-for="brgy in barangay"
-                    :key="brgy.barangay_id"
-                    :value="brgy"
-                  >
-                    {{ brgy.name }}
-                  </option>
-                </select>
-              </div>
-              <div class="mb-4">
-                <h1 class="text-sm font-medium">Customer Location:</h1>
-                <select
-                  class="w-full p-2 rounded-md my-1 border outline-none"
-                  v-model="customerbarangay"
-                  required
-                >
-                  <option
-                    v-for="brgy in barangay"
-                    :key="brgy.barangay_id"
-                    :value="brgy"
-                  >
-                    {{ brgy.name }}
-                  </option>
-                </select>
-              </div>
-
-              <div class="flex justify-between items-center">
-                <button
-                  @click="
-                    fetchShippingFee(
-                      Height,
-                      Weight,
-                      Length,
-                      Width,
-                      shipping_fee
-                    )
-                  "
-                  class="inline-flex items-center justify-center px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  Test Shipping Fee
-                </button>
-                <span
-                  v-if="shippingtestResult > 0"
-                  class="text-sm font-semibold text-gray-900"
-                >
-                  Fee:
-                  <span class="text-green-600">{{ shippingtestResult }}</span>
-                </span>
-              </div>
-            </div>
-          </div> -->
-
           <div class="py-2">
             <p for="" class="text-sm">Stocks:</p>
             <input
@@ -442,7 +352,7 @@
 </template>
 <script>
 // YourComponent.vue <script> part
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { userLogin, getUserFromLocalStorage } from "@/scripts/Seller"; // Adjust the path as necessary
@@ -460,6 +370,53 @@ export default {
     };
 
     const Products = ref([]);
+    const filteredProducts = ref([]);
+    const paginatedProducts = ref([]);
+    const searchQuery = ref("");
+    const currentPage = ref(1);
+    const itemsPerPage = 10;
+
+    const filterProducts = () => {
+      const searchString = searchQuery.value.toLowerCase();
+      filteredProducts.value = Products.value.filter((product) => {
+        return (
+          (product.product_id &&
+            product.product_id.toString().includes(searchString)) ||
+          (product.product_name &&
+            product.product_name.toLowerCase().includes(searchString)) ||
+          (product.price && product.price.toString().includes(searchString)) ||
+          (product.shipping_fee &&
+            product.shipping_fee.toString().includes(searchString)) ||
+          (product.ratings &&
+            product.ratings.toString().includes(searchString)) ||
+          (product.quantity &&
+            product.quantity.toString().includes(searchString))
+        );
+      });
+      currentPage.value = 1;
+      updatePaginatedProducts();
+    };
+
+    const updatePaginatedProducts = () => {
+      console.log("pagenated:", filteredProducts.value);
+      const startIndex = (currentPage.value - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      paginatedProducts.value = filteredProducts.value.slice(
+        startIndex,
+        endIndex
+      );
+    };
+
+    const pages = computed(() => {
+      const totalPages = Math.ceil(
+        filteredProducts.value.length / itemsPerPage
+      );
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    });
+
+    watch(currentPage, updatePaginatedProducts);
+    watch(filteredProducts, updatePaginatedProducts);
+    watch(searchQuery, filterProducts);
 
     const deleteProduct = async (deleteId) => {
       console.log(deleteId);
@@ -722,6 +679,7 @@ export default {
           }
         );
         Products.value = response.data;
+        filteredProducts.value = response.data;
         console.log("Products ", Products.value);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -808,6 +766,13 @@ export default {
     };
 
     return {
+      filteredProducts,
+      paginatedProducts,
+      searchQuery,
+      currentPage,
+      pages,
+      filterProducts,
+      updatePaginatedProducts,
       shippingtestResult,
       customerbarangay,
       subrgy,
