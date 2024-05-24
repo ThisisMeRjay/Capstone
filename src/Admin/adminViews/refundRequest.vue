@@ -32,18 +32,18 @@
               class="shadow border text-gray-900 outline-none text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-32 px-3 py-2.5"
             >
               <option value="">Default</option>
-              <option value="ready_to_pickup">Ready to Pick Up</option>
+              <!-- <option value="ready_to_pickup">Ready to Pick Up</option>
               <option value="ready_to_pickup">Reserved for Rider</option>
               <option value="out_for_delivery">Out for Delivery</option>
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
-              <option value="delayed">Delayed</option>
-              <!-- <option value="return_in_progress">Return in Progress</option> -->
+              <option value="delayed">Delayed</option> -->
+              <option value="return_in_progress">Return in Progress</option>
               <option value="return_completed">Return Completed</option>
-              <!-- <option value="return_requested">Return Requested</option>
+              <option value="return_requested">Return Requested</option>
               <option value="return_declined">Return Declined</option>
-              <option value="return_approved">Return Approved</option> -->
-              <option value="closed">Closed</option>
+              <option value="return_approved">Return Approved</option>
+              <!-- <option value="closed">Closed</option> -->
             </select>
           </form>
         </div>
@@ -77,6 +77,8 @@
                   <th scope="col" class="px-6 py-2">date delivered</th>
                   <th scope="col" class="px-6 py-2">rider assigned</th>
                   <th scope="col" class="px-6 py-2">Delivery proof</th>
+                  <th scope="col" class="px-6 py-2">refund video</th>
+                  <th scope="col" class="px-6 py-2">refund reason</th>
                   <th scope="col" class="px-6 py-2">action</th>
                 </tr>
               </thead>
@@ -145,6 +147,22 @@
                     >
                       view
                     </button>
+                  </td>
+                  <td class="px-6 py-1">
+                    <div v-if="item.video_evidence">
+                      <video
+                        :src="getVideoUrl(item.video_evidence)"
+                        :type="getVideoType(item.video_evidence)"
+                        controls
+                        class="w-full"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                    <div v-else>No Video Evidence</div>
+                  </td>
+                  <td class="px-6 py-1">
+                    {{ item.reason }}
                   </td>
                   <td class="px-6 py-1">
                     <button
@@ -469,11 +487,12 @@ export default {
     const options = ref([]);
 
     const updateOptions = () => {
-      if (selectValue.value === "ready_to_pickup") {
+      if (selectValue.value === "return_requested") {
         // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
         options.value = [
-          { value: "ready_to_pickup", text: "Ready to Pickup" },
-          { value: "reserved_for_rider", text: "Reserved for Rider" },
+          { value: "return_requested", text: "Return Requested" },
+          { value: "return_approved", text: "Return Approved" },
+          { value: "return_declined", text: "Return Declined" },
         ];
       }
     };
@@ -489,7 +508,7 @@ export default {
         userOrderName.value = editableOrderStatus.value.username;
         selectValue.value = editableOrderStatus.value.status;
         updateOptions();
-        if (editableOrderStatus.value.status == "ready_to_pickup") {
+        if (editableOrderStatus.value.status == "return_requested") {
           showStatusModal.value = true;
         }
         console.log("info", editableOrderStatus.value);
@@ -597,8 +616,8 @@ export default {
           "return_requested",
           "return_approved",
         ];
-        const filteredData = response.data.filter(
-          (order) => !validStatuses.includes(order.status)
+        const filteredData = response.data.filter((order) =>
+          validStatuses.includes(order.status)
         );
         orders.value = filteredData.map((order) => ({
           ...order,
@@ -609,6 +628,25 @@ export default {
         console.log("filteredOrders: ", filteredOrders.value);
       } catch (error) {
         console.error("Error fetching orders:", error);
+      }
+    };
+
+    const getVideoUrl = (videoPath) => {
+      // Assuming the video path is relative to the server's public directory
+      return `${url}/Ecommerce/vue-project/src/backend/${videoPath}`;
+    };
+
+    const getVideoType = (videoPath) => {
+      const extension = videoPath.split(".").pop().toLowerCase();
+      switch (extension) {
+        case "mp4":
+          return "video/mp4";
+        case "webm":
+          return "video/webm";
+        case "ogg":
+          return "video/ogg";
+        default:
+          return "video/mp4"; // Fallback to MP4
       }
     };
 
@@ -659,6 +697,8 @@ export default {
     });
 
     return {
+      getVideoType,
+      getVideoUrl,
       deleteOrder,
       searchedOrders,
       filterByStatus,

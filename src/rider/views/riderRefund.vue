@@ -1,7 +1,7 @@
 <template>
   <div class="p-2 border border-slate-900/20 rounded-md">
     <div class="relative overflow-x-auto">
-      <h1 class="pb-3 sticky left-0">Delivery</h1>
+      <h1 class="pb-3 sticky left-0">Refund</h1>
       <table class="min-w-full text-sm text-left text-gray-900 sm:rounded-md">
         <thead
           class="text-xs text-sky-100 uppercase bg-gradient-to-r from-blue-500 from-10% via-violet-500 via-30% to-orange-500 to-90% sm:rounded-md"
@@ -120,8 +120,8 @@
           />
         </div>
         <!-- <div v-if="proof">
-          <p>{{ proof }}</p>
-        </div> -->
+            <p>{{ proof }}</p>
+          </div> -->
         <div class="flex justify-evenly my-5 gap-5 items-center">
           <button
             type="button"
@@ -232,15 +232,9 @@ export default {
           "return_declined",
           "return_requested",
           "return_approved",
-          "pending",
-          "confirmed",
-          "processing",
-          "delivered",
-          "closed",
-          "ready_to_pickup",
         ];
         const filteredData = res.data.filter((order) =>
-          !validStatuses.includes(order.status)
+          validStatuses.includes(order.status)
         );
         orders.value = filteredData;
       } catch {}
@@ -276,9 +270,8 @@ export default {
         selectValue.value = editableOrderStatus.value.status;
         updateOptions();
         if (
-          editableOrderStatus.value.status == "reserved_for_rider" ||
-          editableOrderStatus.value.status == "out_for_delivery" ||
-          editableOrderStatus.value.status == "delayed"
+          editableOrderStatus.value.status == "return_approved" ||
+          editableOrderStatus.value.status == "return_in_progress"
         ) {
           showStatusModal.value = true;
         } else {
@@ -293,24 +286,17 @@ export default {
     const options = ref([]);
 
     const updateOptions = () => {
-      if (selectValue.value === "reserved_for_rider") {
+      if (selectValue.value === "return_approved") {
         // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
         options.value = [
-          { value: "reserved_for_rider", text: "Reserved for rider" },
-          { value: "out_for_delivery", text: "Out for delivery" },
-        ];
-      } else if (selectValue.value === "out_for_delivery") {
-        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
-        options.value = [
-          { value: "out_for_delivery", text: "Out for delivery" },
-          { value: "delivered", text: "Delivered" },
-          { value: "delayed", text: "Delayed" },
-        ];
-      } else if (selectValue.value === "delayed") {
-        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
-        options.value = [
-          { value: "delayed", text: "Delayed" },
+          { value: "return_approved", text: "Return Approved" },
           { value: "return_in_progress", text: "Return in Progress" },
+        ];
+      } else if (selectValue.value === "return_in_progress") {
+        // Only show 'Out for delivery' and 'Delivered' when 'out_for_delivery' is selected
+        options.value = [
+          { value: "return_in_progress", text: "Return in Progress" },
+          { value: "return_completed", text: "Return Completed" },
         ];
       }
     };

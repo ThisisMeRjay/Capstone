@@ -750,7 +750,7 @@
                     'rounded-md',
                     'my-1',
                     'bg-gray-100',
-                    errorMessage.nameErr && userLogin.contact_number.lenght > 0
+                    errorMessage.nameErr && userLogin.username.lenght > 0
                       ? 'border-red-500'
                       : userLogin.username.length > 0
                       ? 'border-green-500'

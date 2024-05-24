@@ -88,6 +88,11 @@ const router = createRouter({
           ],
         },
         {
+          path: "/admin_refund",
+          name: "admin_refund",
+          component: () => import("../Admin/adminViews/refundRequest.vue"),
+        },
+        {
           path: "/admin_delivery",
           name: "admin_delivery",
           component: () => import("../Admin/adminViews/adminDelivery.vue"),
@@ -148,6 +153,11 @@ const router = createRouter({
           path: "/rider_history",
           name: "rider_history",
           component: () => import("../rider/views/riderHistory.vue"),
+        },
+        {
+          path: "/rider_refund",
+          name: "rider_refund",
+          component: () => import("../rider/views/riderRefund.vue"),
         },
       ],
     },

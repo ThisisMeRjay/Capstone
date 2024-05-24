@@ -37,20 +37,27 @@
             <div
               class="w-full hover:bg-gray-700/10 transition hover:shadow hover:text-blue-500 hover:font-medium p-2 mt-3"
             >
-              <h1 class="" @click="showBar = false">home</h1>
+              <h1 class="" @click="showBar = false">Home</h1>
+            </div>
+          </RouterLink>
+          <RouterLink to="/rider_refund">
+            <div
+              class="w-full hover:bg-gray-700/10 transition hover:shadow hover:text-blue-500 hover:font-medium p-2"
+            >
+              <h1 class="" @click="showBar = false">Refund</h1>
             </div>
           </RouterLink>
           <RouterLink to="/rider_history">
             <div
               class="w-full hover:bg-gray-700/10 transition hover:shadow hover:text-blue-500 hover:font-medium p-2"
             >
-              <h1 class="" @click="showBar = false">history</h1>
+              <h1 class="" @click="showBar = false">History</h1>
             </div>
           </RouterLink>
             <div
               class="w-full hover:bg-gray-700/10 transition hover:shadow hover:text-blue-500 hover:font-medium p-2"
             >
-              <h1 class="" @click="logout">logout</h1>
+              <h1 class="" @click="logout">Logout</h1>
             </div>
         </div>
       </aside>

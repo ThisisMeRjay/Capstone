@@ -22,11 +22,10 @@
           <thead
             class="text-xs text-slate-800 bg-slate-100/20 uppercase rounded-md"
           >
-            <tr class="bg-gray-100/10 border-b border-gray-600/50">
+            <tr class="bg-gray-100/10 border-b border-gray-600/50 sticky top-0">
               <th scope="col" class="px-6 py-3">Product ID</th>
               <th scope="col" class="px-6 py-3">Product Name</th>
               <th scope="col" class="px-6 py-3">Price</th>
-              <th scope="col" class="px-6 py-3">Shipping Fee</th>
               <th scope="col" class="px-6 py-3">Ratings</th>
               <th scope="col" class="px-6 py-3">Stock</th>
               <th colspan="2" scope="col" class="px-6 py-3">Action</th>
@@ -46,7 +45,6 @@
                 {{ item.product_name }}
               </td>
               <td class="px-6 py-4">{{ item.price }}</td>
-              <td class="px-6 py-4">{{ item.shipping_fee }}</td>
               <td class="px-6 py-4">{{ item.ratings }}</td>
               <td class="px-6 py-4">{{ item.quantity }}</td>
               <td class="px-6 py-4 flex gap-5">

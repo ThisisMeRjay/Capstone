@@ -191,24 +191,78 @@
                 </div>
               </div>
             </div>
-            <div class="flex items-center justify-between">
-              <label for="username" class="mr-2">Name:</label>
-              <input
-                id="username"
-                v-model="userLogin.store_name"
-                placeholder="Username"
-                class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
-              />
+            <div class="relative">
+              <div class="flex justify-end gap-5 items-center">
+                <label for="username" class="">Name:</label>
+                <input
+                  type="text"
+                  id="name"
+                  v-model="userLogin.store_name"
+                  placeholder="Name"
+                  required
+                  :class="[
+                    'border',
+                    'w-full',
+                    'p-2',
+                    'rounded-md',
+                    'my-1',
+                    'bg-gray-100',
+                    errorMessage.nameErr &&
+                    userLogin.store_name.lenght > 0
+                      ? 'border-red-500'
+                      : userLogin.store_name.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
+                />
+              </div>
+              <p
+                class="px-3 py-1 rounded-md text-red-500"
+                v-if="errorMessage.nameErr && userLogin.store_name.length > 0"
+              >
+                {{ errorMessage.nameErr }}
+              </p>
             </div>
 
-            <div class="flex items-center justify-between">
-              <label for="contact_number" class="mr-2">Contact No:</label>
-              <input
-                id="contact_number"
-                v-model="userLogin.store_contact_number"
-                placeholder="Contact Number"
-                class="input border-2 rounded-lg border-gray-300 p-2 w-3/4 focus:outline-none focus:border-blue-500"
-              />
+            <div class="relative">
+              <div class="flex justify-end gap-5 items-center">
+                <label for="username" class="">Contact no:</label>
+                <div
+                  class="flex border w-full p-2 rounded-md my-1 bg-gray-100 items-center"
+                >
+                  <span class="bg-gray-200 px-2">+63</span>
+                  <input
+                    type="tel"
+                    id="number"
+                    v-model="userLogin.store_contact_number"
+                    placeholder="8123456789 or 9123456789"
+                    required
+                    :class="[
+                      'border',
+                      'w-full',
+                      'p-2',
+                      'rounded-md',
+                      'my-1',
+                      'bg-gray-100',
+                      errorMessage.contactNumberErr &&
+                      userLogin.store_contact_number.length > 0
+                        ? 'border-red-500'
+                        : userLogin.store_contact_number.length > 0
+                        ? 'border-green-500'
+                        : 'border-gray-300',
+                    ]"
+                  />
+                </div>
+              </div>
+              <p
+                v-if="
+                  errorMessage.contactNumberErr &&
+                  userLogin.store_contact_number.length > 0
+                "
+                class="text-red-500"
+              >
+                {{ errorMessage.contactNumberErr }}
+              </p>
             </div>
 
             <div class="text-right mt-4">
@@ -262,7 +316,7 @@
   </div>
 </template>
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, reactive } from "vue";
 import { Icon } from "@iconify/vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
@@ -350,7 +404,36 @@ export default {
       }
     };
 
+    const errorMessage = reactive({
+      nameErr: null,
+      contactNumberErr: null,
+    });
+
+    const nameValidation = computed(() => {
+      const pattern = /^[\p{L}'\- ]+$/u;
+      if (!pattern.test(userLogin.value.store_name.trim())) {
+        return "Please enter a valid name.";
+      }
+      return null;
+    });
+
+    const contactNumberValidation = computed(() => {
+      // This pattern checks for numbers starting with '8' or '9' after the '+63' prefix and ensures they are 10 digits in total.
+      const pattern = /^[89]\d{9}$/;
+      if (!pattern.test(userLogin.value.store_contact_number)) {
+        return "Contact number must start with '8' or '9' after the '+63' prefix and be exactly 10 digits long.";
+      }
+      return null;
+    });
+
     const saveProfile = async () => {
+      // Perform a final validation check on form submission
+      errorMessage.nameErr = nameValidation.value;
+      errorMessage.contactNumberErr = contactNumberValidation.value;
+      if (errorMessage.nameErr || errorMessage.contactNumberErr) {
+        console.log(errorMessage.nameErr, errorMessage.contactNumberErr);
+        return;
+      }
       try {
         const res = await axios.put(
           `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=save`,
@@ -373,6 +456,9 @@ export default {
     };
 
     return {
+      contactNumberValidation,
+      errorMessage,
+      nameValidation,
       saveProfile,
       triggerFileInput,
       fileInput,

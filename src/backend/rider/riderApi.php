@@ -139,8 +139,8 @@ function getOrders() // Better to pass $conn as a parameter if possible
             LEFT JOIN users AS u ON u.user_id = o.user_id
             LEFT JOIN products AS p ON p.product_id = od.product_id
             LEFT JOIN user_store AS us ON us.store_id = p.store_id
-            WHERE od.status NOT IN ('pending', 'confirmed', 'processing', 'return_declined', 'return_requested', 'return_completed', 'return_approved', 'ready_to_pickup', 'delivered', 'closed') 
-              AND od.rider_id = ?
+            -- WHERE od.status NOT IN ('pending', 'confirmed', 'processing', 'return_declined', 'return_requested', 'return_completed', 'return_approved', 'ready_to_pickup', 'delivered', 'closed') 
+              WHERE od.rider_id = ?
             ORDER BY od.order_detail_id DESC";
 
     if ($stmt = $conn->prepare($sql)) {

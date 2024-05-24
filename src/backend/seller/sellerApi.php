@@ -101,7 +101,9 @@ function getOrdersAdmin()
     us.store_name,
     r.rider_name,
     pr.*,
-    rev.revenue_amount
+    rev.revenue_amount,
+    ref.video_evidence,
+    ref.reason
 FROM 
     order_details AS od
 LEFT JOIN
@@ -118,6 +120,8 @@ LEFT JOIN
     rider AS r ON r.rider_id = od.rider_id
 LEFT JOIN
     revenue AS rev ON rev.order_detail_id = od.order_detail_id
+LEFT JOIN
+    refund_requests AS ref ON ref.order_detail_id = od.order_detail_id
 WHERE 
     od.status NOT IN ('pending', 'confirmed', 'processing', 'cancelled')
 ORDER BY 
@@ -764,7 +768,9 @@ LEFT JOIN
 LEFT JOIN
     barangay AS b ON  i.location = b.barangay_id
 WHERE 
-    p.store_id = ?");
+    p.store_id = ?
+ORDER BY p.product_id DESC
+    ");
     $stmt->bind_param("i", $id);
     $stmt->execute();
 
