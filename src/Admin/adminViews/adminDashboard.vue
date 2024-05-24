@@ -73,6 +73,18 @@
             Refund Management
           </div>
         </RouterLink>
+        <RouterLink to="/admin_shipping">
+          <div
+            class="w-full bg-gray-100 p-2 mt-3 rounded-xl"
+            :class="{
+              'text-sky-700': $route.name === 'admin_shipping',
+              'text-sky-900': $route.name !== 'admin_shipping',
+              ' font-semibold text-base': true,
+            }"
+          >
+            Shipping Management
+          </div>
+        </RouterLink>
       </div>
       <div class="ml-2">
         <button
