@@ -32,7 +32,7 @@ switch ($action) {
         break;
     case 'fetchRealTimeMonthlySales':
         fetchRealTimeMonthlySales();
-        break;   
+        break;
     case 'fetchRiders':
         fetchRiders();
         break;
@@ -51,11 +51,52 @@ switch ($action) {
     case 'totalRevenue':
         totalRevenue();
         break;
+    case 'getAllProducts':
+        getAllProducts();
+        break;
+    case 'updateShippingFee':
+        updateShippingFee();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function updateShippingFee()
+{
+    global $conn;
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    // Get the new shipping fee from the request body
+    $newShippingFee = $data['shipping_fee'];
+
+    // Update the shipping_fee of all products in the database
+    $sql = "UPDATE products SET shipping_fee = $newShippingFee";
+
+    if ($conn->query($sql) === TRUE) {
+        echo "Shipping fee updated successfully";
+    } else {
+        echo "Error updating shipping fee: " . $conn->error;
+    }
+
+    $conn->close();
+}
+
+function getAllProducts()
+{
+    global $conn;
+
+    // Use prepared statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT products.shipping_fee FROM products");
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stmt->close();
+
+    echo json_encode($row);
 }
 
 function totalRevenue()

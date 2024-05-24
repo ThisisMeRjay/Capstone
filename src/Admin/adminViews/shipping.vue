@@ -9,6 +9,12 @@
       >
         Calculate Shipping Fee
       </button>
+      <button
+        @click="confirmSaveShippingFee"
+        class="text-sm p-2 bg-green-500 hover:bg-green-700 text-white rounded-md"
+      >
+        Save Shipping Fee
+      </button>
     </div>
   </div>
 
@@ -69,7 +75,7 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import axios from "axios";
 import { getDistance } from "geolib";
 import { API_URL } from "@/config";
@@ -90,27 +96,29 @@ export default {
           `${url}/Ecommerce/vue-project/src/backend/auth.php?action=getBrgy`
         );
         const barangays = response.data;
-
         const volumeCm3 = length.value * width.value * height.value;
         const weightFactor = 1; // Cost per kilogram
         const volumeFactor = 0.005; // Cost per cubic centimeter
         const distanceFactor = 0.001; // Cost per meter
 
         const shippingFeesByBarangay = barangays.map((barangay) => {
-          const productLocation = {
+          const customerLocation = {
             latitude: parseFloat(barangay.lat),
             longitude: parseFloat(barangay.lon),
           };
 
-          const customerLocation = {
-            latitude: 14.6091, // Replace with the customer's latitude
-            longitude: 121.0223, // Replace with the customer's longitude
+          const productLocation = {
+            latitude: 13.12929, // Replace with the customer's latitude
+            longitude: 123.75641, // Replace with the customer's longitude
           };
 
           const distanceMeters = getDistance(productLocation, customerLocation);
 
+          // Convert baseShippingFee to a number with decimal places
+          const baseShippingFeeWithDecimal = parseFloat(baseShippingFee.value);
+
           const fee =
-            baseShippingFee.value +
+            baseShippingFeeWithDecimal +
             distanceMeters * distanceFactor +
             weight.value * weightFactor +
             volumeCm3 * volumeFactor;
@@ -127,7 +135,48 @@ export default {
       }
     };
 
+    const shipping = ref("");
+
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=getAllProducts`
+        );
+        shipping.value = response.data;
+        baseShippingFee.value = shipping.value.shipping_fee;
+        console.log("Products ", shipping.value.shipping_fee);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    const confirmSaveShippingFee = () => {
+      if (confirm("Are you sure you want to save the new shipping fee?")) {
+        saveShippingFee();
+      }
+    };
+
+    const saveShippingFee = async () => {
+      try {
+        const response = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/admin/adminApi.php?action=updateShippingFee`,
+          {
+            shipping_fee: baseShippingFee.value,
+          }
+        );
+        console.log("Shipping fee saved:", response.data);
+        // Optionally, you can show a success message or perform additional actions
+      } catch (error) {
+        console.error("Error saving shipping fee:", error);
+        // Optionally, you can show an error message or perform error handling
+      }
+    };
+
+    fetchProducts();
+
     return {
+      shipping,
+      fetchProducts,
       baseShippingFee,
       weight,
       height,
@@ -135,6 +184,7 @@ export default {
       width,
       shippingFees,
       calculateShippingFee,
+      confirmSaveShippingFee,
     };
   },
 };
