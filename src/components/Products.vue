@@ -187,7 +187,7 @@
                 </div>
               </div>
               <!-- Display "And Up" for ratings less than 5 -->
-              <span v-if="6 - rating < 5">&nbsp; And Up</span>
+              <span v-if="6 - rating < 5"></span>
             </div>
           </div>
         </div>
@@ -364,7 +364,7 @@ export default {
         // Filter by rating for the selected store
         const filtered = products.value.filter((product) => {
           const roundedRating = Math.round(product.ratings);
-          const isRatingMatch = roundedRating >= minRatingValue;
+          const isRatingMatch = roundedRating === minRatingValue;
           const isStoreMatch =
             product.store_id === selectedStore.value.store_id;
           return isRatingMatch && isStoreMatch;
@@ -374,7 +374,7 @@ export default {
         // No store selected, filter all products by rating
         const filtered = products.value.filter((product) => {
           const roundedRating = Math.round(product.ratings);
-          return roundedRating >= minRatingValue;
+          return roundedRating === minRatingValue;
         });
         products.value = filtered;
       }
