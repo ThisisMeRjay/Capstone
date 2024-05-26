@@ -7,7 +7,7 @@ import axios from "axios";
 import { getDistance } from "geolib";
 import { API_URL } from "@/config";
 import moment from "moment-timezone";
-import ProductModal from "@/components/ProductModal.vue";
+import ProductModal from "@/components/ProductModalCart.vue";
 import { debounce } from "lodash";
 export default {
   components: {

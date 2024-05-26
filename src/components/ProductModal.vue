@@ -22,7 +22,8 @@
       >
         <span
           class="px-4 py-1 bg-blue-500/10 text-sm sm:text-base shadow text-blue-500 font-semibold rounded-md"
-        >{{ product.store_name }}</span>
+          >{{ product.store_name }}</span
+        >
       </div>
 
       <div class="flex">
@@ -169,9 +170,16 @@
       </div>
     </div>
   </div>
+  <!-- login modal -->
+  <LoginModal
+    :is-visible="showLogin"
+    @update:isVisible="showLogin = $event"
+    @login-completed="HandleSignIn"
+  ></LoginModal>
 </template>
 
 <script>
+import LoginModal from "@/components/LoginModal.vue";
 import { Icon } from "@iconify/vue";
 import axios from "axios";
 import { ref, watch, onMounted, reactive } from "vue";
@@ -183,9 +191,11 @@ export default {
   },
   components: {
     Icon,
+    LoginModal,
   },
   setup(props, { emit }) {
     const url = API_URL;
+    const showLogin = ref(false);
 
     const refreshPage = () => {
       location.reload(true);
@@ -271,6 +281,8 @@ export default {
       try {
         if (cart_id === null || cart_id === undefined) {
           console.log("You have to login first");
+          closeModal();
+          showLogin.value = true;
           return;
         }
 
@@ -321,6 +333,7 @@ export default {
     });
 
     return {
+      showLogin,
       getReviews,
       reviews,
       quantity,

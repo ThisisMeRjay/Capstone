@@ -393,7 +393,7 @@
 </template>
 <script>
 import { Icon } from "@iconify/vue";
-import { onMounted, ref, reactive, computed, watch } from "vue";
+import { onMounted, ref, reactive, computed, watch, } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { API_URL } from "@/config";
@@ -429,9 +429,15 @@ export default {
       this.showRegister = false;
       this.showLogin = true;
     },
+    mounted() {
+      this.showLogin = true;
+      this.showRegister = false;
+    },
 
     close() {
       this.$emit("update:isVisible", false);
+      this.showLogin = true;
+      this.showRegister = false;
     },
   },
   setup(props, { emit }) {

@@ -49,6 +49,9 @@ switch ($action) {
     case 'submitRefundRequest':
         submitRefundRequest();
         break;
+    case 'addCartSecond':
+        addCartSecond();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
@@ -462,7 +465,7 @@ function fetchSpecs()
     echo json_encode($res);
 }
 
-function addCart()
+function addCartSecond()
 {
     global $conn, $res;
     $data = json_decode(file_get_contents("php://input"), true);
@@ -506,6 +509,62 @@ function addCart()
             $res['success'] = false;
             $res['message'] = 'Failed to add product.';
         }
+        $insertStmt->close();
+    }
+
+    $checkStmt->close();
+    echo json_encode($res);
+}
+
+function addCart()
+{
+    global $conn, $res;
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    // Extract data from the array
+    $product_id = $data['product_id'];
+    $quantity = $data['quantity'];
+    $cart_id = $data['cart_id'];
+
+    // Check if the product already exists in the cart
+    $checkStmt = $conn->prepare("SELECT quantity FROM cart_items WHERE cart_id = ? AND product_id = ?");
+    $checkStmt->bind_param("ii", $cart_id, $product_id);
+    $checkStmt->execute();
+    $result = $checkStmt->get_result();
+
+    if ($result->num_rows > 0) {
+        // If product exists, update the quantity
+        $row = $result->fetch_assoc();
+        $existingQuantity = $row['quantity'];
+        $newQuantity = $existingQuantity + $quantity;
+
+        $updateStmt = $conn->prepare("UPDATE cart_items SET quantity = ? WHERE cart_id = ? AND product_id = ?");
+        $updateStmt->bind_param("iii", $newQuantity, $cart_id, $product_id);
+        $updateStmt->execute();
+
+        if ($updateStmt->affected_rows > 0) {
+            $res['success'] = true;
+            $res['message'] = 'Quantity updated successfully.';
+        } else {
+            $res['success'] = false;
+            $res['message'] = 'Failed to update quantity.';
+        }
+
+        $updateStmt->close();
+    } else {
+        // If product does not exist, insert new record
+        $insertStmt = $conn->prepare("INSERT INTO cart_items (cart_id, product_id, quantity) VALUES (?, ?, ?)");
+        $insertStmt->bind_param("iii", $cart_id, $product_id, $quantity);
+        $insertStmt->execute();
+
+        if ($insertStmt->affected_rows > 0) {
+            $res['success'] = true;
+            $res['message'] = 'Product added successfully.';
+        } else {
+            $res['success'] = false;
+            $res['message'] = 'Failed to add product.';
+        }
+
         $insertStmt->close();
     }
 
