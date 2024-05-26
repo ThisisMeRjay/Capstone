@@ -8,44 +8,36 @@
     <button
       @click="handleButtonClick('category')"
       :class="[
-        'bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full font-semibold shadow-lg border hover:border-slate-300',
-        catButton === 'category' ? 'bg-blue-500 text-white' : 'text-slate-800',
-        activeButton !== null &&
-        activeButton !== 'category' &&
-        activeButton !== 'home'
-          ? 'bg-slate-700/10'
-          : '',
+        'py-2 px-4 rounded-full font-semibold shadow-lg border',
+        catButton === 'category'
+          ? 'bg-slate-700/30 text-white'
+          : 'bg-slate-700/10 text-slate-800 hover:bg-slate-700/30 hover:border-slate-300',
       ]"
     >
       Category
     </button>
+
     <button
       @click="handleButtonClick('home')"
       :class="[
-        'bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full font-semibold shadow-lg border hover:border-slate-300',
+        'py-2 px-4 rounded-full font-semibold shadow-lg border',
         activeButton === 'category' ||
         activeButton === 'home' ||
         activeButton === null
-          ? 'bg-blue-500 text-white'
-          : 'text-slate-800',
-        activeButton !== null &&
-        activeButton !== 'category' &&
-        activeButton !== 'home'
-          ? 'bg-slate-700/10'
-          : '',
+          ? 'bg-slate-700/30 text-white'
+          : 'bg-slate-700/10 text-slate-800 hover:bg-slate-700/30 hover:border-slate-300',
       ]"
     >
       Home
     </button>
+
     <button
       @click="handleButtonClick('store')"
       :class="[
-        'bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full font-semibold shadow-lg border hover:border-slate-300',
-        selectedStore ? 'bg-blue-500 text-white' : 'text-slate-800',
-        activeButton === 'store' ? 'bg-blue-500 text-white' : '',
-        activeButton !== null && activeButton !== 'store'
-          ? 'bg-slate-700/10'
-          : '',
+        'py-2 px-4 rounded-full font-semibold shadow-lg border',
+        selectedStore || activeButton === 'store'
+          ? 'bg-slate-700/30 text-white'
+          : 'bg-slate-700/10 text-slate-800 hover:bg-slate-700/30 hover:border-slate-300',
       ]"
     >
       {{ selectedStore ? "Selected Store" : "View All Stores" }}
@@ -379,6 +371,7 @@ export default {
         filterbyStoreName(null); // Call filterbyStoreName with null to reset products
       }
       showStoresModal.value = false;
+      selectedCategoryName.value = null;
     };
 
     const filterbyStoreName = async (storeID) => {
