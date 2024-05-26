@@ -6,20 +6,47 @@
     class="flex py-2 pl-2 sm:pl-8 bg-gradient-to-r from-blue-500/20 from-10% to-blue-500/0 to-100% gap-2 sm:text-sm text-xs"
   >
     <button
-      @click="handleSidebarCategory"
-      class="bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full text-slate-800 font-semibold shadow-lg border hover:border-slate-300"
+      @click="handleButtonClick('category')"
+      :class="[
+        'bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full font-semibold shadow-lg border hover:border-slate-300',
+        catButton === 'category' ? 'bg-blue-500 text-white' : 'text-slate-800',
+        activeButton !== null &&
+        activeButton !== 'category' &&
+        activeButton !== 'home'
+          ? 'bg-slate-700/10'
+          : '',
+      ]"
     >
       Category
     </button>
     <button
-      @click="fetchProducts"
-      class="bg-blue-500 hover:bg-blue-600 py-2 text-slate-100 px-4 rounded-full font-semibold shadow"
+      @click="handleButtonClick('home')"
+      :class="[
+        'bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full font-semibold shadow-lg border hover:border-slate-300',
+        activeButton === 'category' ||
+        activeButton === 'home' ||
+        activeButton === null
+          ? 'bg-blue-500 text-white'
+          : 'text-slate-800',
+        activeButton !== null &&
+        activeButton !== 'category' &&
+        activeButton !== 'home'
+          ? 'bg-slate-700/10'
+          : '',
+      ]"
     >
       Home
     </button>
     <button
-      @click="fetchAllStores"
-      class="bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full text-slate-800 font-semibold shadow-lg border hover:border-slate-300"
+      @click="handleButtonClick('store')"
+      :class="[
+        'bg-slate-700/10 hover:bg-slate-700/30 py-2 px-4 rounded-full font-semibold shadow-lg border hover:border-slate-300',
+        selectedStore ? 'bg-blue-500 text-white' : 'text-slate-800',
+        activeButton === 'store' ? 'bg-blue-500 text-white' : '',
+        activeButton !== null && activeButton !== 'store'
+          ? 'bg-slate-700/10'
+          : '',
+      ]"
     >
       {{ selectedStore ? "Selected Store" : "View All Stores" }}
     </button>
@@ -297,8 +324,40 @@ export default {
       showStoresModal.value = true;
     };
 
+    const activeButton = ref(null);
     const selectedStore = ref(null);
+    const catButton = ref(null);
 
+    const handleButtonClick = (buttonType) => {
+      // if (activeButton.value === buttonType) {
+      //   activeButton.value = null;
+      // } else {
+      //   activeButton.value = buttonType;
+      // }
+
+      switch (buttonType) {
+        case "category":
+          if (catButton.value === buttonType) {
+            catButton.value = null;
+          } else {
+            catButton.value = "category";
+          }
+          handleSidebarCategory();
+          break;
+        case "home":
+          activeButton.value = buttonType;
+          fetchProducts();
+          break;
+        case "store":
+          activeButton.value = buttonType;
+          fetchAllStores();
+          break;
+      }
+      console.log("cat button status: ", catButton.value);
+      console.log("act button status: ", activeButton.value);
+    };
+    console.log("cat button status start: ", catButton.value);
+    console.log("act button status start: ", activeButton.value);
     const products = ref(props.products || []);
     const isModalVisible = ref(false);
     const selectedProduct = ref(null);
@@ -542,7 +601,6 @@ export default {
     };
 
     onMounted(() => {
-      handleResize();
       GetStorename();
       getCategories();
       fetchProducts();
@@ -561,10 +619,14 @@ export default {
         showCategory.value = false;
       } else {
         showCategory.value = true;
+        catButton.value = "category";
       }
     };
 
     return {
+      catButton,
+      activeButton,
+      handleButtonClick,
       selectedStore,
       handleResize,
       products,
