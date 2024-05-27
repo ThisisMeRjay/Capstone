@@ -50,7 +50,7 @@
               </div>
             </div>
             <div class="text-md sm:text-lg font-semibold text-black-500">
-              ₱{{ finalQuantity }}
+              ₱{{ formatPrice(finalQuantity) }}
             </div>
             <div
               class="w-full flex gap-2 justify-start items-center text-sm font-medium text-black-700"
@@ -192,6 +192,15 @@ export default {
   components: {
     Icon,
     LoginModal,
+  },
+  methods: {
+    formatPrice(value) {
+      const numericValue = parseFloat(value);
+      if (isNaN(numericValue)) {
+        return value; // Return the original value if it's not a valid number
+      }
+      return numericValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    },
   },
   setup(props, { emit }) {
     const url = API_URL;

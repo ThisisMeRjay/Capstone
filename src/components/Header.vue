@@ -155,7 +155,7 @@
                         Total:
                         <span
                           class="text-red-500 py-1 px-2 bg-slate-500/10 rounded-md"
-                          >₱{{ items.priceTrack }}</span
+                          >₱{{ formatPrice(items.priceTrack) }}</span
                         >
                       </p>
                     </div>
@@ -1049,7 +1049,7 @@
             <!-- Sign In -->
             <div
               class="flex items-center gap-2 p-2 rounded-md hover:bg-slate-800/50 w-full text-white hover:font-bold"
-              @click="HamburgerSignin"
+              @click="showLogin = true"
               v-else
             >
               <Icon icon="bi:person" class="text-xl" />
@@ -1085,7 +1085,7 @@
   <!-- cart modal -->
   <div
     v-if="showCart"
-    class="flex justify-center items-center"
+    class="fixed inset-0 flex justify-center items-center bg-black/50 z-20"
     @click="closeCart"
   >
     <div class="cart-modal z-30" @click.stop>
@@ -1140,10 +1140,10 @@
                   />
                 </div>
                 <div>
-                  <h1 class="font-bold text-xs">
-                    {{ items.product_name }}
-                  </h1>
-                  <p class="text-xs font-semibold">₱{{ items.totalPrice }}</p>
+                  <h1 class="font-bold text-xs">{{ items.product_name }}</h1>
+                  <p class="text-xs font-semibold">
+                    ₱{{ formatPrice(items.totalPrice) }}
+                  </p>
 
                   <div class="flex gap-2">
                     <div
@@ -1203,6 +1203,7 @@
       </div>
     </div>
   </div>
+
   <product-modal
     :is-visible="isModalVisible"
     :product="selectedProduct"
@@ -1295,7 +1296,7 @@
                           </div>
                         </div>
                       </div>
-                      <p class="text-xs">₱{{ items.price }}</p>
+                      <p class="text-xs">₱{{ formatPrice(items.price) }}</p>
                       <p class="text-xs">x{{ items.quantity }}</p>
                     </div>
                   </div>
@@ -1304,8 +1305,9 @@
                       class="flex gap-2 justify-between items-center border-y p-2 border-cyan-500/50 bg-cyan-300/10"
                     >
                       <span class="text-sm font-medium">Shipping Fee</span>
-                      <p class="text-xs">₱
-                        {{ items.shippingFee.toFixed(2) }}
+                      <p class="text-xs">
+                        ₱
+                        {{ formatPrice(items.shippingFee).toFixed(2) }}
                       </p>
                     </div>
                   </div>
@@ -1321,7 +1323,7 @@
                   >Order Total <span>({{ totalQuantity }})</span> Item</span
                 >
                 <p class="text-sm font-medium text-red-500">
-                  ₱{{ priceTotalAll }}
+                  ₱{{ formatPrice(priceTotalAll) }}
                 </p>
               </div>
             </div>

@@ -26,6 +26,13 @@ export default {
     };
   },
   methods: {
+    formatPrice(value) {
+      const numericValue = parseFloat(value);
+      if (isNaN(numericValue)) {
+        return value; // Return the original value if it's not a valid number
+      }
+      return numericValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    },
     HamburgerSignin() {
       this.isSidebarOpen = !this.isSidebarOpen;
       this.showLogin = !this.showLogin;
@@ -195,45 +202,6 @@ export default {
       }
     };
 
-    const cartItems = async () => {
-      try {
-        const res = await axios.post(
-          `${url}/Ecommerce/vue-project/src/backend/api.php?action=fetchCartItems`,
-          {
-            cart_id: userLogin.value.user_id,
-          }
-        );
-        console.log("cart value before", res.data);
-
-        // Merge and update cart items with totalPrice calculation
-        const updatedCartItems = [];
-        for (const item of res.data) {
-          // Calculate the total price for the item
-          item.totalPrice = item.price * item.quantity;
-
-          const existingItemIndex = updatedCartItems.findIndex(
-            (cartItem) => cartItem.product_id === item.product_id
-          );
-
-          if (existingItemIndex !== -1) {
-            // Product already in cart, update quantity and total price
-            const existingItem = updatedCartItems[existingItemIndex];
-            const newQuantity = existingItem.quantity + item.quantity;
-            const maxQuantity = Math.min(newQuantity, item.stock); // Limit quantity to available stock
-            existingItem.quantity = maxQuantity;
-            existingItem.totalPrice = existingItem.totalPrice * newQuantity; // Update total price based on new quantity
-          } else {
-            // New product, add to cart
-            updatedCartItems.push(item);
-          }
-        }
-
-        cartItemsValue.value = updatedCartItems;
-        console.log("cart value: ", cartItemsValue.value);
-      } catch (error) {
-        console.error("Error fetching cart items:", error);
-      }
-    };
     const refreshPage = () => {
       location.reload(true);
     };
@@ -328,6 +296,7 @@ export default {
         } catch (error) {
           console.error("Error updating cart quantity:", error);
         }
+        cartItems();
       }
     };
 
@@ -405,6 +374,7 @@ export default {
         } catch (error) {
           console.error("Error updating cart quantity:", error);
         }
+        cartItems();
       }
     };
 
@@ -427,6 +397,46 @@ export default {
         //  console.log(res);
       } catch (error) {
         console.error(error);
+      }
+    };
+
+    const cartItems = async () => {
+      try {
+        const res = await axios.post(
+          `${url}/Ecommerce/vue-project/src/backend/api.php?action=fetchCartItems`,
+          {
+            cart_id: userLogin.value.user_id,
+          }
+        );
+        console.log("cart value before", res.data);
+
+        // Merge and update cart items with totalPrice calculation
+        const updatedCartItems = [];
+        for (const item of res.data) {
+          // Calculate the total price for the item
+          item.totalPrice = item.price * item.quantity;
+
+          const existingItemIndex = updatedCartItems.findIndex(
+            (cartItem) => cartItem.product_id === item.product_id
+          );
+
+          if (existingItemIndex !== -1) {
+            // Product already in cart, update quantity and total price
+            const existingItem = updatedCartItems[existingItemIndex];
+            const newQuantity = existingItem.quantity + item.quantity;
+            const maxQuantity = Math.min(newQuantity, item.stock); // Limit quantity to available stock
+            existingItem.quantity = maxQuantity;
+            existingItem.totalPrice = existingItem.totalPrice * newQuantity; // Update total price based on new quantity
+          } else {
+            // New product, add to cart
+            updatedCartItems.push(item);
+          }
+        }
+
+        cartItemsValue.value = updatedCartItems;
+        console.log("cart value: ", cartItemsValue.value);
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
       }
     };
 

@@ -35,7 +35,7 @@
       @click="handleButtonClick('store')"
       :class="[
         'py-2 px-4 rounded-full font-semibold shadow-lg border',
-        selectedStore || activeButton === 'store'
+        selectedStore && activeButton === 'store'
           ? 'bg-slate-700/30 text-white'
           : 'bg-slate-700/10 text-slate-800 hover:bg-slate-700/30 hover:border-slate-300',
       ]"
@@ -256,7 +256,7 @@
                         {{ product.product_name }}
                       </a>
                     </h3>
-                    <p class="font-medium">₱{{ product.price }}</p>
+                    <p class="font-medium">₱{{ formatPrice(product.price) }}</p>
                     <div class="mt-1">
                       <span
                         v-for="star in getStars(product.ratings)"
@@ -300,6 +300,15 @@ export default {
     Icon,
     ProductModal,
     Header,
+  },
+  methods: {
+    formatPrice(value) {
+      const numericValue = parseFloat(value);
+      if (isNaN(numericValue)) {
+        return value; // Return the original value if it's not a valid number
+      }
+      return numericValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    },
   },
   name: "home",
   props: ["products"],
