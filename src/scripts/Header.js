@@ -459,12 +459,12 @@ export default {
     // shipping fee must come from db
     const selectedPayment = ref("");
 
-    const fetchShippingFee = (item) => {
+    const fetchShippingFee = async (itemsFromSameStore) => {
       try {
         // Ensure coordinates are parsed as floats
         const productLocation = {
-          latitude: parseFloat(item.lat),
-          longitude: parseFloat(item.lon),
+          latitude: parseFloat(itemsFromSameStore[0].lat),
+          longitude: parseFloat(itemsFromSameStore[0].lon),
         };
         const customerLocation = {
           latitude: parseFloat(userLogin.value.lat),
@@ -475,39 +475,44 @@ export default {
         const distanceMeters = getDistance(productLocation, customerLocation);
         console.log("Distance (meters):", distanceMeters);
 
-        // Parse additional values as floats to ensure numerical operations
-        const baseShippingFee = parseFloat(item.shipping_fee); // Base fee could include handling, smallest package fee, etc.
-        const weightKg = parseFloat(item.weight); // Assuming weight is in kilograms
-        const dimensionsCm = {
-          length: parseFloat(item.length),
-          width: parseFloat(item.width),
-          height: parseFloat(item.height),
-        }; // Assuming dimensions are in centimeters
-        const quantity = parseInt(item.quantity); // Parse quantity of the item
+        let totalWeight = 0;
+        let totalVolume = 0;
+        let totalQuantity = 0;
+        let totalBaseShippingFee = 0;
+
+        for (const item of itemsFromSameStore) {
+          const weightKg = parseFloat(item.weight); // Assuming weight is in kilograms
+          const dimensionsCm = {
+            length: parseFloat(item.length),
+            width: parseFloat(item.width),
+            height: parseFloat(item.height),
+          }; // Assuming dimensions are in centimeters
+          const quantity = parseInt(item.quantity); // Parse quantity of the item
+          const baseShippingFee = parseFloat(item.shipping_fee); // Base fee per product
+
+          // Calculate volume in cubic centimeters (for more granularity)
+          const volumeCm3 =
+            dimensionsCm.length * dimensionsCm.width * dimensionsCm.height;
+
+          totalWeight += weightKg * quantity;
+          totalVolume += volumeCm3 * quantity;
+          totalQuantity += quantity;
+          totalBaseShippingFee += baseShippingFee * quantity;
+        }
 
         // Constants for calculation
         const weightFactor = 5; // Cost per kilogram
         const volumeFactor = 0.001; // Cost per cubic centimeter (for more granularity)
         const distanceFactor = 0.006; // Cost per meter
 
-        // Calculate volume in cubic centimeters (for more granularity)
-        const volumeCm3 =
-          dimensionsCm.length * dimensionsCm.width * dimensionsCm.height;
-
-        // Compute the shipping fee, adjust weight and volume based on quantity
+        // Compute the shipping fee
+        const distanceBasedShippingFee = distanceMeters * distanceFactor;
+        const weightAndVolumeFee =
+          totalWeight * weightFactor + totalVolume * volumeFactor;
         const shippingFee =
-          baseShippingFee +
-          distanceMeters * distanceFactor +
-          weightKg * quantity * weightFactor +
-          volumeCm3 * quantity * volumeFactor;
+          totalBaseShippingFee + distanceBasedShippingFee + weightAndVolumeFee;
 
-        const dis = baseShippingFee + distanceMeters * distanceFactor;
-        const vol = volumeCm3 * quantity * volumeFactor;
-        const wei = weightKg * quantity * weightFactor;
         console.log("Shipping Fee:", shippingFee.toFixed(2));
-        console.log("Shipping Fee + distance:", dis.toFixed(2));
-        console.log("volumeCm3:", vol.toFixed(2));
-        console.log("wieght:", wei.toFixed(2));
         return shippingFee.toFixed(2); // Return the shipping fee formatted as a string with two decimal places
       } catch (error) {
         console.error("Error calculating shipping fee:", error);
@@ -522,45 +527,81 @@ export default {
       // Reset the total price before calculation
       priceTotalPerItem.value = 0;
 
+      // Group items by store_id
+      const itemsByStore = {};
+      for (const item of checkoutItems.value) {
+        const storeId = item.store_id;
+        if (!itemsByStore[storeId]) {
+          itemsByStore[storeId] = [];
+        }
+        itemsByStore[storeId].push(item);
+      }
+
       // Use Promise.all to wait for all shipping fee fetches to complete
       const itemsWithShipping = await Promise.all(
-        checkoutItems.value.map(async (item) => {
-          console.log("product loc", item);
+        Object.values(itemsByStore).map(async (itemsFromSameStore) => {
           try {
-            // Fetch shipping fee for each item
-            const shippingFeeData = await fetchShippingFee(item);
+            // Fetch shipping fee for each group of items from the same store
+            const shippingFeeData = await fetchShippingFee(itemsFromSameStore);
             const shippingFee = parseFloat(shippingFeeData); // Ensure it's a number
-            computedshippingFee.value = shippingFeeData;
-            console.log("shipping", shippingFeeData);
 
             // Calculate price per item including shipping fee
-            const pricePerItem =
-              item.quantity * parseFloat(item.price) + shippingFee;
+            const itemsWithShippingFee = itemsFromSameStore.map((item) => {
+              const pricePerItem =
+                item.quantity * parseFloat(item.price) +
+                shippingFee / itemsFromSameStore.length;
 
-            // Add price per item to the total
-            priceTotalPerItem.value += pricePerItem;
+              // Add price per item to the total
+              priceTotalPerItem.value += pricePerItem;
 
-            // Return item with added shipping fee for further processing/display
-            return { ...item, shippingFee }; // Use spread operator to include original item properties
+              // Return item with added shipping fee for further processing/display
+              return {
+                ...item,
+                shippingFee: shippingFee / itemsFromSameStore.length,
+              }; // Use spread operator to include original item properties
+            });
+            
+
+            return itemsWithShippingFee;
+            
           } catch (error) {
-            console.error("Error fetching shipping fee for item:", item, error);
+            console.error(
+              "Error fetching shipping fee for items:",
+              itemsFromSameStore,
+              error
+            );
             // Handle the error as needed (e.g., set a default shipping fee, notify the user, etc.)
-            // Return the item without shipping fee or with default fee
-            return { ...item, shippingFee: 0 }; // Assuming default shipping fee is 0
+            // Return the items without shipping fee or with default fee
+            return itemsFromSameStore.map((item) => ({
+              ...item,
+              shippingFee: 0,
+            })); // Assuming default shipping fee is 0
           }
         })
       );
 
-      // After calculating shipping for all items, assign them to itemsToCheckout
-      itemsToCheckout.value = itemsWithShipping;
+      // Flatten the array of arrays
+      const flattenedItemsWithShipping = itemsWithShipping.flat();
+      
 
-      // Assuming itemsToCheckout.value is an array of objects, each with a 'quantity' property
-      totalQuantity.value = itemsToCheckout.value.reduce(
-        (accumulator, currentItem) => {
-          return accumulator + currentItem.quantity;
-        },
+      // Group the items by store_id
+      const groupedItemsByStore = {};
+      for (const item of flattenedItemsWithShipping) {
+        const storeId = item.store_id;
+        if (!groupedItemsByStore[storeId]) {
+          groupedItemsByStore[storeId] = [];
+        }
+        groupedItemsByStore[storeId].push(item);
+      }
+
+      // Assign the grouped items to itemsToCheckout
+      itemsToCheckout.value = groupedItemsByStore;
+
+      // Calculate the total quantity
+      totalQuantity.value = flattenedItemsWithShipping.reduce(
+        (accumulator, currentItem) => accumulator + currentItem.quantity,
         0
-      ); // Initial value of the
+      );
 
       // Assign the total price to priceTotalAll
       priceTotalAll.value = priceTotalPerItem.value.toFixed(2);
@@ -1012,10 +1053,9 @@ export default {
         openModalId.value = null;
       } else {
         // Otherwise, open the modal for this ID and find the corresponding item
-        selectedItem.value = itemsToCheckout.value.find(
-          (item) => item.store_id === id
-        );
-
+        const itemsForStore = itemsToCheckout.value[id] || []; // Get the array of items for the given store_id
+        selectedItem.value =
+          itemsForStore.find((item) => item.store_id === id) || {}; // Find the item with the given store_id, or use an empty object if not found
         openModalId.value = id;
       }
       console.log("selected item", selectedItem.value);

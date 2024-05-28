@@ -144,18 +144,15 @@
       </div>
       <!-- Reviews Section -->
       <div class="py-4">
-        <div class="flex justify-between">
-          <p class="text-xs sm:text-md font-medium text-blue-500">
-            Customer reviews
-          </p>
+        <div class="flex">
           <p
             @click="getReviews(product.product_id)"
             class="text-xs sm:text-md font-medium text-blue-800 hover:text-blue-600 cursor-pointer"
           >
-            click here to view
+            View Reviews...
           </p>
         </div>
-        <div v-if="reviews.length">
+        <div v-if="reviewActivte">
           <div
             v-for="(review, index) in reviews"
             :key="index"
@@ -257,7 +254,9 @@ export default {
       (newPrice) => {
         if (props.product.quantity) {
           // Ensure quantity is treated as a decimal
-          props.product.quantity = parseFloat(props.product.quantity.toFixed(2));
+          props.product.quantity = parseFloat(
+            props.product.quantity.toFixed(2)
+          );
         } else {
           // Start from 1.00 if no initial quantity set
           quantity.value = 1.0;
@@ -356,6 +355,8 @@ export default {
 
     const reviews = ref([]);
 
+    const reviewActivte = ref(false);
+
     const getReviews = async (productID) => {
       try {
         const response = await axios.post(
@@ -369,6 +370,7 @@ export default {
       } catch (error) {
         console.error("Error fetching Specs:", error);
       }
+      reviewActivte.value = !reviewActivte.value;
     };
 
     onMounted(() => {
@@ -376,6 +378,7 @@ export default {
     });
 
     return {
+      reviewActivte,
       showLogin,
       getReviews,
       reviews,

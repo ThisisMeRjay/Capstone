@@ -138,7 +138,7 @@
           <div
             v-for="(cat, index) in item"
             :key="index"
-            class="mx-3 hover:bg-slate-700/10 rounded-md transition"
+            class="mx-3 hover:bg-slate-700/10 rounded-md transition cursor-pointer"
             @click="filterByCategory(cat.category_id, cat.category_name)"
           >
             <button class="py-1 text-xs my-1 px-2 rounded-md">
@@ -212,7 +212,7 @@
         </div>
       </div>
     </div>
-    <div class="bg-white cursor-pointer w-full">
+    <div class="bg-white w-full">
       <div class="px-10 py-10">
         <div>
           <h2
@@ -229,7 +229,7 @@
             @click="showModal(product)"
             v-for="product in products"
             :key="product.product_id"
-            class="group relative bg-gradient-to-tr from-blue-500 via-violet-500 to-orange-500 rounded-xl p-[1px] overflow-hidden hover:shadow-lg hover:shadow-blue-500/50 transition"
+            class="cursor-pointer group relative bg-gradient-to-tr from-blue-500 via-violet-500 to-orange-500 rounded-xl p-[1px] overflow-hidden hover:shadow-lg hover:shadow-blue-500/50 transition"
           >
             <div class="bg-slate-100 w-full h-full rounded-xl">
               <div

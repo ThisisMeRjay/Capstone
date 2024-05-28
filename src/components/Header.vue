@@ -1,7 +1,7 @@
 <template>
   <!-- Top -->
   <div
-    class="sm:flex justify-between py-4 px-2 sm:px-12 text-xs sm:text-sm cursor-pointer hidden"
+    class="sm:flex justify-between py-4 px-2 sm:px-12 text-xs sm:text-sm hidden"
   >
     <div class="flex place-items-center">
       <p class="text-slate-600">
@@ -29,12 +29,14 @@
       >
     </div>
     <div
-      class="flex items-center gap-2 px-3 py-2 bg-blue-400/10 rounded-full shadow text-blue-500 hover:font-semibold transition"
+      class="flex items-center gap-2 px-3 py-2 bg-blue-400/10 rounded-full shadow text-blue-500 hover:font-semibold transition cursor-pointer"
       @click="orderTracking()"
       :class="userLogin.length === 0 ? 'text-blue-500 pointer-events-none' : ''"
     >
-      <Icon icon="fluent:vehicle-bus-24-regular" class="text-lg" />
-      <span>Track your order</span>
+      <div v-if="userLogin.length !== 0" class="flex gap-1 items-center">
+        <Icon icon="fluent:vehicle-bus-24-regular" class="text-lg" />
+        <span>Track your order</span>
+      </div>
     </div>
   </div>
 
@@ -346,7 +348,7 @@
                               to request a refund.
                             </p>
                             <button
-                              class="px-3 py-1 bg-red-500 text-white rounded mb-2"
+                              class="px-3 py-1 bg-red-500 text-white rounded mb-2 cursor-pointer"
                               @click="openRefundModal(item)"
                             >
                               Request Refund
@@ -362,7 +364,7 @@
                             <p
                               class="bg-green-300/20 w-fit p-1 rounded text-md font-semibold text-green-400 shadow"
                             >
-                              Refund Resquest sent
+                              Refund Resquest Submitted
                             </p>
                             <p class="font-bold ml-4">Status:</p>
                             <div class="font-semibold bg-gray-300 p-1 rounded">
@@ -377,7 +379,7 @@
                             <p class="text-sm font-semibold mb-2">
                               Refund Process:
                             </p>
-                            <div class="mb-2">
+                            <div class="mb-2 cursor-pointer">
                               <label for="refund-video" class="block mb-1"
                                 >Upload Video Evidence:</label
                               >
@@ -401,13 +403,13 @@
                             </div>
                             <div class="flex justify-end">
                               <button
-                                class="px-3 py-1 bg-blue-500 text-white rounded mr-2"
+                                class="px-3 py-1 bg-blue-500 text-white rounded mr-2 cursor-pointer"
                                 @click="submitRefundRequest(item)"
                               >
                                 Submit
                               </button>
                               <button
-                                class="px-3 py-1 bg-red-500 text-white rounded"
+                                class="px-3 py-1 bg-red-500 text-white rounded cursor-pointer"
                                 @click="cancelRefundProcess(item)"
                               >
                                 Cancel
@@ -537,7 +539,7 @@
   </div>
   <!-- Navigator -->
   <div
-    class="text-xs sm:text-sm flex container-fluid shadow-lg bg-gradient-to-r from-blue-600/75 via-violet-500/50 to-orange-500/10 p-2 sm:p-4 pl-2 sm:pl-12 place-items-center cursor-pointer"
+    class="text-xs sm:text-sm flex container-fluid shadow-lg bg-gradient-to-r from-blue-600/75 via-violet-500/50 to-orange-500/10 p-2 sm:p-4 pl-2 sm:pl-12 place-items-center"
   >
     <!-- kulang ng logo dito -->
     <div class="flex sm:ml-10 ml-0">
@@ -550,14 +552,16 @@
       >
         <button
           @click="showSearch = true"
-          class="w-50 lg:w-80 p-2 hover:bg-gray-300"
+          class="w-50 lg:w-50 p-1 hover:bg-gray-300"
         >
           <div class="flex items-center text-white lg:text-black">
             <Icon
-              class="text-2xl lg:ml-4"
+              class="text-2xl lg:ml-1"
               icon="material-symbols-light:search"
             />
-            <span class="pl-10 hidden lg:flex"> Search any things... </span>
+            <span class="pr-1 hidden lg:flex text-xs">
+              Search any things...
+            </span>
           </div>
         </button>
 
@@ -588,6 +592,7 @@
 
       <!-- Cart -->
       <div
+        v-if="userLogin.length !== 0"
         :class="
           userLogin.length === 0 ? 'text-slate-800  pointer-events-none' : ''
         "
@@ -624,7 +629,7 @@
             :alt="userLogin.username"
           />
 
-          <div>
+          <div class="hover:bg-slate-500/20 rounded-lg p-1">
             <h1 class="text-slate-800 truncate font-bold">
               {{ userLogin.username }}
             </h1>
@@ -1095,7 +1100,7 @@
         <div class="flex justify-end">
           <div
             @click="closeCart"
-            class="bg-slate-600/20 rounded-full text-red-500 shadow p-2"
+            class="bg-slate-600/20 rounded-full text-red-500 shadow p-2 cursor-pointer"
           >
             <Icon icon="iconamoon:close-bold" />
           </div>
@@ -1108,7 +1113,11 @@
           class="p-2 bg-slate-500/10 h-96 overflow-scroll overflow-x-hidden rounded-md shadow-sm"
         >
           <div class="flex gap-2 font-semibold mb-2">
-            <input type="checkbox" @change="checkAll" />Select All
+            <input
+              class="cursor-pointer"
+              type="checkbox"
+              @change="checkAll"
+            />Select All
           </div>
           <div v-for="items in cartItemsValue" :key="items">
             <div class="my-1 relative">
@@ -1244,15 +1253,50 @@
             </div>
             <div class="bg-slate-200 rounded-md p-2">
               <div
-                class="my-1"
-                v-for="(items, index) in itemsToCheckout"
-                :key="index"
+                v-for="(itemsGroup, storeId) in itemsToCheckout"
+                :key="storeId"
+                class="my-3"
               >
-                <div>
-                  <div class="flex gap-2 justify-start items-center">
+                <div class="mb-2">
+                  <span
+                    class="text-sm font-semibold bg-slate-300 rounded-lg p-2 hover:bg-slate-400 cursor-pointer"
+                    @click="toggleStoreModal(storeId)"
+                  >
+                    {{ itemsGroup[0].store_name }}
+                  </span>
+                  <!-- Modal Element -->
+                  <div
+                    v-if="openModalId === storeId"
+                    class="modal absolute inset-x-0 mx-3 md:right-0 md:mt-1 md:w-64 md:translate-x-full bg-white shadow-lg rounded-lg p-4 transition-transform"
+                  >
+                    <div class="flex justify-between">
+                      <h3
+                        class="font-semibold text-lg flex justify-center text-blue-500"
+                      >
+                        {{ itemsGroup[0].store_name }}
+                      </h3>
+                      <button
+                        @click="closeStoreModal"
+                        class="rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                      >
+                        <Icon icon="iconamoon:close-bold" />
+                      </button>
+                    </div>
+                    <div class="mt-2 font-semibold">
+                      <p class="text-sm mt-1">
+                        Address: {{ itemsGroup[0].store_address }}
+                      </p>
+                      <p class="text-sm mt-1">
+                        Contact no: {{ itemsGroup[0].store_contact_number }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div v-for="(item, index) in itemsGroup" :key="index">
+                  <div class="flex gap-2 justify-start items-center py-2">
                     <div>
                       <img
-                        :src="'data:image/png;base64,' + items.image"
+                        :src="'data:image/png;base64,' + item.image"
                         alt=""
                         class="w-10 h-10 rounded-md"
                       />
@@ -1260,59 +1304,32 @@
                     <div class="w-full">
                       <div class="flex justify-between">
                         <span class="text-sm font-semibold">{{
-                          items.product_name
+                          item.product_name
                         }}</span>
-                        <span
-                          class="text-sm font-semibold bg-slate-600/30 rounded p-1 cursor-pointer"
-                          @click="toggleStoreModal(items.store_id)"
-                          >{{ items.store_name }}</span
-                        >
-                        <!-- Modal Element -->
-                        <div
-                          v-if="openModalId === items.store_id"
-                          class="modal absolute inset-x-0 mx-3 md:right-0 md:mt-1 md:w-64 md:translate-x-full bg-white shadow-lg rounded-lg p-4 transition-transform"
-                        >
-                          <div class="flex justify-between">
-                            <h3
-                              class="font-semibold text-lg flex justify-center text-blue-500"
-                            >
-                              {{ selectedItem.store_name }}
-                            </h3>
-                            <button
-                              @click="closeStoreModal"
-                              class="rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                            >
-                              <Icon icon="iconamoon:close-bold" />
-                            </button>
-                          </div>
-                          <div class="mt-2 font-semibold">
-                            <p class="text-sm mt-1">
-                              Address: {{ selectedItem.store_address }}
-                            </p>
-                            <p class="text-sm mt-1">
-                              Contact no:
-                              {{ selectedItem.store_contact_number }}
-                            </p>
-                          </div>
-                        </div>
                       </div>
-                      <p class="text-xs">₱{{ formatPrice(items.price) }}</p>
-                      <p class="text-xs">x{{ items.quantity }}</p>
-                    </div>
-                  </div>
-                  <div class="my-2">
-                    <div
-                      class="flex gap-2 justify-between items-center border-y p-2 border-cyan-500/50 bg-cyan-300/10"
-                    >
-                      <span class="text-sm font-medium">Shipping Fee</span>
-                      <p class="text-xs">
-                        ₱
-                        {{ formatPrice(items.shippingFee).toFixed(2) }}
-                      </p>
+                      <p class="text-xs">₱{{ formatPrice(item.price) }}</p>
+                      <p class="text-xs">x{{ item.quantity }}</p>
                     </div>
                   </div>
                 </div>
-                <hr class="border my-2 border-gray-700/10" />
+                <div class="my-2">
+                  <div
+                    class="flex gap-2 justify-between items-center border-y p-2 border-cyan-500/50 bg-cyan-300/10"
+                  >
+                    <span class="text-sm font-medium">Shipping Fee</span>
+                    <p class="text-xs">
+                      ₱{{
+                        formatPrice(
+                          itemsGroup.reduce(
+                            (total, item) => total + item.shippingFee,
+                            0
+                          )
+                        )
+                      }}
+                    </p>
+                  </div>
+                </div>
+                <hr class="border my-4 border-gray-700/10" />
               </div>
             </div>
             <div class="my-1">
