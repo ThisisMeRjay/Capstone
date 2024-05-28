@@ -204,7 +204,7 @@ function fetchAllRiders()
     $stmt = $conn->prepare("
         SELECT r.*, COUNT(od.rider_id) AS order_count
         FROM rider AS r
-        LEFT JOIN order_details AS od ON r.rider_id = od.rider_id AND od.status NOT IN ('delivered', 'cancelled', 'closed')
+        LEFT JOIN order_details AS od ON r.rider_id = od.rider_id AND od.status NOT IN ('delivered', 'cancelled', 'closed', 'return_completed')
         WHERE r.status = 'approved'
         GROUP BY r.rider_id
     ");

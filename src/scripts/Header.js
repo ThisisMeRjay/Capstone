@@ -560,10 +560,8 @@ export default {
                 shippingFee: shippingFee / itemsFromSameStore.length,
               }; // Use spread operator to include original item properties
             });
-            
 
             return itemsWithShippingFee;
-            
           } catch (error) {
             console.error(
               "Error fetching shipping fee for items:",
@@ -582,7 +580,6 @@ export default {
 
       // Flatten the array of arrays
       const flattenedItemsWithShipping = itemsWithShipping.flat();
-      
 
       // Group the items by store_id
       const groupedItemsByStore = {};
@@ -631,33 +628,52 @@ export default {
 
     const computedshippingFee = ref(null);
     const submitOrder = async () => {
-      console.log(priceTotalAll.value); // Assuming priceTotalAll is a reactive reference
-      console.log(selectedPayment.value); // Assuming selectedPayment is a reactive reference
-      console.log(userLogin.value.user_id); // Assuming userLogin is a reactive reference
-      console.log("checkoutItems length", checkoutItems.value.length);
-
-      // Directly use the value for the API call
-      let userID = userLogin.value.user_id;
-      let totalPrice = priceTotalAll.value;
-      let orderStatus = "pending";
-      let numofItems = checkoutItems.value.length;
-      let payment = selectedPayment.value;
-
-      // This is for Order details
-      let ids = checkoutItems.value.map((item) => item.product_id);
-      console.log("product IDs", ids);
-      let quantities = checkoutItems.value.map((item) => item.quantity);
-      console.log("Quantities", quantities);
-      let eachshipping = itemsToCheckout.value.map((item) => item.shippingFee);
-      let eachproduct = itemsToCheckout.value.map((item) =>
-        parseFloat((parseFloat(item.price) * item.quantity).toFixed(2))
-      );
-      console.log("each product", eachproduct);
-      console.log("each shipping", eachshipping);
-      console.log("price to all", priceTotalAll.value);
-
-      //API call
       try {
+        // Logging various values for debugging
+        console.log("priceTotalAll:", priceTotalAll.value); // Assuming priceTotalAll is a reactive reference
+        console.log("selectedPayment:", selectedPayment.value); // Assuming selectedPayment is a reactive reference
+        console.log("userLogin.user_id:", userLogin.value.user_id); // Assuming userLogin is a reactive reference
+        console.log("checkoutItems length:", checkoutItems.value.length);
+
+        // Directly use the value for the API call
+        const userID = userLogin.value.user_id;
+        const totalPrice = priceTotalAll.value;
+        const orderStatus = "pending";
+        const numofItems = checkoutItems.value.length;
+        const payment = selectedPayment.value;
+
+        // Ensure itemsToCheckout.value is an object containing arrays
+        if (
+          typeof itemsToCheckout.value !== "object" ||
+          itemsToCheckout.value === null
+        ) {
+          console.error(
+            "itemsToCheckout.value is not a valid object:",
+            itemsToCheckout.value
+          );
+          return;
+        }
+
+        // Extract and flatten arrays from itemsToCheckout.value
+        const extractedItems = Object.values(itemsToCheckout.value).flat();
+        console.log("Extracted items:", extractedItems);
+
+        // Extracting product details
+        const ids = checkoutItems.value.map((item) => item.product_id);
+        console.log("product IDs:", ids);
+        const quantities = checkoutItems.value.map((item) => item.quantity);
+        console.log("Quantities:", quantities);
+
+        // Extracting shipping and price details from the extracted items
+        const eachshipping = extractedItems.map((item) => item.shippingFee);
+        const eachproduct = extractedItems.map((item) =>
+          parseFloat((parseFloat(item.price) * item.quantity).toFixed(2))
+        );
+        console.log("each product:", eachproduct);
+        console.log("each shipping:", eachshipping);
+        console.log("price to all:", totalPrice);
+
+        // API call
         const res = await axios.post(
           `${url}/Ecommerce/vue-project/src/backend/api.php?action=CheckoutOrder`,
           {
@@ -677,11 +693,11 @@ export default {
             },
           }
         );
-        console.log("Response from server", res.data);
+        console.log("Response from server:", res.data);
+        refreshPage();
       } catch (error) {
-        console.error(error);
+        console.error("Error during API call:", error);
       }
-      refreshPage();
     };
 
     getUserFromLocalStorage();

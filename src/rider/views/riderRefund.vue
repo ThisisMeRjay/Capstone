@@ -158,7 +158,7 @@
             <strong>Estimated Delivery:</strong> {{ detail.estimated_delivery }}
           </li>
           <li><strong>Quantity:</strong> {{ detail.quantity }}</li>
-          <li><strong>Price:</strong> {{ detail.total_revenue_and_price }}</li>
+          <li><strong>Price:</strong> {{ formatPrice(detail.total_revenue_and_price) }}</li>
         </ul>
         <div class="mt-4 flex justify-between">
           <div></div>
@@ -184,6 +184,15 @@ import moment from "moment-timezone";
 export default {
   components: {
     Icon,
+  },
+  methods: {
+    formatPrice(value) {
+      const numericValue = parseFloat(value);
+      if (isNaN(numericValue)) {
+        return value; // Return the original value if it's not a valid number
+      }
+      return numericValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    },
   },
   setup() {
     const showModal = ref(false);

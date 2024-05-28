@@ -544,7 +544,6 @@ export default {
         riderModal.value = true;
         console.log("ID ", orderIdToEdit.value);
       }
-      refreshPage();
     };
 
     const insertRider = async (ID) => {
