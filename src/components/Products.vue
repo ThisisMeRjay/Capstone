@@ -256,7 +256,7 @@
                         {{ product.product_name }}
                       </a>
                     </h3>
-                    <p class="font-medium">₱{{ formatPrice(product.price) }}</p>
+                    <p class="font-medium" v-html="formatPrice(product)"></p>
                     <div class="mt-1">
                       <span
                         v-for="star in getStars(product.ratings)"
@@ -302,12 +302,30 @@ export default {
     Header,
   },
   methods: {
-    formatPrice(value) {
-      const numericValue = parseFloat(value);
-      if (isNaN(numericValue)) {
-        return value; // Return the original value if it's not a valid number
+    formatPrice(product) {
+      const numericPrice = parseFloat(product.price);
+      const numericNewPrice = parseFloat(product.new_price);
+
+      if (isNaN(numericPrice)) {
+        return product.price; // Return the original price if it's not a valid number
       }
-      return numericValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+
+      const formattedOldPrice = numericPrice
+        .toFixed(2)
+        .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+
+      if (!isNaN(numericNewPrice)) {
+        const formattedNewPrice = numericNewPrice
+          .toFixed(2)
+          .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+        return `<div>
+                <span class="line-through">₱${formattedOldPrice}</span>
+                <br>
+                <span class="text-red-500">₱${formattedNewPrice}</span>
+              </div>`;
+      }
+
+      return `₱${formattedOldPrice}`;
     },
   },
   name: "home",
@@ -695,5 +713,12 @@ export default {
 }
 .star-rating-filter:hover {
   background-color: #cbd5e1; /* Darker shade for hover */
+}
+.line-through {
+  text-decoration: line-through;
+}
+
+.text-red-500 {
+  color: #ef4444;
 }
 </style>

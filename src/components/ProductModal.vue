@@ -49,9 +49,10 @@
                 }}</span>
               </div>
             </div>
-            <div class="text-md sm:text-lg font-semibold text-black-500">
-              ₱{{ formatPrice(finalQuantity) }}
-            </div>
+            <div
+              class="text-md sm:text-lg font-semibold text-black-500"
+              v-html="formatPrice(product)"
+            ></div>
             <div
               class="w-full flex gap-2 justify-start items-center text-sm font-medium text-black-700"
             >
@@ -191,12 +192,30 @@ export default {
     LoginModal,
   },
   methods: {
-    formatPrice(value) {
-      const numericValue = parseFloat(value);
-      if (isNaN(numericValue)) {
-        return value; // Return the original value if it's not a valid number
+    formatPrice(product) {
+      const numericPrice = parseFloat(product.price);
+      const numericNewPrice = parseFloat(product.new_price);
+
+      if (isNaN(numericPrice)) {
+        return product.price; // Return the original price if it's not a valid number
       }
-      return numericValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+
+      const formattedOldPrice = numericPrice
+        .toFixed(2)
+        .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+
+      if (!isNaN(numericNewPrice)) {
+        const formattedNewPrice = numericNewPrice
+          .toFixed(2)
+          .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+        return `<div>
+                <span class="line-through">₱${formattedOldPrice}</span>
+                <br>
+                <span class="text-blue-500">₱${formattedNewPrice}</span>
+              </div>`;
+      }
+
+      return `₱${formattedOldPrice}`;
     },
   },
   setup(props, { emit }) {
@@ -358,3 +377,12 @@ export default {
   },
 };
 </script>
+<style>
+.line-through {
+  text-decoration: line-through;
+}
+
+.text-blue-500 {
+  color: #3b82f6;
+}
+</style>

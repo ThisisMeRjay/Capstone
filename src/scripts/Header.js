@@ -305,12 +305,12 @@ export default {
     const updatePrices = debounce(() => {
       const updatedPriceData = {};
       cartItemsValue.value.forEach((item) => {
-        const numericPrice = parseFloat(item.price); // Ensure the price is a number
+        const numericPrice = parseFloat(item.effective_price); // Ensure the price is a number
         updatedPriceData[item.product_id] = parseFloat(numericPrice.toFixed(2));
       });
       updatedPrices.value = updatedPriceData;
       cartItemsValue.value = cartItemsValue.value.map((item) => {
-        const numericPrice = parseFloat(item.price); // Ensure the price is a number
+        const numericPrice = parseFloat(item.effective_price); // Ensure the price is a number
         const newPrice = updatedPrices.value[item.product_id] || numericPrice;
         const formattedNewPrice = parseFloat(newPrice.toFixed(2));
         const newTotalPrice = newPrice
@@ -414,7 +414,7 @@ export default {
         const updatedCartItems = [];
         for (const item of res.data) {
           // Calculate the total price for the item
-          item.totalPrice = item.price * item.quantity;
+          item.totalPrice = item.effective_price * item.quantity;
 
           const existingItemIndex = updatedCartItems.findIndex(
             (cartItem) => cartItem.product_id === item.product_id
@@ -424,13 +424,15 @@ export default {
             // Product already in cart, update quantity and total price
             const existingItem = updatedCartItems[existingItemIndex];
             const newQuantity = existingItem.quantity + item.quantity;
-            const maxQuantity = Math.min(newQuantity, item.stock); // Limit quantity to available stock
+            const maxQuantity = Math.min(newQuantity, item.stock);
+            // Limit quantity to available stock
             existingItem.quantity = maxQuantity;
-            existingItem.totalPrice = existingItem.totalPrice * newQuantity; // Update total price based on new quantity
+            existingItem.totalPrice = existingItem.effective_price * maxQuantity; // Update total price based on new quantity and new_price
           } else {
             // New product, add to cart
             updatedCartItems.push(item);
           }
+          console.log("total price:", item.totalPrice);
         }
 
         cartItemsValue.value = updatedCartItems;

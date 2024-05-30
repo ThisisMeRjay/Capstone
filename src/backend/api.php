@@ -660,24 +660,25 @@ function fetchCartItems()
 
     // Use prepared statement to prevent SQL injection
     $stmt = $conn->prepare("SELECT 
-    p.*, 
-    ci.*,
-    i.location,
-    i.quantity AS stock,
-    b.*,
-    us.*
-FROM 
-    products AS p
-LEFT JOIN 
-    cart_items AS ci ON ci.product_id = p.product_id
-LEFT JOIN 
-    inventory AS i ON i.product_id = ci.product_id
-LEFT JOIN 
-    barangay AS b ON b.barangay_id = i.location
-LEFT JOIN 
-    user_store AS us ON us.store_id = p.store_id
-WHERE 
-    ci.cart_id = ?");
+        p.*,
+        ci.*,
+        i.location,
+        i.quantity AS stock,
+        b.*,
+        us.*,
+        IF(p.new_price IS NOT NULL AND p.new_price <> 0, p.new_price, p.price) AS effective_price
+    FROM 
+        products AS p
+    LEFT JOIN 
+        cart_items AS ci ON ci.product_id = p.product_id
+    LEFT JOIN 
+        inventory AS i ON i.product_id = ci.product_id
+    LEFT JOIN 
+        barangay AS b ON b.barangay_id = i.location
+    LEFT JOIN 
+        user_store AS us ON us.store_id = p.store_id
+    WHERE 
+        ci.cart_id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
 
