@@ -346,6 +346,7 @@ export default {
     const activeButton = ref(null);
     const selectedStore = ref(null);
     const catButton = ref(null);
+    const sidebutton = ref(null);
 
     const handleButtonClick = (buttonType) => {
       // if (activeButton.value === buttonType) {
@@ -370,10 +371,14 @@ export default {
         case "store":
           activeButton.value = buttonType;
           fetchAllStores();
+        case "side":
+          sidebutton.value = buttonType;
+          activeButton.value = 'store';
           break;
       }
       console.log("cat button status: ", catButton.value);
       console.log("act button status: ", activeButton.value);
+      console.log("side button status: ", sidebutton.value);
     };
     console.log("cat button status start: ", catButton.value);
     console.log("act button status start: ", activeButton.value);
@@ -433,6 +438,7 @@ export default {
     };
 
     const filterByRating = (minRatingValue) => {
+      handleButtonClick("side");
       if (temp_data.value.length === 0) {
         temp_data.value = products.value;
       } else {
@@ -461,6 +467,7 @@ export default {
 
     const filterByPrice = () => {
       // Clear any previously set temporary data for other filters
+      handleButtonClick("side");
       if (temp_data.value.length === 0) {
         temp_data.value = products.value;
       } else {
@@ -592,6 +599,7 @@ export default {
 
     // Use axios.post instead of axios.get, and pass data in the request body
     const filterByCategory = async (id, name) => {
+      handleButtonClick("side");
       if (temp_data.value.length === 0) {
         temp_data.value = products.value;
       } else {
@@ -644,6 +652,7 @@ export default {
     };
 
     return {
+      sidebutton,
       catButton,
       activeButton,
       handleButtonClick,

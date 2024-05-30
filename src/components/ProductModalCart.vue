@@ -49,9 +49,10 @@
                 }}</span>
               </div>
             </div>
-            <div class="text-md sm:text-lg font-semibold text-black-500">
-              ₱{{ formatPrice(finalQuantity) }}
-            </div>
+            <div
+              class="text-md sm:text-lg font-semibold text-black-500"
+              v-html="finalQuantity || formatPrice(product)"
+            ></div>
             <div
               class="w-full flex gap-2 justify-start items-center text-sm font-medium text-black-700"
             >
@@ -66,7 +67,7 @@
                 <div class="relative flex items-center max-w-[8rem] sm:pl-8">
                   <button
                     type="button"
-                    @click="decrement"
+                    @click="decrement(product)"
                     :disabled="product.quantity === 1"
                     class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg px-2 h-8 focus:ring-gray-100 focus:ring-2 focus:outline-none"
                   >
@@ -84,7 +85,7 @@
                   />
                   <button
                     type="button"
-                    @click="increment"
+                    @click="increment(product)"
                     :disabled="product.quantity === product.stock"
                     class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg px-2 h-8 focus:ring-gray-100 focus:ring-2 focus:outline-none"
                   >
@@ -179,7 +180,7 @@
 import LoginModal from "@/components/LoginModal.vue";
 import { Icon } from "@iconify/vue";
 import axios from "axios";
-import { ref, watch, onMounted, reactive } from "vue";
+import { ref, watch, onMounted, reactive, toRefs } from "vue";
 import { API_URL } from "@/config";
 export default {
   props: {
@@ -190,15 +191,6 @@ export default {
     Icon,
     LoginModal,
   },
-  methods: {
-    formatPrice(value) {
-      const numericValue = parseFloat(value);
-      if (isNaN(numericValue)) {
-        return value; // Return the original value if it's not a valid number
-      }
-      return numericValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
-    },
-  },
   setup(props, { emit }) {
     const url = API_URL;
     const showLogin = ref(false);
@@ -207,71 +199,70 @@ export default {
       location.reload(true);
     };
 
-    const finalQuantity = ref("");
     const isHeartRed = reactive([]);
 
     const closeModal = () => {
       emit("update:isVisible", false);
       reviews.value = [];
     };
+    const finalQuantity = ref(null); // Define finalQuantity
+    const formatPrice = (product) => {
+      const numericPrice = parseFloat(product.price);
+      const numericNewPrice = parseFloat(product.new_price);
 
-    const increment = async (productId) => {
-      if (props.product) {
-        const updatedQuantity = Math.min(
-          parseFloat((Number(props.product.quantity) + 1).toFixed(2)),
-          props.product.stock
+      if (isNaN(numericPrice)) {
+        return product.price; // Return the original price if it's not a valid number
+      }
+
+      const formattedOldPrice = (numericPrice * product.quantity)
+        .toFixed(2)
+        .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+
+      if (!isNaN(numericNewPrice)) {
+        const formattedNewPrice = (numericNewPrice * product.quantity)
+          .toFixed(2)
+          .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+        return `<div>
+              <span class="line-through">₱${formattedOldPrice}</span>
+              <br>
+              <span class="text-blue-500">₱${formattedNewPrice}</span>
+            </div>`;
+      }
+
+      return `₱${formattedOldPrice}`;
+    };
+
+    const increment = async (product) => {
+      if (product) {
+        product.quantity = Math.min(
+          parseFloat((Number(product.quantity) + 1).toFixed(2)),
+          product.stock
         );
-
-        console.log("response update quantity", updatedQuantity);
-        console.log("response update productId", props.product.product_id);
-        console.log("response update cart_id", userLogin.value.user_id);
 
         try {
           // Make an API call to update the cart quantity
           const response = await axios.post(
             `${url}/Ecommerce/vue-project/src/backend/api.php?action=updateCart`,
             {
-              product_id: props.product.product_id,
-              quantity: updatedQuantity,
+              product_id: product.product_id,
+              quantity: product.quantity,
               cart_id: userLogin.value.user_id,
             }
           );
-          console.log("response update ", response.data);
 
-          // Update the local quantity and final quantity
-          props.product.quantity = updatedQuantity;
-          finalQuantity.value = parseFloat(
-            (updatedQuantity * props.product.price).toFixed(2)
-          );
+          // Update the final quantity
+          finalQuantity.value = formatPrice(product);
+          emit("update:product", product); // Emit a copy of the updated product object
         } catch (error) {
           console.error("Error updating cart quantity:", error);
         }
       }
     };
 
-    watch(
-      () => (props.product ? props.product.price : null),
-      (newPrice) => {
-        if (props.product.quantity) {
-          // Ensure quantity is treated as a decimal
-          props.product.quantity = parseFloat(
-            props.product.quantity.toFixed(2)
-          );
-        } else {
-          // Start from 1.00 if no initial quantity set
-          quantity.value = 1.0;
-        }
-        // Calculate new final quantity based on new price
-        finalQuantity.value = newPrice
-          ? parseFloat((props.product.quantity * newPrice).toFixed(2))
-          : 0;
-      }
-    );
-
-    const decrement = async (productId) => {
-      if (props.product) {
-        const updatedQuantity = Math.max(
-          parseFloat((Number(props.product.quantity) - 1).toFixed(2)),
+    const decrement = async (product) => {
+      if (product) {
+        product.quantity = Math.max(
+          parseFloat((Number(product.quantity) - 1).toFixed(2)),
           1
         );
 
@@ -280,17 +271,15 @@ export default {
           const response = await axios.post(
             `${url}/Ecommerce/vue-project/src/backend/api.php?action=updateCart`,
             {
-              product_id: props.product.product_id,
-              quantity: updatedQuantity,
+              product_id: product.product_id,
+              quantity: product.quantity,
               cart_id: userLogin.value.user_id,
             }
           );
 
-          // Update the local quantity and final quantity
-          props.product.quantity = updatedQuantity;
-          finalQuantity.value = parseFloat(
-            (updatedQuantity * props.product.price).toFixed(2)
-          );
+          // Update the final quantity
+          finalQuantity.value = formatPrice(product);
+          emit("update:product", { ...product }); // Emit a copy of the updated product object
         } catch (error) {
           console.error("Error updating cart quantity:", error);
         }
@@ -378,6 +367,7 @@ export default {
     });
 
     return {
+      formatPrice,
       reviewActivte,
       showLogin,
       getReviews,
@@ -393,3 +383,11 @@ export default {
   },
 };
 </script>
+<style>
+.line-through {
+  text-decoration: line-through;
+}
+.text-blue-500 {
+  color: #3b82f6;
+}
+</style>

@@ -26,6 +26,7 @@
               <th scope="col" class="px-6 py-3">Product ID</th>
               <th scope="col" class="px-6 py-3">Product Name</th>
               <th scope="col" class="px-6 py-3">Price</th>
+              <th scope="col" class="px-6 py-3">New price</th>
               <th scope="col" class="px-6 py-3">Ratings</th>
               <th scope="col" class="px-6 py-3">Stock</th>
               <th colspan="2" scope="col" class="px-6 py-3">Action</th>
@@ -45,6 +46,7 @@
                 {{ item.product_name }}
               </td>
               <td class="px-6 py-4">{{ item.price }}</td>
+              <td class="px-6 py-4">{{ item.new_price }}</td>
               <td class="px-6 py-4">{{ item.ratings }}</td>
               <td class="px-6 py-4">{{ item.quantity }}</td>
               <td class="px-6 py-4 flex gap-5">
@@ -192,6 +194,14 @@
             <input
               type="number"
               v-model="product_price"
+              class="p-2 rounded-md w-full"
+            />
+          </div>
+          <div class="py-2">
+            <p for="" class="text-sm">New price:</p>
+            <input
+              type="number"
+              v-model="new_price"
               class="p-2 rounded-md w-full"
             />
           </div>
@@ -450,6 +460,7 @@ export default {
     const product_name = ref("");
     const product_description = ref("");
     const product_price = ref("");
+    const new_price = ref("");
     const shipping_fee = ref("");
     const quantity = ref("");
     const image = ref("");
@@ -524,6 +535,7 @@ export default {
         console.log("edit products:", productEditable.value);
         product_name.value = productEditable.value.product_name;
         product_price.value = productEditable.value.price;
+        new_price.value = productEditable.value.new_price;
         product_description.value = productEditable.value.product_description;
         shipping_fee.value = productEditable.value.shipping_fee;
         quantity.value = productEditable.value.quantity;
@@ -554,6 +566,10 @@ export default {
         return;
       }
       if (!product_price.value) {
+        alert("Please enter the product price.");
+        return;
+      }
+      if (!new_price.value) {
         alert("Please enter the product price.");
         return;
       }
@@ -608,6 +624,7 @@ export default {
             product_id: editProductId.value,
             product_name: product_name.value,
             product_price: product_price.value,
+            new_price: new_price.value,
             product_description: product_description.value,
             // shipping_fee: shipping_fee.value,
             quantity: quantity.value,
@@ -764,6 +781,7 @@ export default {
     };
 
     return {
+      new_price,
       filteredProducts,
       paginatedProducts,
       searchQuery,

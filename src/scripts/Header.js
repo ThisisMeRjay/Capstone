@@ -316,7 +316,7 @@ export default {
         const newTotalPrice = newPrice
           ? parseFloat((item.quantity * formattedNewPrice).toFixed(2))
           : 0;
-        return { ...item, price: formattedNewPrice, totalPrice: newTotalPrice };
+        return { ...item, totalPrice: newTotalPrice };
       });
     }, 100);
 

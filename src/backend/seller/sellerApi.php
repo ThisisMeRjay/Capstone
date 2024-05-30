@@ -524,6 +524,7 @@ function editProductsInfo()
     $product_id = $data['product_id'];
     $product_name = $data['product_name'];
     $product_price = $data['product_price'];
+    $newprice = $data['new_price'];
     $product_description = $data['product_description'];
     // $shipping_fee = $data['shipping_fee'];
     $quantity = $data['quantity'];
@@ -556,8 +557,8 @@ function editProductsInfo()
 
 
         // Update product information in the products table
-        $stmt = $conn->prepare("UPDATE products SET category_id = ?, product_name = ?, price = ?, product_description = ?, image = ?, weight = ?, height = ?, length = ?, width = ? WHERE product_id = ?");
-        $stmt->bind_param("isdssidddd", $catID, $product_name, $product_price, $product_description, $image, $weight, $height, $length, $width, $product_id);
+        $stmt = $conn->prepare("UPDATE products SET category_id = ?, product_name = ?, price = ?, new_price = ?, product_description = ?, image = ?, weight = ?, height = ?, length = ?, width = ? WHERE product_id = ?");
+        $stmt->bind_param("isddssidddd", $catID, $product_name, $product_price, $newprice, $product_description, $image, $weight, $height, $length, $width, $product_id);
         $stmt->execute();
         $stmt->close();
 

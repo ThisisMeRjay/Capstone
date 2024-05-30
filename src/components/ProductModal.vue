@@ -51,7 +51,7 @@
             </div>
             <div
               class="text-md sm:text-lg font-semibold text-black-500"
-              v-html="formatPrice(product)"
+              v-html="finalQuantity || formatPrice(product)"
             ></div>
             <div
               class="w-full flex gap-2 justify-start items-center text-sm font-medium text-black-700"
@@ -180,7 +180,7 @@
 import LoginModal from "@/components/LoginModal.vue";
 import { Icon } from "@iconify/vue";
 import axios from "axios";
-import { ref, watch, onMounted, reactive } from "vue";
+import { ref, watch, onMounted, reactive, toRefs } from "vue";
 import { API_URL } from "@/config";
 export default {
   props: {
@@ -191,8 +191,34 @@ export default {
     Icon,
     LoginModal,
   },
-  methods: {
-    formatPrice(product) {
+  setup(props, { emit }) {
+    const url = API_URL;
+    const showLogin = ref(false);
+
+    const refreshPage = () => {
+      location.reload(true);
+    };
+    // Initialize with product.quantity if product exists, or fallback to 1
+    const finalQuantity = ref('');
+    const isHeartRed = reactive([]);
+
+    const closeModal = () => {
+      emit("update:isVisible", false);
+      reviews.value = [];
+    };
+
+    const { product } = toRefs(props);
+    const quantity = ref(1); // Default initial quantity
+    const backup = ref(null);
+
+    const resetProduct = () => {
+      if (!backup.value) {
+        backup.value = JSON.parse(JSON.stringify(product.value));
+      }
+      return JSON.parse(JSON.stringify(backup.value));
+    };
+
+    const formatPrice = (product) => {
       const numericPrice = parseFloat(product.price);
       const numericNewPrice = parseFloat(product.new_price);
 
@@ -216,69 +242,84 @@ export default {
       }
 
       return `₱${formattedOldPrice}`;
-    },
-  },
-  setup(props, { emit }) {
-    const url = API_URL;
-    const showLogin = ref(false);
-
-    const refreshPage = () => {
-      location.reload(true);
-    };
-
-    const quantity = ref(1); // Initialize with product.quantity if product exists, or fallback to 1
-    const finalQuantity = ref("");
-    const isHeartRed = reactive([]);
-
-    const closeModal = () => {
-      emit("update:isVisible", false);
-      reviews.value = [];
     };
 
     const increment = () => {
-      if (props.product) {
+      let productCopy = resetProduct();
+
+      if (productCopy) {
+        console.log("increment", productCopy);
+
         // Ensure the quantity is incremented by 1 and remains a decimal
         quantity.value = Math.min(
           parseFloat((Number(quantity.value) + 1).toFixed(2)), // Adding 1 and fixing to two decimal places
-          props.product.stock
+          productCopy.stock
         );
+
         // Calculate final quantity in decimal
-        finalQuantity.value = parseFloat(
-          (quantity.value * props.product.price).toFixed(2)
+        if (productCopy.new_price) {
+          productCopy.new_price = parseFloat(
+            (quantity.value * productCopy.new_price).toFixed(2)
+          );
+        } else {
+          productCopy.price = parseFloat(
+            (quantity.value * productCopy.price).toFixed(2)
+          );
+        }
+
+        // Update the product price formatting
+        finalQuantity.value = formatPrice(productCopy);
+
+        // Emit an event to update the product object
+        emit("update:product", productCopy);
+        console.log("increment after", productCopy);
+      }
+    };
+
+    const decrement = () => {
+      let productCopy = resetProduct();
+
+      if (productCopy) {
+        console.log("decrement", productCopy);
+        console.log("current quantity:", quantity.value);
+
+        // Ensure the quantity is decremented by 1 and remains a decimal
+        quantity.value = Math.max(
+          parseFloat((Number(quantity.value) - 1).toFixed(2)),
+          1 // Minimum quantity is 1
         );
+
+        console.log("new quantity after decrement:", quantity.value);
+
+        // Calculate final quantity in decimal
+        if (productCopy.new_price) {
+          productCopy.new_price = parseFloat(
+            (quantity.value * productCopy.new_price).toFixed(2)
+          );
+        } else {
+          productCopy.price = parseFloat(
+            (quantity.value * productCopy.price).toFixed(2)
+          );
+        }
+
+        // Update the product price formatting
+        finalQuantity.value = formatPrice(productCopy);
+
+        // Emit an event to update the product object
+        emit("update:product", productCopy);
+        console.log("decrement after", productCopy);
       }
     };
 
     watch(
-      () => (props.product ? props.product.price : null),
-      (newPrice) => {
-        if (props.product.quantity) {
-          // Ensure quantity is treated as a decimal
-          quantity.value = parseFloat(props.product.quantity.toFixed(2));
-        } else {
-          // Start from 1.00 if no initial quantity set
-          quantity.value = 1.0;
+      () => quantity.value,
+      (newQuantity) => {
+        if (newQuantity !== undefined) {
+          quantity.value = newQuantity;
         }
-        // Calculate new final quantity based on new price
-        finalQuantity.value = newPrice
-          ? parseFloat((quantity.value * newPrice).toFixed(2))
-          : 0;
-      }
+      },
+      { immediate: true }
     );
-
-    const decrement = () => {
-      if (props.product) {
-        // Ensure the quantity is decremented by 1 and remains a decimal
-        quantity.value = Math.max(
-          parseFloat((Number(quantity.value) - 1).toFixed(2)),
-          1
-        );
-        // Calculate final quantity in decimal
-        finalQuantity.value = parseFloat(
-          (quantity.value * props.product.price).toFixed(2)
-        );
-      }
-    };
 
     const userLogin = ref([]);
     // get user data from local storage
@@ -361,6 +402,7 @@ export default {
     });
 
     return {
+      formatPrice,
       reviewActivte,
       showLogin,
       getReviews,
