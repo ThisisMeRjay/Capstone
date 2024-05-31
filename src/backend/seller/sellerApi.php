@@ -360,7 +360,6 @@ function SaveProduct()
     $productName = $data['productName'];
     $productDescription = $data['productDescription'];
     $price = $data['price'];
-    // $shipping = $data['shipping'];
     $specifications = $data['specifications'];
     $quantity = $data['quantity'];
     $storeID = $data['store_id'];
@@ -370,8 +369,15 @@ function SaveProduct()
     $width = $data['width'];
     $brgyID = $data['barangay_id'];
 
-    $stmt = $conn->prepare("INSERT INTO products (category_id, product_name, product_description, price, image, store_id, weight, height, length, width) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issdsidddd", $selectedCategory, $productName, $productDescription, $price, $imageData, $storeID, $weight, $height, $length, $width);
+    // Fetch the last product's shipping fee
+    $getShippingFeeStmt = $conn->prepare("SELECT shipping_fee FROM products ORDER BY product_id DESC LIMIT 1");
+    $getShippingFeeStmt->execute();
+    $getShippingFeeStmt->bind_result($shippingFee);
+    $getShippingFeeStmt->fetch();
+    $getShippingFeeStmt->close();
+
+    $stmt = $conn->prepare("INSERT INTO products (category_id, product_name, product_description, price, shipping_fee, image, store_id, weight, height, length, width) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issddsiiddd", $selectedCategory, $productName, $productDescription, $price, $shippingFee, $imageData, $storeID, $weight, $height, $length, $width);
     if ($stmt->execute()) {
         $product_id = $conn->insert_id;
         // Insert specifications as before...

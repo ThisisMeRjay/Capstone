@@ -317,54 +317,27 @@
                 </select>
               </div>
               <div class="gap-2 mt-2">
-                <label for="zone" class="font-semibold">
-                  Street <span class="text-red-500">*</span>
-                </label>
-                <select
+                <label for="zone" class="font-semibold">Street(Optional)</label>
+                <input
+                  type="text"
                   id="zone"
                   v-model="registerZone"
-                  required
+                  placeholder="Enter your street"
                   class="w-full p-2 rounded-md my-1 bg-gray-100"
-                >
-                  <option value="" disabled selected>Select your street</option>
-                  <option v-for="zone in 7" :key="zone" :value="'Zone ' + zone">
-                    Zone {{ zone }}
-                  </option>
-                </select>
+                />
               </div>
 
               <div class="gap-2 mt-2">
-                <label for="houseno" class="font-semibold">
-                  House no. <span class="text-red-500">*</span>
-                </label>
+                <label for="houseno" class="font-semibold"
+                  >House#/bldg/apt#/Zone#(Optional)</label
+                >
                 <input
                   type="text"
                   id="houseno"
                   v-model="registerHouseno"
-                  placeholder="House no."
-                  required
-                  :class="[
-                    'border',
-                    'w-full',
-                    'p-2',
-                    'rounded-md',
-                    'my-1',
-                    'bg-gray-100',
-                    errorMessage.houseNumberErr && registerHouseno.length > 0
-                      ? 'border-red-500'
-                      : registerHouseno.length > 0
-                      ? 'border-green-500'
-                      : 'border-gray-300',
-                  ]"
+                  placeholder="Enter your house#/bldg/apt#/Zone#"
+                  class="w-full p-2 rounded-md my-1 bg-gray-100"
                 />
-                <p
-                  v-if="
-                    errorMessage.houseNumberErr && registerHouseno.length > 0
-                  "
-                  class="text-red-500"
-                >
-                  {{ errorMessage.houseNumberErr }}
-                </p>
               </div>
 
               <div class="my-5">
@@ -393,7 +366,7 @@
 </template>
 <script>
 import { Icon } from "@iconify/vue";
-import { onMounted, ref, reactive, computed, watch, } from "vue";
+import { onMounted, ref, reactive, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { API_URL } from "@/config";
@@ -511,8 +484,7 @@ export default {
       nameErr: null,
       emailErr: null,
       passwordErr: null,
-      contactNumberErr: null,
-      houseNumberErr: null, // New error field for house number validation
+      contactNumberErr: null, // New error field for house number validation
     });
 
     const checkNameExists = debounce(async (name) => {
@@ -594,14 +566,6 @@ export default {
       return null;
     });
 
-    const houseNumberValidation = computed(() => {
-      const pattern = /^\d+$/; // Ensures only digits are entered
-      if (!pattern.test(registerHouseno.value)) {
-        return "House number must be numeric.";
-      }
-      return null;
-    });
-
     // Watch for changes in the name and email fields to validate them
 
     watch(
@@ -644,14 +608,6 @@ export default {
       { immediate: true }
     );
 
-    watch(
-      registerHouseno,
-      () => {
-        errorMessage.houseNumberErr = houseNumberValidation.value;
-      },
-      { immediate: true }
-    );
-
     const showRegister = ref(false);
     const showLogin = ref(true);
 
@@ -661,20 +617,17 @@ export default {
       errorMessage.emailErr = emailValidation.value;
       errorMessage.passwordErr = passwordValidation.value;
       errorMessage.contactNumberErr = contactNumberValidation.value;
-      errorMessage.houseNumberErr = houseNumberValidation.value;
       if (
         errorMessage.nameErr ||
         errorMessage.emailErr ||
         errorMessage.passwordErr ||
-        errorMessage.contactNumberErr ||
-        errorMessage.houseNumberErr // Include this check
+        errorMessage.contactNumberErr
       ) {
         console.log(
           errorMessage.nameErr,
           errorMessage.emailErr,
           errorMessage.passwordErr,
-          errorMessage.contactNumberErr,
-          errorMessage.houseNumberErr
+          errorMessage.contactNumberErr
         );
         return;
       }

@@ -529,6 +529,7 @@ export default {
 
     const handleSearchCompleted = (product) => {
       products.value = product;
+      activeButton.value = "none";
     };
     // get categories
     const getCategories = async () => {

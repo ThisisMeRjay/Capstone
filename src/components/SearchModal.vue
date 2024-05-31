@@ -41,7 +41,7 @@
           <p
             v-for="(term, index) in recentSearches"
             :key="index"
-            class="px-3 text-sm py-1 my-1 border border-slate-700/10 rounded-md cursor-pointer"
+            class="px-3 text-sm py-1 my-1 border border-slate-700/10 rounded-md cursor-pointer hover:bg-slate-400/10"
             @click="reSearch(term)"
           >
             {{ term }}

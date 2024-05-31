@@ -113,7 +113,7 @@
               v-model="selectedBarangay"
               required
             >
-              <option value="" disabled selected>Select Barangay</option>
+              <option value="" disabled selected>Select Location</option>
               <option
                 v-for="brgy in barangay"
                 :key="brgy.barangay_id"
@@ -432,20 +432,12 @@ export default {
         alert("Please enter a product description.");
         return;
       }
-      if (!price.value) {
-        alert("Please enter a price.");
-        return;
-      }
-      if (!quantity.value) {
-        alert("Please enter a quantity.");
-        return;
-      }
-      if (!specifications.value.trim()) {
-        alert("Please enter specifications.");
-        return;
-      }
       if (!userLogin.value.store_id) {
         alert("Store ID is missing.");
+        return;
+      }
+      if (!selectedBarangay.value) {
+        alert("Please select a barangay.");
         return;
       }
       if (!Weight.value) {
@@ -464,11 +456,18 @@ export default {
         alert("Please enter the width.");
         return;
       }
-      if (!selectedBarangay.value) {
-        alert("Please select a barangay.");
+      if (!price.value) {
+        alert("Please enter a price.");
         return;
       }
-
+      if (!quantity.value) {
+        alert("Please enter a quantity.");
+        return;
+      }
+      if (!specifications.value.Spec_key || !specifications.value.Spec_value) {
+        alert("Please enter atleast one Spec Key and one Spec Value.");
+        return;
+      }
       try {
         const response = await axios.post(
           `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=SaveProduct`,
