@@ -289,7 +289,7 @@
                 />
                 <img
                   v-else
-                  src="../assets/profile.jpg"
+                  src="../../assets/profile.jpg"
                   class="object-cover rounded-full shadow"
                   :alt="userLogin.store_name"
                   style="width: 60px; height: 60px"
