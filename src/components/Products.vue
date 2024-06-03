@@ -6,6 +6,20 @@
     class="flex py-2 pl-2 sm:pl-8 bg-gradient-to-r from-blue-500/20 from-10% to-blue-500/0 to-100% gap-2 sm:text-sm text-xs"
   >
     <button
+      v-if="
+        !(
+          activeButton === 'category' ||
+          activeButton === 'home' ||
+          activeButton === null
+        )
+      "
+      @click="handleButtonClick('home')"
+      class="py-2 px-4 rounded-full font-semibold shadow-lg border bg-slate-700/10 text-slate-800 hover:bg-slate-700/30 hover:border-slate-300"
+    >
+      Home
+    </button>
+
+    <button
       @click="handleButtonClick('category')"
       :class="[
         'py-2 px-4 rounded-full font-semibold shadow-lg border',
@@ -15,20 +29,6 @@
       ]"
     >
       Category
-    </button>
-
-    <button
-      @click="handleButtonClick('home')"
-      :class="[
-        'py-2 px-4 rounded-full font-semibold shadow-lg border',
-        activeButton === 'category' ||
-        activeButton === 'home' ||
-        activeButton === null
-          ? 'bg-slate-700/30 text-white'
-          : 'bg-slate-700/10 text-slate-800 hover:bg-slate-700/30 hover:border-slate-300',
-      ]"
-    >
-      Home
     </button>
 
     <button
@@ -222,66 +222,96 @@
           </h2>
         </div>
 
-        <div
-          class="mt-6 grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 xl:gap-x-4"
-        >
+        <div v-if="products.length > 0">
           <div
-            @click="showModal(product)"
-            v-for="product in products"
-            :key="product.product_id"
-            class="cursor-pointer group relative bg-gradient-to-tr from-blue-500 via-violet-500 to-orange-500 rounded-xl p-[1px] overflow-hidden hover:shadow-lg hover:shadow-blue-500/50 transition"
+            class="mt-6 grid grid-cols-2 gap-x-4 gap-y-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 xl:gap-x-4"
           >
-            <div class="bg-slate-100 w-full h-full rounded-xl">
-              <div
-                class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-xl bg-sky-900 lg:aspect-none group-hover:opacity-75 lg:h-44"
-              >
-                <img
-                  :src="'data:image/png;base64,' + product.image"
-                  :alt="product.imageAlt"
-                  class="h-32 w-full object-center lg:h-44 lg:w-full"
-                />
-                <Icon
-                  icon="ph:heart-light"
-                  class="heart-icon"
-                  @click="onHeartClick(product)"
-                />
-              </div>
-              <div class="mt-24 text-xs sm:text-sm">
+            <div
+              @click="showModal(product)"
+              v-for="product in products"
+              :key="product.product_id"
+              class="cursor-pointer group relative bg-gradient-to-tr from-blue-500 via-violet-500 to-orange-500 rounded-xl p-[1px] overflow-hidden hover:shadow-lg hover:shadow-blue-500/50 transition"
+            >
+              <div class="bg-slate-100 w-full h-full rounded-xl">
                 <div
-                  class="absolute bottom-0 w-full inset-x-0 rounded-b-md p-2"
+                  class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-xl bg-sky-900 lg:aspect-none group-hover:opacity-75 lg:h-44"
                 >
-                  <div class="flex flex-col space-y-2 pl-2">
-                    <h3 class="text-sky-900 font-bold">
-                      <a :href="product.href">
-                        {{ product.product_name }}
-                      </a>
-                    </h3>
-                    <p class="font-medium" v-html="formatPrice(product)"></p>
-                    <div class="mt-1">
-                      <span
-                        v-for="star in getStars(product.ratings)"
-                        :key="star.id"
-                        :class="{
-                          'star-colored': star.colored,
-                          'star-grey': !star.colored,
-                        }"
-                      >
-                        <template v-if="!star.half">&#9733;</template>
-                        <!-- Full star -->
-                        <template v-else>&#9734;</template>
-                        <!-- Assuming &#9734; is your half star or modify as needed -->
-                      </span>
+                  <img
+                    :src="'data:image/png;base64,' + product.image"
+                    :alt="product.imageAlt"
+                    class="h-32 w-full object-center lg:h-44 lg:w-full"
+                  />
+                  <Icon
+                    icon="ph:heart-light"
+                    class="heart-icon"
+                    @click="onHeartClick(product)"
+                  />
+                </div>
+                <div class="mt-24 text-xs sm:text-sm">
+                  <div
+                    class="absolute bottom-0 w-full inset-x-0 rounded-b-md p-2"
+                  >
+                    <div class="flex flex-col space-y-2 pl-2">
+                      <h3 class="text-sky-900 font-bold">
+                        <a :href="product.href">
+                          {{ product.product_name }}
+                        </a>
+                      </h3>
+                      <p class="font-medium" v-html="formatPrice(product)"></p>
+                      <div class="mt-1">
+                        <span
+                          v-for="star in getStars(product.ratings)"
+                          :key="star.id"
+                          :class="{
+                            'star-colored': star.colored,
+                            'star-grey': !star.colored,
+                          }"
+                        >
+                          <template v-if="!star.half">&#9733;</template>
+                          <!-- Full star -->
+                          <template v-else>&#9734;</template>
+                          <!-- Assuming &#9734; is your half star or modify as needed -->
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            <product-modal
+              :is-visible="isModalVisible"
+              :product="selectedProduct"
+              @update:isVisible="isModalVisible = $event"
+            ></product-modal>
           </div>
-          <product-modal
-            :is-visible="isModalVisible"
-            :product="selectedProduct"
-            @update:isVisible="isModalVisible = $event"
-          ></product-modal>
+        </div>
+        <div v-else>
+          <div
+            v-if="!showNoProductsMessage"
+            class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+          >
+            <div
+              v-for="placeholder in placeholderCount"
+              :key="placeholder"
+              class="bg-white rounded-xl p-[1px] overflow-hidden shadow-md"
+            >
+              <div class="w-full h-full rounded-xl bg-gray-200 animate-pulse">
+                <div class="h-32 sm:h-48 bg-gray-300 rounded-t-xl"></div>
+                <div class="flex flex-col p-2 sm:p-4 space-y-2">
+                  <div class="h-4 bg-gray-400 rounded-full animate-pulse"></div>
+                  <div
+                    class="h-4 bg-gray-400 rounded-full animate-pulse w-3/4"
+                  ></div>
+                  <div
+                    class="h-4 bg-gray-400 rounded-full animate-pulse w-1/2"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center mt-8">
+            <p class="text-gray-500">No products found.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -300,6 +330,32 @@ export default {
     Icon,
     ProductModal,
     Header,
+  },
+  data() {
+    return {
+      showNoProductsMessage: false,
+      noProductsMessageTimer: null,
+    };
+  },
+  watch: {
+    products: {
+      handler(newProducts) {
+        if (newProducts.length === 0) {
+          // Clear any existing timer
+          clearTimeout(this.noProductsMessageTimer);
+
+          // Set a new timer to display the "No products found" message after 5 seconds
+          this.noProductsMessageTimer = setTimeout(() => {
+            this.showNoProductsMessage = true;
+          }, 5000);
+        } else {
+          // Reset the message flag and clear the timer
+          this.showNoProductsMessage = false;
+          clearTimeout(this.noProductsMessageTimer);
+        }
+      },
+      deep: true,
+    },
   },
   methods: {
     formatPrice(product) {
@@ -332,6 +388,18 @@ export default {
   props: ["products"],
 
   setup(props) {
+    const placeholderCount = 15; // Adjust this value as needed
+    const orginProducts = ref([]);
+    const getProductsOrig = () => {
+      products.value = orginProducts.value;
+      selectedStore.value = "";
+
+      selectedCategoryName.value = "";
+      catID.value = null;
+      minPrice.value = 0;
+      maxPrice.value = 0;
+    };
+
     const url = API_URL;
 
     const minPrice = ref(0);
@@ -366,14 +434,14 @@ export default {
           break;
         case "home":
           activeButton.value = buttonType;
-          fetchProducts();
+          getProductsOrig();
           break;
         case "store":
           activeButton.value = buttonType;
           fetchAllStores();
         case "side":
           sidebutton.value = buttonType;
-          activeButton.value = 'store';
+          activeButton.value = "store";
           break;
       }
       console.log("cat button status: ", catButton.value);
@@ -390,6 +458,7 @@ export default {
     const selectedCategoryName = ref("");
     const storeName = ref([]);
     const temp_data = ref([]);
+    const catID = ref(null);
 
     const selectStore = (storeId) => {
       if (storeId) {
@@ -403,7 +472,16 @@ export default {
         filterbyStoreName(null); // Call filterbyStoreName with null to reset products
       }
       showStoresModal.value = false;
-      selectedCategoryName.value = null;
+      // selectedCategoryName.value = null;
+      if (catID.value === null) {
+        // If no category is selected, fetch all products for the selected store
+        products.value = temp_data.value.filter(
+          (product) => product.store_id === selectedStore.value.store_id
+        );
+      } else {
+        // If a category is selected, filter by category and store
+        filterByCategory(catID.value, selectedCategoryName.value);
+      }
     };
 
     const filterbyStoreName = async (storeID) => {
@@ -463,6 +541,7 @@ export default {
         });
         products.value = filtered;
       }
+      handleResize();
     };
 
     const filterByPrice = () => {
@@ -510,6 +589,7 @@ export default {
         });
         products.value = filtered;
       }
+      handleResize();
 
       console.log("Filtered range", products.value);
     };
@@ -565,6 +645,8 @@ export default {
         );
         //  console.log("API Response Data:", response.data);
         products.value = response.data;
+
+        orginProducts.value = products.value;
 
         selectedStore.value = "";
 
@@ -626,6 +708,7 @@ export default {
       }
 
       selectedCategoryName.value = name;
+      catID.value = id;
       handleResize();
     };
 
@@ -653,6 +736,9 @@ export default {
     };
 
     return {
+      catID,
+      placeholderCount,
+      orginProducts,
       sidebutton,
       catButton,
       activeButton,
