@@ -464,8 +464,12 @@ export default {
         alert("Please enter a quantity.");
         return;
       }
-      if (!specifications.value.Spec_key || !specifications.value.Spec_value) {
-        alert("Please enter atleast one Spec Key and one Spec Value.");
+      const hasEmptySpec = specifications.value.some(
+        (spec) => !spec.Spec_key.trim() || !spec.Spec_value.trim()
+      );
+
+      if (hasEmptySpec) {
+        alert("Please enter a key and value for each specification.");
         return;
       }
       try {

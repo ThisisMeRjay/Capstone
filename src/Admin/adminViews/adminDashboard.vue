@@ -121,7 +121,7 @@ export default {
     const router = useRouter();
     const logout = () => {
       localStorage.removeItem("admin");
-      router.push("/seller_index");
+      router.push("/home");
     };
     var userLogin = ref([]);
     const getUserFromLocalStorage = () => {

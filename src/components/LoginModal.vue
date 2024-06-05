@@ -9,7 +9,7 @@
         >
           <div class="flex justify-end">
             <div
-              class="bg-slate-600/20 rounded-full text-red-500 shadow p-2"
+              class="bg-slate-600/20 rounded-full text-red-500 shadow p-2 cursor-pointer"
               @click="close"
             >
               <Icon icon="iconamoon:close-bold" />
@@ -96,16 +96,33 @@
               </div>
 
               <div class="my-5">
+                <!-- <div class="pt-3">
+                  <button
+                    type="submit"
+                    class="flex w-full justify-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+                  >
+                    Register
+                  </button>
+                </div>
+                <div class="flex justify-center items-center gap-2 pt-2">
+                  Already have an account?
+                  <button
+                    class="flex w-full justify-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+                    @click="showLoginModal"
+                  >
+                    Sign In
+                  </button>
+                </div> -->
                 <button
                   type="submit"
-                  class="bg-sky-900 w-full font-semibold text-lg text-white px-5 py-2 rounded-md"
+                  class="flex w-full justify-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
                 >
                   Login
                 </button>
                 <div class="flex justify-center gap-2 py-2">
                   <p>Don't have account?</p>
                   <span
-                    class="text-blue-500 hover:text-blue-700"
+                    class="text-blue-500 hover:text-blue-700 cursor-pointer"
                     @click="showRegisterModal"
                     >Sign up
                   </span>
@@ -135,6 +152,46 @@
             <h1 class="font-bold text-sky-900 text-2xl text-center">
               Register
             </h1>
+            <div class="flex items-center justify-center mt-4 gap-8 relative">
+              <button
+                @click="setActive('Customer')"
+                class="text-black font-normal hover:text-blue-700 relative"
+                :class="{ 'font-bold': activeOption === 'Customer' }"
+              >
+                Customer
+                <span
+                  v-if="activeOption === 'Customer'"
+                  class="ml-2 font-semibold"
+                >
+                </span>
+                <span
+                  v-if="activeOption === 'Customer'"
+                  class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-600 rounded-full"
+                ></span>
+              </button>
+              <button
+                @click="setActive('Store')"
+                class="text-black hover:text-blue-700 relative font-normal"
+                :class="{ 'font-bold': activeOption === 'Store' }"
+              >
+                Store/Seller
+                <span
+                  v-if="activeOption === 'Store'"
+                  class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-600 rounded-full"
+                ></span>
+              </button>
+              <button
+                @click="setActive('Rider')"
+                class="text-black hover:text-blue-700 relative font-normal"
+                :class="{ 'font-bold': activeOption === 'Rider' }"
+              >
+                Rider
+                <span
+                  v-if="activeOption === 'Rider'"
+                  class="absolute bottom-0 left-0 w-full h-0.5 bg-slate-600 rounded-full"
+                ></span>
+              </button>
+            </div>
             <p
               v-if="registerResponseMessage"
               class="text-green-600 px-4 shadow-sm mt-2 py-3 rounded-md bg-green-400/10"
@@ -142,8 +199,8 @@
               {{ registerResponseMessage }}
             </p>
           </div>
-          <form @submit.prevent="signUp">
-            <div class="p-2 rounded-md shadow-sm mb-2">
+          <form @submit.prevent="signUp" v-if="activeOption === 'Customer'">
+            <div class="rounded-md shadow-sm mb-2">
               <div class="gap-2 mt-2">
                 <label for="name" class="font-semibold"
                   >Name <span class="text-red-500">*</span></label
@@ -340,23 +397,362 @@
                 />
               </div>
 
-              <div class="my-5">
+              <div class="pt-3">
                 <button
                   type="submit"
-                  class="bg-sky-900 w-full font-semibold text-lg text-white px-5 py-2 rounded-md"
+                  class="flex w-full justify-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
                 >
                   Register
                 </button>
-                <div class="flex justify-center gap-2 py-2">
-                  <p>Already have account?</p>
-                  <button
-                    class="text-blue-500 hover:text-blue-700"
-                    @click="showLoginModal"
-                  >
-                    Sign In
-                  </button>
-                </div>
               </div>
+              <div class="flex justify-center items-center gap-2 pt-2">
+                Already have an account?
+                <button
+                  class="text-blue-500 hover:text-blue-700"
+                  @click="showLoginModal"
+                >
+                  Sign In
+                </button>
+              </div>
+            </div>
+          </form>
+          <form
+            class="space-y-6 text-sm"
+            @submit.prevent="signUpStore"
+            v-if="activeOption === 'Store'"
+          >
+            <div class="gap-2 mt-2">
+              <label for="name" class="font-semibold"
+                >Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                id="name"
+                v-model="registerName"
+                placeholder="Name"
+                required
+                :class="[
+                  'border',
+                  'w-full',
+                  'p-2',
+                  'rounded-md',
+                  'my-1',
+                  'bg-gray-100',
+                  errorMessage.nameErr
+                    ? 'border-red-500'
+                    : registerName.length > 0
+                    ? 'border-green-500'
+                    : 'border-gray-300',
+                ]"
+              />
+              <p
+                class="px-3 py-1 rounded-md text-red-500"
+                v-if="errorMessage.nameErr && registerName.length > 0"
+              >
+                {{ errorMessage.nameErr }}
+              </p>
+            </div>
+
+            <div class="gap-2 mt-2">
+              <label for="email" class="font-semibold"
+                >Email <span class="text-red-500">*</span></label
+              >
+              <input
+                type="email"
+                id="email"
+                v-model="registerEmail"
+                placeholder="Email"
+                required
+                :class="[
+                  'border',
+                  'w-full',
+                  'p-2',
+                  'rounded-md',
+                  'my-1',
+                  'bg-gray-100',
+                  errorMessage.emailErr
+                    ? 'border-red-500'
+                    : registerEmail.length > 0
+                    ? 'border-green-500'
+                    : 'border-gray-300',
+                ]"
+              />
+              <p
+                class="px-3 py-1 rounded-md text-red-500"
+                v-if="errorMessage.emailErr && registerEmail.length > 0"
+              >
+                {{ errorMessage.emailErr }}
+              </p>
+            </div>
+
+            <div class="relative mt-2 gap-2" style="position: relative">
+              <label for="password" class="font-semibold">
+                Password <span class="text-red-500">*</span>
+              </label>
+              <div style="position: relative">
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  id="password"
+                  v-model="registerPassword"
+                  placeholder="Password"
+                  required
+                  class="border w-full p-2 rounded-md my-1 bg-gray-100 pr-10"
+                  :class="{
+                    'border-red-500': errorMessage.passwordErr,
+                    'border-green-500': registerPassword.length > 0,
+                    'border-gray-300':
+                      !errorMessage.passwordErr &&
+                      registerPassword.length === 0,
+                  }"
+                  style="padding-right: 2.5rem"
+                />
+                <button
+                  type="button"
+                  class="absolute inset-y-0 right-0 flex items-center password-toggle-button"
+                  style="top: 50%; transform: translateY(-50%); right: 0.75rem"
+                >
+                  <icon
+                    :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'"
+                    class="text-lg cursor-pointer"
+                    @click.stop="toggleShowPassword"
+                  />
+                </button>
+              </div>
+              <p
+                class="px-3 py-1 rounded-md text-red-500"
+                v-if="errorMessage.passwordErr && registerPassword.length > 0"
+              >
+                {{ errorMessage.passwordErr }}
+              </p>
+            </div>
+
+            <div class="gap-2 mt-2">
+              <label for="address" class="font-semibold"
+                >Address <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                id="address"
+                v-model="registerAddress"
+                placeholder="Legazpi City"
+                required
+                class="w-full p-2 rounded-md my-1 bg-gray-100"
+              />
+            </div>
+
+            <div class="gap-2 mt-2">
+              <label for="number" class="font-semibold">
+                Contact Number <span class="text-red-500">*</span>
+              </label>
+              <div
+                class="flex border w-full p-2 rounded-md my-1 bg-gray-100 items-center"
+              >
+                <span class="bg-gray-200 px-2">+63</span>
+                <input
+                  type="tel"
+                  id="number"
+                  v-model="contactNumber"
+                  placeholder="8123456789 or 9123456789"
+                  required
+                  :class="[
+                    'flex-1',
+                    'border-none',
+                    'outline-none',
+                    'bg-gray-100',
+                    errorMessage.contactNumberErr && contactNumber.length > 0
+                      ? 'border-red-500'
+                      : contactNumber.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
+                />
+              </div>
+              <p
+                v-if="errorMessage.contactNumberErr && contactNumber.length > 0"
+                class="text-red-500"
+              >
+                {{ errorMessage.contactNumberErr }}
+              </p>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                class="flex w-full justify-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+              >
+                Register
+              </button>
+            </div>
+            <div class="flex justify-center items-center gap-2">
+              Already have an account?
+              <button
+                class="text-blue-500 hover:text-blue-700"
+                @click="showLoginModal"
+              >
+                Sign In
+              </button>
+            </div>
+          </form>
+          <form
+            class="space-y-6 text-sm"
+            @submit.prevent="signUpRider"
+            v-if="activeOption === 'Rider'"
+          >
+            <div class="gap-2 mt-2">
+              <label for="name" class="font-semibold"
+                >Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                id="name"
+                v-model="registerName"
+                placeholder="Name"
+                required
+                :class="[
+                  'border',
+                  'w-full',
+                  'p-2',
+                  'rounded-md',
+                  'my-1',
+                  'bg-gray-100',
+                  errorMessage.nameErr
+                    ? 'border-red-500'
+                    : registerName.length > 0
+                    ? 'border-green-500'
+                    : 'border-gray-300',
+                ]"
+              />
+              <p
+                class="px-3 py-1 rounded-md text-red-500"
+                v-if="errorMessage.nameErr && registerName.length > 0"
+              >
+                {{ errorMessage.nameErr }}
+              </p>
+            </div>
+
+            <div class="gap-2 mt-2">
+              <label for="email" class="font-semibold"
+                >Email <span class="text-red-500">*</span></label
+              >
+              <input
+                type="email"
+                id="email"
+                v-model="registerEmail"
+                placeholder="Email"
+                required
+                :class="[
+                  'border',
+                  'w-full',
+                  'p-2',
+                  'rounded-md',
+                  'my-1',
+                  'bg-gray-100',
+                  errorMessage.emailErr
+                    ? 'border-red-500'
+                    : registerEmail.length > 0
+                    ? 'border-green-500'
+                    : 'border-gray-300',
+                ]"
+              />
+              <p
+                class="px-3 py-1 rounded-md text-red-500"
+                v-if="errorMessage.emailErr && registerEmail.length > 0"
+              >
+                {{ errorMessage.emailErr }}
+              </p>
+            </div>
+
+            <div class="relative mt-2 gap-2" style="position: relative">
+              <label for="password" class="font-semibold">
+                Password <span class="text-red-500">*</span>
+              </label>
+              <div style="position: relative">
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  id="password"
+                  v-model="registerPassword"
+                  placeholder="Password"
+                  required
+                  class="border w-full p-2 rounded-md my-1 bg-gray-100 pr-10"
+                  :class="{
+                    'border-red-500': errorMessage.passwordErr,
+                    'border-green-500': registerPassword.length > 0,
+                    'border-gray-300':
+                      !errorMessage.passwordErr &&
+                      registerPassword.length === 0,
+                  }"
+                  style="padding-right: 2.5rem"
+                />
+                <button
+                  type="button"
+                  class="absolute inset-y-0 right-0 flex items-center password-toggle-button"
+                  style="top: 50%; transform: translateY(-50%); right: 0.75rem"
+                >
+                  <icon
+                    :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'"
+                    class="text-lg cursor-pointer"
+                    @click.stop="toggleShowPassword"
+                  />
+                </button>
+              </div>
+              <p
+                class="px-3 py-1 rounded-md text-red-500"
+                v-if="errorMessage.passwordErr && registerPassword.length > 0"
+              >
+                {{ errorMessage.passwordErr }}
+              </p>
+            </div>
+            <div class="gap-2 mt-2">
+              <label for="number" class="font-semibold">
+                Contact Number <span class="text-red-500">*</span>
+              </label>
+              <div
+                class="flex border w-full p-2 rounded-md my-1 bg-gray-100 items-center"
+              >
+                <span class="bg-gray-200 px-2">+63</span>
+                <input
+                  type="tel"
+                  id="number"
+                  v-model="contactNumber"
+                  placeholder="8123456789 or 9123456789"
+                  required
+                  :class="[
+                    'flex-1',
+                    'border-none',
+                    'outline-none',
+                    'bg-gray-100',
+                    errorMessage.contactNumberErr && contactNumber.length > 0
+                      ? 'border-red-500'
+                      : contactNumber.length > 0
+                      ? 'border-green-500'
+                      : 'border-gray-300',
+                  ]"
+                />
+              </div>
+              <p
+                v-if="errorMessage.contactNumberErr && contactNumber.length > 0"
+                class="text-red-500"
+              >
+                {{ errorMessage.contactNumberErr }}
+              </p>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                class="flex w-full justify-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+              >
+                Register
+              </button>
+            </div>
+            <div class="flex justify-center items-center gap-2">
+              Already have an account?
+              <button
+                class="text-blue-500 hover:text-blue-700"
+                @click="showLoginModal"
+              >
+                Sign In
+              </button>
             </div>
           </form>
         </div>
@@ -371,9 +767,11 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import { API_URL } from "@/config";
 import { debounce } from "lodash";
+import { RouterLink } from "vue-router";
 export default {
   components: {
     Icon,
+    RouterLink,
   },
   props: {
     isVisible: {
@@ -416,6 +814,19 @@ export default {
   setup(props, { emit }) {
     const url = API_URL;
 
+    // Define a ref to hold the active button
+    const activeOption = ref("Customer");
+
+    const setActive = (option) => {
+      if (option === "Customer") {
+        activeOption.value = "Customer";
+      } else if (option === "Store") {
+        activeOption.value = "Store";
+      } else if (option === "Rider") {
+        activeOption.value = "Rider";
+      }
+    };
+
     const selectedBarangay = ref("");
     const barangay = ref([]);
 
@@ -443,32 +854,106 @@ export default {
 
     const signIn = async () => {
       try {
-        const urli = `${url}/Ecommerce/vue-project/src/backend/auth.php?action=login`;
-        const res = await axios.post(
-          urli,
+        let successfulLogin = false;
+
+        // Customer Login
+        const urliCustomer = `${url}/Ecommerce/vue-project/src/backend/auth.php?action=login`;
+        const resCustomer = await axios.post(
+          urliCustomer,
           {
             email: loginEmail.value,
             password: loginPassword.value,
           },
           { headers: { "Content-Type": "application/json" } }
         );
-        errorMessage.emailErr = res.data.messageEmail;
-        errorMessage.passwordErr = res.data.message;
 
-        name.value = res.data.customer;
-        localStorage.setItem("user", JSON.stringify(name.value));
-        if (res.data.success) {
+        if (resCustomer.data.success) {
+          successfulLogin = true;
+          errorMessage.emailErr = "";
+          errorMessage.passwordErr = "";
+          const nameCustomer = resCustomer.data.customer;
+          localStorage.setItem("user", JSON.stringify(nameCustomer));
           refreshPage();
-          const role = res.data.role;
-          if (role === "admin") {
+          const roleCustomer = resCustomer.data.role;
+          if (roleCustomer === "admin") {
             router.push("/admin_dashboard");
           } else {
             router.push("/home");
             emit("update:isVisible", false);
-            emit("login-completed", name.value);
+            emit("login-completed", nameCustomer);
           }
+        } else {
+          errorMessage.emailErr = resCustomer.data.messageEmail;
+          errorMessage.passwordErr = resCustomer.data.message;
         }
-      } catch {}
+
+        // If customer login is successful, exit the function
+        if (successfulLogin) return;
+
+        // Rider Login
+        const urliRider = `${url}/Ecommerce/vue-project/src/backend/rider/riderAuth.php?action=login`;
+        const resRider = await axios.post(
+          urliRider,
+          {
+            email: loginEmail.value,
+            password: loginPassword.value,
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        if (resRider.data.success) {
+          successfulLogin = true;
+          errorMessage.emailErr = "";
+          errorMessage.passwordErr = "";
+          console.log("res data: ", resRider.data.store);
+          const nameRider = resRider.data.store;
+          localStorage.setItem("rider", JSON.stringify(nameRider));
+          const roleRider = resRider.data.rider_role;
+          if (roleRider === "rider") {
+            router.push("/rider_index");
+          } else {
+            router.push("/rider_start");
+          }
+        } else {
+          errorMessage.emailErr = resRider.data.messageEmail;
+          errorMessage.passwordErr = resRider.data.message;
+        }
+
+        // If rider login is successful, exit the function
+        if (successfulLogin) return;
+
+        // Seller/Admin Login
+        const urliSeller = `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=login`;
+        const resSeller = await axios.post(
+          urliSeller,
+          {
+            email: loginEmail.value,
+            password: loginPassword.value,
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        if (resSeller.data.success) {
+          successfulLogin = true;
+          errorMessage.emailErr = "";
+          errorMessage.passwordErr = "";
+          console.log("res data: ", resSeller.data.store);
+          const nameSeller = resSeller.data.store;
+          const roleSeller = resSeller.data.store_role;
+          if (roleSeller === "seller") {
+            localStorage.setItem("seller", JSON.stringify(nameSeller));
+            router.push("/seller_dashboard");
+          } else if (roleSeller === "admin") {
+            localStorage.setItem("admin", JSON.stringify(nameSeller));
+            router.push("/admin_dashboard");
+          }
+        } else {
+          errorMessage.emailErr = resSeller.data.messageEmail;
+          errorMessage.passwordErr = resSeller.data.message;
+        }
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     const registerZone = ref("");
@@ -489,16 +974,26 @@ export default {
 
     const checkNameExists = debounce(async (name) => {
       try {
-        const response = await axios.post(
+        const endpoints = [
+          `${url}/Ecommerce/vue-project/src/backend/rider/riderAuth.php?action=checkName`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=checkName`,
           `${url}/Ecommerce/vue-project/src/backend/auth.php?action=checkName`,
-          {
-            name: name,
+        ];
+
+        let nameExists = false;
+
+        for (const endpoint of endpoints) {
+          const response = await axios.post(endpoint, { name });
+          if (response.data.exists) {
+            nameExists = true;
+            break;
           }
-        );
-        if (response.data.exists) {
-          errorMessage.nameErr = "This name is already exists.";
+        }
+
+        if (nameExists) {
+          errorMessage.nameErr = "This name already exists.";
         } else {
-          errorMessage.nameErr = nameValidation.value; // continue with other validations
+          errorMessage.nameErr = nameValidation.value; // Continue with other validations
         }
       } catch (error) {
         console.error("Error checking name:", error);
@@ -515,13 +1010,23 @@ export default {
 
     const checkEmailExists = debounce(async (email) => {
       try {
-        const response = await axios.post(
+        const endpoints = [
+          `${url}/Ecommerce/vue-project/src/backend/rider/riderAuth.php?action=checkEmail`,
+          `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=checkEmail`,
           `${url}/Ecommerce/vue-project/src/backend/auth.php?action=checkEmail`,
-          {
-            email: email,
+        ];
+
+        let emailExists = false;
+
+        for (const endpoint of endpoints) {
+          const response = await axios.post(endpoint, { email });
+          if (response.data.exists) {
+            emailExists = true;
+            break;
           }
-        );
-        if (response.data.exists) {
+        }
+
+        if (emailExists) {
           errorMessage.emailErr = "This email is already registered.";
         } else {
           errorMessage.emailErr = emailValidation.value; // continue with other validations
@@ -694,7 +1199,123 @@ export default {
       selectedBarangay.value = "";
     };
 
+    const registerAddress = ref("Legazpi City");
+    const role = ref(1);
+    const signUpStore = async () => {
+      // Perform a final validation check on form submission
+      errorMessage.nameErr = nameValidation.value;
+      errorMessage.emailErr = emailValidation.value;
+      errorMessage.passwordErr = passwordValidation.value;
+      errorMessage.contactNumberErr = contactNumberValidation.value;
+      if (
+        errorMessage.nameErr ||
+        errorMessage.emailErr ||
+        errorMessage.passwordErr ||
+        errorMessage.contactNumberErr
+      ) {
+        console.log(
+          errorMessage.nameErr,
+          errorMessage.emailErr,
+          errorMessage.passwordErr,
+          errorMessage.contactNumberErr
+        );
+        return;
+      }
+      try {
+        const urli = `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=register`;
+        const res = await axios.post(
+          urli,
+          {
+            name: registerName.value,
+            email: registerEmail.value,
+            password: registerPassword.value,
+            address: registerAddress.value,
+            contact_number: contactNumber.value,
+            role: role.value,
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        registerResponseMessage.value = res.data.message;
+        if (res.data.success) {
+          showRegister.value = false;
+          showLogin.value = true;
+        }
+      } catch (res) {
+        // console.log(res.data.success);
+      }
+      // console.log("Register Name:", registerName.value);
+      // console.log("Register Email:", registerEmail.value);
+      // console.log("Register Password:", registerPassword.value);
+      // console.log("Contact Number:", contactNumber.value);
+      // console.log("Role:", role.value);
+
+      registerName.value = "";
+      registerEmail.value = "";
+      registerPassword.value = "";
+      contactNumber.value = "";
+      role.value = "";
+      registerAddress.value = "";
+    };
+
+    const signUpRider = async () => {
+      // Perform a final validation check on form submission
+      errorMessage.nameErr = nameValidation.value;
+      errorMessage.emailErr = emailValidation.value;
+      errorMessage.passwordErr = passwordValidation.value;
+      errorMessage.contactNumberErr = contactNumberValidation.value;
+      if (
+        errorMessage.nameErr ||
+        errorMessage.emailErr ||
+        errorMessage.passwordErr ||
+        errorMessage.contactNumberErr
+      ) {
+        console.log(
+          errorMessage.nameErr,
+          errorMessage.emailErr,
+          errorMessage.passwordErr,
+          errorMessage.contactNumberErr
+        );
+        return;
+      }
+      try {
+        const urli = `${url}/Ecommerce/vue-project/src/backend/rider/riderAuth.php?action=register`;
+        const res = await axios.post(
+          urli,
+          {
+            name: registerName.value,
+            email: registerEmail.value,
+            password: registerPassword.value,
+            contact_number: contactNumber.value,
+            role: role.value,
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        registerResponseMessage.value = res.data.message;
+        if (res.data.success) {
+          showRegister.value = false;
+          showLogin.value = true;
+        }
+      } catch (res) {
+        console.log(res.data.success);
+      }
+      console.log("Register Name:", registerName.value);
+      console.log("Register Email:", registerEmail.value);
+      console.log("Register Password:", registerPassword.value);
+      console.log("Contact Number:", contactNumber.value);
+      console.log("Role:", role.value);
+
+      registerName.value = "";
+      registerEmail.value = "";
+      registerPassword.value = "";
+      contactNumber.value = "";
+    };
+
     return {
+      signUpRider,
+      registerAddress,
+      signUpStore,
+      setActive,
+      activeOption,
       GetBarangays,
       barangay,
       selectedBarangay,

@@ -207,8 +207,7 @@
                     'rounded-md',
                     'my-1',
                     'bg-gray-100',
-                    errorMessage.nameErr &&
-                    userLogin.store_name.lenght > 0
+                    errorMessage.nameErr && userLogin.store_name.lenght > 0
                       ? 'border-red-500'
                       : userLogin.store_name.length > 0
                       ? 'border-green-500'
@@ -332,7 +331,7 @@ export default {
     const logout = () => {
       if (confirm("Are you sure you want to logout?")) {
         localStorage.removeItem("seller");
-        router.push("/seller_index");
+        router.push("/home");
       } else {
         console.log("Logout canceled or dialog closed.");
       }

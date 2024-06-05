@@ -17,11 +17,11 @@
       <div
         @click="showAside"
         v-if="showBar"
-        class="backdrop-blur-sm bg-gray-700/10 fixed z-10 top-0 left-0 w-full h-full"
+        class="backdrop-blur-sm bg-gray-700/10 fixed z-10 top-0 left-0 w-full h-full cursor-pointer"
       ></div>
       <aside
         v-if="showBar"
-        class="bg-gray-200 fixed z-20 top-0 right-0 w-72 h-screen"
+        class="bg-gray-200 fixed z-20 top-0 right-0 w-72 h-screen cursor-pointer"
       >
         <div class="flex justify-between items-center shadow p-2">
           <h1 class="font-semibold text-lg">Menu</h1>
@@ -83,7 +83,7 @@ export default {
     const logout = () => {
       if (confirm("Are you sure you want to logout?")) {
         localStorage.removeItem("rider");
-        router.push("/rider_start");
+        router.push("/home");
       } else {
         console.log("Logout canceled or dialog closed.");
       }
