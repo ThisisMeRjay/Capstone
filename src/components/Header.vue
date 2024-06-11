@@ -11,24 +11,6 @@
     </div>
 
     <div
-      class="flex items-center text-violet-600 underline hover:text-violet-800"
-      v-if="userLogin.length === 0"
-    >
-      <RouterLink
-        to="/seller_dashboard"
-        :class="$route.name === 'seller_dashboard'"
-        >Sign in as Seller</RouterLink
-      >
-    </div>
-    <div
-      class="flex items-center text-violet-600 underline hover:text-violet-800"
-      v-if="userLogin.length === 0"
-    >
-      <RouterLink to="/rider_home" :class="$route.name === 'rider_home'"
-        >Sign in as Rider</RouterLink
-      >
-    </div>
-    <div
       class="flex items-center gap-2 px-3 py-2 bg-blue-400/10 rounded-full shadow text-blue-500 hover:font-semibold transition cursor-pointer"
       @click="orderTracking()"
       :class="userLogin.length === 0 ? 'text-blue-500 pointer-events-none' : ''"

@@ -514,36 +514,11 @@ export default {
 
     // request a axios to update the status for an order
     const handleEditStatusOrder = async () => {
-      console.log("Status: ", selectValue.value);
-      console.log("orderId:  ", orderIdToEdit.value);
-      console.log("estimated date:  ", estimatedDelivery.value);
-
-      // Generate current date and time in Philippine time zone and format it
-      const DateToupdate = moment()
-        .tz("Asia/Manila")
-        .format("YYYY-MM-DD HH:mm:ss");
-      console.log("date:  ", DateToupdate);
-
-      try {
-        const response = await axios.put(
-          `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
-          {
-            id: orderIdToEdit.value,
-            status: selectValue.value,
-            estimated_delivery: estimatedDelivery.value,
-            date: DateToupdate,
-          }
-        );
-        // Assuming you might want to do something with the response here
-        console.log(response.data);
-      } catch (error) {
-        console.error("Error editing status:", error);
-      }
-      showStatusModal.value = false;
       if (selectValue.value === "reserved_for_rider") {
         riderModal.value = true;
         console.log("ID ", orderIdToEdit.value);
       }
+      
     };
 
     const insertRider = async (ID) => {
@@ -554,8 +529,34 @@ export default {
 
       if (confirmAction) {
         // User clicked OK
-        console.log("rider ID: ", ID);
-        console.log("order ID: ", orderIdToEdit.value);
+        console.log("Rider ID:", ID);
+        console.log("Order ID:", orderIdToEdit.value);
+        console.log("Status:", selectValue.value);
+        console.log("Order ID:", orderIdToEdit.value);
+        console.log("Estimated delivery:", estimatedDelivery.value);
+
+        // Generate current date and time in Philippine time zone and format it
+        const DateToUpdate = moment()
+          .tz("Asia/Manila")
+          .format("YYYY-MM-DD HH:mm:ss");
+        console.log("Date:", DateToUpdate);
+
+        try {
+          const response = await axios.put(
+            `${url}/Ecommerce/vue-project/src/backend/seller/sellerApi.php?action=EditStatus`,
+            {
+              id: orderIdToEdit.value,
+              status: selectValue.value,
+              estimated_delivery: estimatedDelivery.value,
+              date: DateToUpdate,
+            }
+          );
+
+          // Assuming you might want to do something with the response here
+          console.log(response.data);
+        } catch (error) {
+          console.error("Error editing status:", error);
+        }
 
         try {
           const response = await axios.put(
@@ -565,20 +566,25 @@ export default {
               rider_id: ID,
             }
           );
+
           // Assuming you might want to do something with the response here
           console.log(response.data);
 
           // Optionally alert the user that the operation was successful
           alert("Rider has been successfully assigned!");
         } catch (error) {
-          console.error("Error editing status:", error);
+          console.error("Error assigning rider:", error);
           alert("Failed to assign the rider."); // Notify user about the error
         }
+        refreshPage();
       } else {
         // User clicked Cancel
         console.log("Operation canceled by the user.");
+        riderModal.value = false;
+        showStatusModal.value = true;
+
       }
-      refreshPage();
+      
     };
 
     // Now userLogin is directly accessible here  , and it's reactive

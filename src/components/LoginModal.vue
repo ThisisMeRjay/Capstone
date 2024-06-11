@@ -1197,6 +1197,8 @@ export default {
       registerHouseno.value = "";
       address.value = "";
       selectedBarangay.value = "";
+      // errorMessage.emailErr = "";
+      // errorMessage.passwordErr = "";
     };
 
     const registerAddress = ref("Legazpi City");

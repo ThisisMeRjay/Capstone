@@ -459,7 +459,7 @@ export default {
     let priceTotalAll = ref(0);
     let priceTotalPerItem = ref(0);
     // shipping fee must come from db
-    const selectedPayment = ref("");
+    const selectedPayment = ref("cash on delivery");
 
     const fetchShippingFee = async (itemsFromSameStore) => {
       try {
