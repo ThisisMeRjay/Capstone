@@ -733,7 +733,39 @@ function EditStatus()
             $stmt->bind_param("ssi", $newStatus, $estdate, $id);
             break;
         case 'return_in_progress':
+            $stmt = $conn->prepare("UPDATE order_details SET status = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("si", $newStatus, $id);
+            break;
         case 'return_completed':
+            // Update the order details to reflect the cancellation
+            $stmt = $conn->prepare("UPDATE order_details SET status = ? WHERE order_detail_id = ?");
+            $stmt->bind_param("si", $newStatus, $id);
+            if ($stmt->execute() && $stmt->affected_rows > 0) {
+                // Assuming inventory needs to be updated upon cancellation
+                $stmt = $conn->prepare("SELECT quantity, product_id FROM order_details WHERE order_detail_id = ?");
+                $stmt->bind_param("i", $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($row = $result->fetch_assoc()) {
+                    $updateInventoryStmt = $conn->prepare("UPDATE inventory SET quantity = quantity + ? WHERE product_id = ?");
+                    $updateInventoryStmt->bind_param("ii", $row['quantity'], $row['product_id']);
+                    $updateInventoryStmt->execute();
+                    $updateInventoryStmt->close();
+                }
+                $stmt->close();
+
+                // Delete revenue records associated with the cancelled order detail
+                $deleteRevenueStmt = $conn->prepare("DELETE FROM revenue WHERE order_detail_id = ?");
+                $deleteRevenueStmt->bind_param("i", $id);
+                $deleteRevenueStmt->execute();
+                if ($deleteRevenueStmt->affected_rows > 0) {
+                    // Log or handle the success of deletion
+                } else {
+                    // Log or handle the case where no revenue record was found or deletion did not occur
+                }
+                $deleteRevenueStmt->close();
+            }
+            break;
         case 'return_declined':
         case 'return_requested':
         case 'return_approved':

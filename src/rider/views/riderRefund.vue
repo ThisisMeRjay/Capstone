@@ -344,6 +344,7 @@ export default {
     const handleEditStatusOrder = async () => {
       console.log("Status: ", selectValue.value);
       console.log("orderId:  ", orderIdToEdit.value);
+      console.log("quantity:  ", editableOrderStatus.value.quantity);
       console.log("estimated date:  ", estimatedDelivery.value);
       console.log("image:  ", proof.value);
 
