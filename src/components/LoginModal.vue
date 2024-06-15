@@ -854,7 +854,9 @@ export default {
 
     const signIn = async () => {
       try {
-        let successfulLogin = false;
+        // Clear previous error messages
+        errorMessage.emailErr = "";
+        errorMessage.passwordErr = "";
 
         // Customer Login
         const urliCustomer = `${url}/Ecommerce/vue-project/src/backend/auth.php?action=login`;
@@ -868,9 +870,9 @@ export default {
         );
 
         if (resCustomer.data.success) {
-          successfulLogin = true;
-          errorMessage.emailErr = "";
-          errorMessage.passwordErr = "";
+          // Handle successful customer login
+          errorMessage.emailErr = ""; // Clear email error message
+          errorMessage.passwordErr = ""; // Clear password error message
           const nameCustomer = resCustomer.data.customer;
           localStorage.setItem("user", JSON.stringify(nameCustomer));
           refreshPage();
@@ -882,13 +884,18 @@ export default {
             emit("update:isVisible", false);
             emit("login-completed", nameCustomer);
           }
+          return; // Exit if customer login is successful
         } else {
-          errorMessage.emailErr = resCustomer.data.messageEmail;
-          errorMessage.passwordErr = resCustomer.data.message;
+          // Handle customer login error
+          if (resCustomer.data.messageEmail) {
+            errorMessage.emailErr = "Checking";
+          } else {
+            // If the email is found but the password is incorrect
+            errorMessage.passwordErr = "Incorrect password";
+            errorMessage.emailErr = "";
+            return; // Stop the process if email is found but password is incorrect
+          }
         }
-
-        // If customer login is successful, exit the function
-        if (successfulLogin) return;
 
         // Rider Login
         const urliRider = `${url}/Ecommerce/vue-project/src/backend/rider/riderAuth.php?action=login`;
@@ -902,10 +909,9 @@ export default {
         );
 
         if (resRider.data.success) {
-          successfulLogin = true;
-          errorMessage.emailErr = "";
-          errorMessage.passwordErr = "";
-          console.log("res data: ", resRider.data.store);
+          // Handle successful rider login
+          errorMessage.emailErr = ""; // Clear email error message
+          errorMessage.passwordErr = ""; // Clear password error message
           const nameRider = resRider.data.store;
           localStorage.setItem("rider", JSON.stringify(nameRider));
           const roleRider = resRider.data.rider_role;
@@ -914,13 +920,20 @@ export default {
           } else {
             router.push("/rider_start");
           }
+          return; // Exit if rider login is successful
         } else {
-          errorMessage.emailErr = resRider.data.messageEmail;
-          errorMessage.passwordErr = resRider.data.message;
+          // Handle rider login error
+          if (resRider.data.messageEmail) {
+            errorMessage.emailErr = "Checking";
+          } else if (resRider.data.message) {
+            errorMessage.passwordErr = resRider.data.message;
+            errorMessage.emailErr = "";
+          } else {
+            // Handle other errors or set a default error message
+            errorMessage.emailErr = "An error occurred during login";
+            errorMessage.passwordErr = "An error occurred during login";
+          }
         }
-
-        // If rider login is successful, exit the function
-        if (successfulLogin) return;
 
         // Seller/Admin Login
         const urliSeller = `${url}/Ecommerce/vue-project/src/backend/seller/sellerAuth.php?action=login`;
@@ -934,10 +947,9 @@ export default {
         );
 
         if (resSeller.data.success) {
-          successfulLogin = true;
-          errorMessage.emailErr = "";
-          errorMessage.passwordErr = "";
-          console.log("res data: ", resSeller.data.store);
+          // Handle successful seller/admin login
+          errorMessage.emailErr = ""; // Clear email error message
+          errorMessage.passwordErr = ""; // Clear password error message
           const nameSeller = resSeller.data.store;
           const roleSeller = resSeller.data.store_role;
           if (roleSeller === "seller") {
@@ -947,13 +959,32 @@ export default {
             localStorage.setItem("admin", JSON.stringify(nameSeller));
             router.push("/admin_dashboard");
           }
+          return; // Exit if seller/admin login is successful
         } else {
-          errorMessage.emailErr = resSeller.data.messageEmail;
-          errorMessage.passwordErr = resSeller.data.message;
+          // Handle seller/admin login error
+          if (resSeller.data.messageEmail) {
+            errorMessage.emailErr = "Checking";
+          } else if (resSeller.data.message) {
+            errorMessage.passwordErr = resSeller.data.message;
+            errorMessage.emailErr = "";
+          } else {
+            // Handle other errors or set a default error message
+            errorMessage.emailErr = "An error occurred during login";
+            errorMessage.passwordErr = "An error occurred during login";
+          }
         }
       } catch (error) {
         console.error(error);
+        // Handle network or other errors
+        errorMessage.emailErr = "An error occurred during login";
+        errorMessage.passwordErr = "An error occurred during login";
       }
+      if (errorMessage.emailErr) {
+        errorMessage.emailErr = "email not found";
+        errorMessage.passwordErr = "check email first";
+      }
+      console.log(errorMessage.passwordErr);
+      console.log(errorMessage.emailErr);
     };
 
     const registerZone = ref("");

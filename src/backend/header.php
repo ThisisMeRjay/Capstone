@@ -2,9 +2,9 @@
 // Allowed origins
 $allowed_origins = array(
     "http://localhost:5173",
-    // "https://jayandtims.000webhostapp.com",
-    "http://172.20.10.2:5173",
-    // "http://192.168.254.105:5173"
+    // "https://disarrayed-tooth.000webhostapp.com",
+    // "http://192.168.90.234:5173",
+    "http://192.168.254.116:5173"
 );
 
 // Check if the origin of the request is one of the allowed origins

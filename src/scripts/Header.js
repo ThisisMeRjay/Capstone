@@ -756,7 +756,7 @@ export default {
         console.error("Error fetching orders :", error); // return an error
       }
     };
-    setInterval(getTrackingOrder, 50);
+    setInterval(getTrackingOrder, 100);
 
     ThisIsForCommentAndReview();
 

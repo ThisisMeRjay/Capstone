@@ -1,6 +1,17 @@
 <template>
-  <div class="bg-sky-900 text-white py-5 flex justify-start items-center gap-3">
+  <div
+    class="bg-sky-900 text-white py-5 flex justify-between items-center gap-3"
+  >
     <h1 class="text-lg pl-5">Admin</h1>
+    <div class="ml-2">
+      <button
+        @click="logout"
+        class="flex justify-start items-center font-semibold hover:bg-slate-400/20 rounded-md w-full py-2 mr-10"
+      >
+        <Icon icon="solar:logout-line-duotone" class="text-2xl" />
+        Logout
+      </button>
+    </div>
   </div>
   <div class="flex relative">
     <div
@@ -86,15 +97,6 @@
           </div>
         </RouterLink>
       </div>
-      <div class="ml-2">
-        <button
-          @click="logout"
-          class="flex justify-start items-center font-semibold hover:bg-slate-400/20 rounded-md text-slate-700 w-full py-2"
-        >
-          <Icon icon="solar:logout-line-duotone" class="text-2xl" />
-          Logout
-        </button>
-      </div>
     </div>
 
     <div class="bg-white cursor-pointer">
@@ -120,9 +122,13 @@ export default {
   setup() {
     const router = useRouter();
     const logout = () => {
-      localStorage.removeItem("admin");
-      router.push("/home");
+      const confirmation = confirm("Are you sure you want to log out?");
+      if (confirmation) {
+        localStorage.removeItem("admin");
+        router.push("/home");
+      }
     };
+
     var userLogin = ref([]);
     const getUserFromLocalStorage = () => {
       const userData = localStorage.getItem("admin");

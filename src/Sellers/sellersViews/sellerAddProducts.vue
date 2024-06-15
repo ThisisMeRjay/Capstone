@@ -437,7 +437,7 @@ export default {
         return;
       }
       if (!selectedBarangay.value) {
-        alert("Please select a barangay.");
+        alert("Please select product location.");
         return;
       }
       if (!Weight.value) {
