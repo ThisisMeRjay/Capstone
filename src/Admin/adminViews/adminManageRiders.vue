@@ -452,14 +452,15 @@ export default {
 
     onMounted(fetchRiders);
 
-    const paginationClass = (condition, isFirst, isLast) => {
-      return [
-        "px-3 py-2 cursor-pointer text-sky-900",
-        {
-          "text-gray-400 cursor-not-allowed": isFirst && condition,
-          "text-gray-400 cursor-not-allowed": isLast && condition,
-        },
-      ];
+    const paginationClass = (isActive, isFirst = false, isLast = false) => {
+      let baseClass = "px-3 py-2 leading-tight border border-gray-300";
+      if (isFirst) baseClass += " rounded-l-lg";
+      if (isLast) baseClass += " rounded-r-lg";
+      if (isActive) {
+        return `${baseClass} text-blue-600 bg-blue-50 cursor-default`;
+      } else {
+        return `${baseClass} text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700`;
+      }
     };
 
     return {
