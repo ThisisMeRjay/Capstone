@@ -57,11 +57,111 @@ switch ($action) {
     case 'updateShippingFee':
         updateShippingFee();
         break;
+    case 'EditSeller':
+        editSeller();
+        break;
+    case 'EditCustomer':
+        editCustomer();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
         echo json_encode($res);
         break;
+}
+
+function editCustomer()
+{
+    global $conn;
+    
+    // Retrieve POST data
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    // Extract data
+    $user_id = $data['user_id'];
+    $customer_name = $data['customer_name'];
+    $customer_email = $data['customer_email'];
+    $customer_address = $data['customer_address'];
+    $customer_contact_number = $data['customer_contact_number'];
+    $barangay_id = $data['barangay_id'];
+    $Zone = $data['Zone'];
+    $House_no = $data['House_no'];
+
+    // Perform validation if necessary
+    // Example validation - ensure required fields are not empty
+    if (empty($user_id) || empty($customer_name) || empty($customer_email) || empty($customer_contact_number)) {
+        $res['error'] = true;
+        $res['message'] = 'Please provide all required fields.';
+        echo json_encode($res);
+        return;
+    }
+
+    // Update customer information in the database
+    $sql = "UPDATE users SET 
+            username = '$customer_name',
+            email = '$customer_email',
+            address = '$customer_address',
+            contact_number = '$customer_contact_number',
+            barangay_id = '$barangay_id',
+            Zone = '$Zone',
+            House_no = '$House_no'
+            WHERE user_id = '$user_id'";
+
+    if ($conn->query($sql) === TRUE) {
+        $res['success'] = true;
+        $res['message'] = 'Customer updated successfully.';
+        echo json_encode($res);
+    } else {
+        $res['error'] = true;
+        $res['message'] = 'Error updating customer: ' . $conn->error;
+        echo json_encode($res);
+    }
+
+    $conn->close();
+}
+
+function editSeller()
+{
+    global $conn;
+    
+    // Retrieve POST data
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    // Extract data
+    $store_id = $data['store_id'];
+    $store_name = $data['store_name'];
+    $store_email = $data['store_email'];
+    $store_address = $data['store_address'];
+    $store_contact_number = $data['store_contact_number'];
+
+    // Perform validation if necessary
+    // Example validation - ensure required fields are not empty
+    if (empty($store_id) || empty($store_name) || empty($store_email) || empty($store_contact_number)) {
+        $res['error'] = true;
+        $res['message'] = 'Please provide all required fields.';
+        echo json_encode($res);
+        return;
+    }
+
+    // Update seller information in the database
+    $sql = "UPDATE user_store SET 
+            store_name = '$store_name',
+            store_email = '$store_email',
+            store_address = '$store_address',
+            store_contact_number = '$store_contact_number'
+            WHERE store_id = '$store_id'";
+
+    if ($conn->query($sql) === TRUE) {
+        $res['success'] = true;
+        $res['message'] = 'Seller updated successfully.';
+        echo json_encode($res);
+    } else {
+        $res['error'] = true;
+        $res['message'] = 'Error updating seller: ' . $conn->error;
+        echo json_encode($res);
+    }
+
+    $conn->close();
 }
 
 function updateShippingFee()
@@ -206,7 +306,10 @@ function fetchAllRiders()
         FROM rider AS r
         LEFT JOIN order_details AS od ON r.rider_id = od.rider_id AND od.status NOT IN ('delivered', 'cancelled', 'closed', 'return_completed')
         WHERE r.status = 'approved'
-        GROUP BY r.rider_id
+        GROUP BY 
+            r.rider_id
+        ORDER BY 
+            r.rider_id DESC
     ");
 
     $stmt->execute();
@@ -267,6 +370,7 @@ function fetchRiders()
     $stmt = $conn->prepare("SELECT *
 FROM rider
 WHERE rider.status = 'pending'
+ORDER BY rider.rider_id DESC
 ");
     $stmt->execute();
     $result = $stmt->get_result();
@@ -547,6 +651,7 @@ function getSellerRequest()
     $stmt = $conn->prepare("SELECT *
 FROM user_store as us
 WHERE us.status = 'pending'
+ORDER BY us.store_id DESC
 ");
     $stmt->execute();
     $result = $stmt->get_result();
@@ -563,6 +668,7 @@ function getSeller()
     $stmt = $conn->prepare("SELECT *
 FROM user_store as us
 WHERE us.status = 'approved'
+ORDER BY us.store_id DESC
 ");
     $stmt->execute();
     $result = $stmt->get_result();
@@ -576,12 +682,19 @@ WHERE us.status = 'approved'
 function getCustomers()
 {
     global $conn;
-    $stmt = $conn->prepare("SELECT 
-    u.*,
-    b.name 
-FROM users as u
-LEFT JOIN barangay as b ON b.barangay_id = u.barangay_id
-");
+    $stmt = $conn->prepare("
+    SELECT 
+        u.*,
+        b.name 
+    FROM 
+        users as u
+    LEFT JOIN 
+        barangay as b 
+    ON 
+        b.barangay_id = u.barangay_id
+    ORDER BY 
+        u.user_id DESC
+    ");
     $stmt->execute();
     $result = $stmt->get_result();
     $customers = [];

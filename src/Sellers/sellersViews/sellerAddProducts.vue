@@ -514,7 +514,7 @@ export default {
     };
 
     const addNewCategory = async () => {
-      const categoryName = newCategory.value.category_name.trim();
+      let categoryName = newCategory.value.category_name.trim();
 
       // Ensure category name is not empty and valid
       if (categoryName === "") {
@@ -533,6 +533,9 @@ export default {
         };
         return;
       }
+
+      // Convert category name to uppercase
+      categoryName = categoryName.toUpperCase();
 
       try {
         const response = await axios.post(

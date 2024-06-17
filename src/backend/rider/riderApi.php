@@ -18,6 +18,9 @@ switch ($action) {
     case 'getOrdersHistory':
         getOrdersHistory();
         break;
+    case 'EditRider': // Add/EditRider action
+        editRider();
+        break;
     default:
         $res['error'] = true;
         $res['message'] = 'Invalid action.';
@@ -25,6 +28,41 @@ switch ($action) {
         break;
 }
 
+function editRider()
+{
+    global $conn;
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    // Check for the presence of required fields
+    if (!isset($data['rider_id']) || !isset($data['rider_name']) || !isset($data['rider_email']) || !isset($data['rider_contact_number'])) {
+        echo json_encode(['error' => 'Missing required fields']);
+        return;
+    }
+
+    $rider_id = $data['rider_id'];
+    $rider_name = $data['rider_name'];
+    $rider_email = $data['rider_email'];
+    $rider_contact_number = $data['rider_contact_number'];
+
+    // Prepare the SQL statement to update the rider information
+    $sql = "UPDATE rider SET rider_name = ?, rider_email = ?, rider_contact_number = ? WHERE rider_id = ?";
+
+    // Prepare the statement
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("sssi", $rider_name, $rider_email, $rider_contact_number, $rider_id);
+        $stmt->execute();
+
+        // Check if the update was successful
+        if ($stmt->affected_rows > 0) {
+            echo json_encode(['success' => true, 'message' => 'Rider updated successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No changes made or rider not found']);
+        }
+        $stmt->close();
+    } else {
+        echo json_encode(['error' => 'Failed to prepare the SQL statement']);
+    }
+}
 function getOrdersHistory()
 {
     global $conn;
